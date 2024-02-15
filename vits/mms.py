@@ -15,40 +15,6 @@ import locale
 locale.getpreferredencoding = lambda: "UTF-8"
 
 
-def download(lang, tgt_extract_dir="./models", tgt_dir="./"):
-    lang_fn, lang_dir = os.path.join(tgt_dir, lang + '.tar.gz'), os.path.join(tgt_extract_dir, lang)
-    if not os.path.exists(tgt_extract_dir):
-        os.makedirs(tgt_extract_dir)
-    if os.path.exists(lang_fn):
-        print(f"Model for language {lang} exists in {lang_fn}")
-        if os.path.exists(lang_dir):
-            print(f"Model for language {lang} exists in {lang_dir}")
-            print(f"Model checkpoints in {lang_dir}: {os.listdir(lang_dir)}")
-            return lang_dir
-        else:
-            print(f"Extracting model for language {lang} from {lang_fn} to {tgt_extract_dir}")
-
-            cmd = f"tar zxvf {lang_fn} -C {tgt_extract_dir}"
-            subprocess.check_output(cmd, shell=True)
-            print(f"Model checkpoints in {lang_dir}: {os.listdir(lang_dir)}")
-            return lang_dir
-    cmd = ";".join([
-        f"wget https://dl.fbaipublicfiles.com/mms/tts/{lang}.tar.gz -O {lang_fn}",
-        f"tar zxvf {lang_fn} -C {tgt_extract_dir}"
-    ])
-    print(f"Download model for language: {lang}")
-    subprocess.check_output(cmd, shell=True)
-    print(f"Model checkpoints in {lang_dir}: {os.listdir(lang_dir)}")
-    return lang_dir
-
-
-# #	English (eng), Korean (kor), Russian (rus), Vietnamese (vie), Thai (nod), Hindi (hin), Arabic (ara), French (fra), German standard (deu)
-# LANGS = ["eng", "kor", "rus", "vie", "nod", "hin", "ara", "fra", "deu"]
-#
-# for LANG in LANGS:
-#     ckpt_dir = download(LANG)
-
-
 def preprocess_char(text, lang=None):
     """
     Special treatement of characters in certain languages
@@ -83,19 +49,22 @@ class TextMapper(object):
 
     def uromanize(self, text, uroman_pl):
         iso = "xxx"
-        with tempfile.NamedTemporaryFile() as tf, tempfile.NamedTemporaryFile() as tf2:
-            with open(tf.name, "w", encoding="utf-8") as f:
-                f.write("\n".join([text]))
-            cmd = f"perl " + uroman_pl
-            cmd += f" -l {iso} "
-            cmd += f" < {tf.name} > {tf2.name}"
-            os.system(cmd)
-            outtexts = []
-            with open(tf2.name, encoding="utf-8") as f:
-                for line in f:
-                    line = re.sub(r"\s+", " ", line).strip()
-                    outtexts.append(line)
-            outtext = outtexts[0]
+        txt_fn = "D:/kidden/github/yimt/vits/src.txt"
+        roman_fn = "D:/kidden/github/yimt/vits/roman.txt"
+        with open(txt_fn, "w", encoding="utf-8") as f:
+            f.write("\n".join([text]))
+        cmd = f"c:/Strawberry/perl/bin/perl.exe " + uroman_pl
+        cmd += f" -l {iso} "
+        cmd += f" < {txt_fn} > {roman_fn}"
+        print(cmd)
+        os.system(cmd)
+        outtexts = []
+        with open(roman_fn, encoding="utf-8") as f:
+            for line in f:
+                line = re.sub(r"\s+", " ", line).strip()
+                outtexts.append(line)
+        outtext = outtexts[0]
+
         return outtext
 
     def get_text(self, text, hps):
@@ -117,38 +86,13 @@ def preprocess_text(txt, text_mapper, hps, uroman_dir=None, lang=None):
     print(hps.data.training_files)
     is_uroman = hps.data.training_files.split('.')[-1] == 'uroman'
     if is_uroman:
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            if uroman_dir is None:
-                cmd = f"git clone git@github.com:isi-nlp/uroman.git {tmp_dir}"
-                print(cmd)
-                subprocess.check_output(cmd, shell=True)
-                uroman_dir = tmp_dir
-            uroman_pl = os.path.join(uroman_dir, "bin", "uroman.pl")
-            print(f"uromanize")
-            txt = text_mapper.uromanize(txt, uroman_pl)
-            print(f"uroman text: {txt}")
+        uroman_pl = os.path.join(uroman_dir, "bin", "uroman.pl")
+        print(f"uromanize")
+        txt = text_mapper.uromanize(txt, uroman_pl)
+        print(f"uroman text: {txt}")
     txt = txt.lower()
     txt = text_mapper.filter_oov(txt)
     return txt
-
-
-def init(shared_args):
-    global net_g  # Make net_g a global variable in the subprocess
-    text_mapper, hps, device, ckpt_dir, _, _ = shared_args
-
-    # Reinitialize net_g in the subprocess
-    net_g = SynthesizerTrn(
-        len(text_mapper.symbols),
-        hps.data.filter_length // 2 + 1,
-        hps.train.segment_size // hps.data.hop_length,
-        **hps.model)
-    net_g.to(device)
-    _ = net_g.eval()
-
-    g_pth = f"{ckpt_dir}/G_100000.pth"
-    print(f"load {g_pth}")
-
-    _ = utils.load_checkpoint(g_pth, net_g, None)
 
 
 def process_transcript(args):
@@ -157,7 +101,7 @@ def process_transcript(args):
     global net_g  # Use the global net_g variable in the subprocess
     file_name, txt = line.strip().split("|")
     print(f"text: {txt}")
-    txt = preprocess_text(txt, text_mapper, hps, lang=lang, uroman_dir="../uroman")
+    txt = preprocess_text(txt, text_mapper, hps, lang=lang, uroman_dir="./uroman")
     stn_tst = text_mapper.get_text(txt, hps)
     with torch.no_grad():
         x_tst = stn_tst.unsqueeze(0).to(device)
@@ -179,14 +123,12 @@ def main():
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     print(f"Run inference with {device}")
 
-    LANGS = ["eng", "kor", "rus", "vie", "nod", "hin", "ara", "fra", "deu"]
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--lang",
         type=str,
         required=True,
         help="Language",
-        choices=LANGS,
         default="eng",
     )
     # Transcript 
@@ -204,13 +146,6 @@ def main():
         help="Output directory",
     )
 
-    parser.add_argument(
-        "--max_workers",
-        type=int,
-        default=1,
-        help="Max workers",
-    )
-
     args = parser.parse_args()
     ckpt_dir = f"./models/{args.lang}"
 
@@ -220,50 +155,39 @@ def main():
     assert os.path.isfile(config_file), f"{config_file} doesn't exist"
     hps = utils.get_hparams_from_file(config_file)
     text_mapper = TextMapper(vocab_file)
-    # net_g = SynthesizerTrn(
-    #     len(text_mapper.symbols),
-    #     hps.data.filter_length // 2 + 1,
-    #     hps.train.segment_size // hps.data.hop_length,
-    #     **hps.model)
-    # net_g.to(device)
-    # _ = net_g.eval()
 
-    # g_pth = f"{ckpt_dir}/G_100000.pth"
-    # print(f"load {g_pth}")
+    net_g = SynthesizerTrn(
+        len(text_mapper.symbols),
+        hps.data.filter_length // 2 + 1,
+        hps.train.segment_size // hps.data.hop_length,
+        **hps.model)
+    net_g.to(device)
+    _ = net_g.eval()
 
-    # _ = utils.load_checkpoint(g_pth, net_g, None)
+    g_pth = f"{ckpt_dir}/G_100000.pth"
+    print(f"load {g_pth}")
 
-    # for line in open(args.transcript_file):
-    #     file_name, txt = line.strip().split("|")
-    #     print(f"text: {txt}")
-    #     txt = preprocess_text(txt, text_mapper, hps, lang=args.lang, uroman_dir="../uroman")
-    #     stn_tst = text_mapper.get_text(txt, hps)
-    #     with torch.no_grad():
-    #         x_tst = stn_tst.unsqueeze(0).to(device)
-    #         x_tst_lengths = torch.LongTensor([stn_tst.size(0)]).to(device)
-    #         hyp = net_g.infer(
-    #             x_tst, x_tst_lengths, noise_scale=.667,
-    #             noise_scale_w=0.8, length_scale=1.0
-    #         )[0][0,0].cpu().float().numpy()
+    _ = utils.load_checkpoint(g_pth, net_g, None)
 
-    #     print(f"Generated audio") 
+    for line in open(args.transcript_file, encoding="utf-8"):
+        file_name, txt = line.strip().split("|")
+        print(f"text: {txt}")
+        txt = preprocess_text(txt, text_mapper, hps, lang=args.lang, uroman_dir="D:/kidden/github/yimt/vits/uroman")
+        stn_tst = text_mapper.get_text(txt, hps)
+        with torch.no_grad():
+            x_tst = stn_tst.unsqueeze(0).to(device)
+            x_tst_lengths = torch.LongTensor([stn_tst.size(0)]).to(device)
+            hyp = net_g.infer(
+                x_tst, x_tst_lengths, noise_scale=.667,
+                noise_scale_w=0.8, length_scale=1.0
+            )[0][0,0].cpu().float().numpy()
 
-    #     # Save audio
-    #     os.makedirs(args.output_dir, exist_ok=True)
-    #     output_file = os.path.join(args.output_dir, f"{file_name}.wav")
-    #     write(output_file, hps.data.sampling_rate, hyp)
-    # Read transcript lines
-    if get_start_method() == 'fork':
-        set_start_method('spawn', force=True)
+        print(f"Generated audio")
 
-    transcript_lines = [line.strip() for line in open(args.transcript_file, encoding="utf-8")]
-    # Initialize shared arguments
-    shared_args = (text_mapper, hps, device, ckpt_dir, args.lang, args.output_dir)
-
-    # Initialize multiprocessing pool
-    with Pool(processes=args.max_workers, initializer=init, initargs=(shared_args,)) as pool:
-        # Use pool.map to process transcript lines
-        pool.map(process_transcript, [(line, shared_args) for line in transcript_lines])
+        # Save audio
+        os.makedirs(args.output_dir, exist_ok=True)
+        output_file = os.path.join(args.output_dir, f"{file_name}.wav")
+        write(output_file, hps.data.sampling_rate, hyp)
 
 
 if __name__ == "__main__":
