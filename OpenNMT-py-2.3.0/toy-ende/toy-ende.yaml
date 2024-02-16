@@ -8,6 +8,9 @@ tgt_vocab: ./toy-ende/run/example.vocab.tgt
 # Prevent overwriting existing files in the folder
 overwrite: False
 
+src_vocab_size: 16000
+tgt_vocab_size: 16000
+
 # Corpus opts:
 data:
     corpus_1:
