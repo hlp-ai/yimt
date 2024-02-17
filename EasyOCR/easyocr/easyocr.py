@@ -85,7 +85,7 @@ class Reader(object):
         self.recognition_models = recognition_models
 
         # check and download detection model
-        self.support_detection_network = ['craft', 'dbnet18']
+        self.support_detection_network = ['craft']
         self.quantize=quantize, 
         self.cudnn_benchmark=cudnn_benchmark
         if detector:
@@ -237,10 +237,8 @@ class Reader(object):
             self.detect_network = detect_network
             if self.detect_network == 'craft':
                 from .detection import get_detector, get_textbox
-            elif self.detect_network in ['dbnet18']:
-                from .detection_db import get_detector, get_textbox
             else:
-                raise RuntimeError("Unsupport detector network. Support networks are craft and dbnet18.")
+                raise RuntimeError("Unsupport detector network.")
             self.get_textbox = get_textbox
             self.get_detector = get_detector
             corrupt_msg = 'MD5 hash mismatch, possible file corruption'
