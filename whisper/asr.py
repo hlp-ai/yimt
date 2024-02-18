@@ -1,3 +1,5 @@
+import sys
+
 import whisper
 import zhconv
 import wave  # 使用wave库可读、写wav类型的音频文件
@@ -41,7 +43,8 @@ if __name__ == '__main__':
     model = whisper.load_model(r"D:\kidden\github\yimt\pretrained\asr\whisper\medium.pt")
 
     # record(3)  # 定义录音时间，单位/s
-    audio = whisper.load_audio(r"D:\dataset\LJSpeech-1.1\wavs\LJ001-0001.wav")
+    wave_fn = sys.argv[1]  # r"D:\dataset\LJSpeech-1.1\wavs\LJ001-0001.wav"
+    audio = whisper.load_audio(wave_fn)
     audio = whisper.pad_or_trim(audio)
 
     # mel = whisper.log_mel_spectrogram(audio, n_mels=128).to(model.device)  # large-v3
