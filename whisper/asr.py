@@ -38,12 +38,13 @@ def record(time):  # 录音程序
 
 
 if __name__ == '__main__':
-    model = whisper.load_model("medium")
+    model = whisper.load_model(r"D:\kidden\github\yimt\pretrained\asr\whisper\medium.pt")
 
     # record(3)  # 定义录音时间，单位/s
     audio = whisper.load_audio(r"D:\dataset\LJSpeech-1.1\wavs\LJ001-0001.wav")
     audio = whisper.pad_or_trim(audio)
 
+    # mel = whisper.log_mel_spectrogram(audio, n_mels=128).to(model.device)  # large-v3
     mel = whisper.log_mel_spectrogram(audio).to(model.device)
     _, probs = model.detect_language(mel)
     lang = max(probs, key=probs.get)
