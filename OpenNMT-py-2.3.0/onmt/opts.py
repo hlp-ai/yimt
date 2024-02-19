@@ -287,17 +287,16 @@ def model_opts(parser):
               choices=['fp32', 'fp16'],
               help='Data type of the model.')
 
-    group.add('--encoder_type', '-encoder_type', type=str, default='rnn',
-              choices=['rnn', 'brnn', 'ggnn', 'mean', 'transformer', 'cnn',
-                       'transformer_lm'],
+    group.add('--encoder_type', '-encoder_type', type=str, default='transformer',
+              choices=['mean', 'transformer', 'transformer_lm'],
               help="Type of encoder layer to use. Non-RNN layers "
                    "are experimental. Options are "
-                   "[rnn|brnn|ggnn|mean|transformer|cnn|transformer_lm].")
-    group.add('--decoder_type', '-decoder_type', type=str, default='rnn',
-              choices=['rnn', 'transformer', 'cnn', 'transformer_lm'],
+                   "[mean|transformer|transformer_lm].")
+    group.add('--decoder_type', '-decoder_type', type=str, default='transformer',
+              choices=['transformer', 'transformer_lm'],
               help="Type of decoder layer to use. Non-RNN layers "
                    "are experimental. Options are "
-                   "[rnn|transformer|cnn|transformer].")
+                   "[transformer|transformer].")
 
     # Freeze Encoder and/or Decoder
     group.add('--freeze_encoder', '-freeze_encoder',
@@ -320,9 +319,6 @@ def model_opts(parser):
               help="Size of encoder rnn hidden states.")
     group.add('--dec_rnn_size', '-dec_rnn_size', type=int, default=500,
               help="Size of decoder rnn hidden states.")
-    group.add('--cnn_kernel_width', '-cnn_kernel_width', type=int, default=3,
-              help="Size of windows in the cnn, the kernel_size is "
-                   "(cnn_kernel_width, 1) in conv layer")
 
     group.add('--pos_ffn_activation_fn', '-pos_ffn_activation_fn',
               type=str, default=ActivationFunction.relu,
@@ -341,14 +337,6 @@ def model_opts(parser):
     # group.add('--residual', '-residual',   action="store_true",
     #                     help="Add residual connections between RNN layers.")
 
-    group.add('--brnn', '-brnn', action=DeprecateAction,
-              help="Deprecated, use `encoder_type`.")
-
-    group.add('--context_gate', '-context_gate', type=str, default=None,
-              choices=['source', 'target', 'both'],
-              help="Type of context gate to use. "
-                   "Do not select for no context gate.")
-
     # The following options (bridge_extra_node to n_steps) are used
     # for training with --encoder_type ggnn (Gated Graph Neural Network).
     group.add('--bridge_extra_node', '-bridge_extra_node',
@@ -364,8 +352,6 @@ def model_opts(parser):
               help='Number of nodes in the graph encoder')
     group.add('--n_steps', '-n_steps', type=int, default=2,
               help='Number of steps to advance graph encoder')
-    group.add('--src_ggnn_size', '-src_ggnn_size', type=int, default=0,
-              help='Vocab size plus feature space for embedding input')
 
     # Attention options
     group = parser.add_argument_group('Model- Attention')
