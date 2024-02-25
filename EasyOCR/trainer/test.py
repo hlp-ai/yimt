@@ -10,7 +10,7 @@ import torch.nn.functional as F
 import numpy as np
 from nltk.metrics.distance import edit_distance
 
-from utils import CTCLabelConverter, AttnLabelConverter, Averager
+from .utils import CTCLabelConverter, AttnLabelConverter, Averager
 from dataset import hierarchical_dataset, AlignCollate
 from model import Model
 
