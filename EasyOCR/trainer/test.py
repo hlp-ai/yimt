@@ -1,18 +1,12 @@
-import os
 import time
-import string
-import argparse
 
 import torch
-import torch.backends.cudnn as cudnn
 import torch.utils.data
 import torch.nn.functional as F
-import numpy as np
 from nltk.metrics.distance import edit_distance
 
-from .utils import CTCLabelConverter, AttnLabelConverter, Averager
-from dataset import hierarchical_dataset, AlignCollate
-from model import Model
+from .utils import Averager
+
 
 def validation(model, criterion, evaluation_loader, converter, opt, device):
     """ validation or evaluation """
