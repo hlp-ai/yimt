@@ -25,7 +25,7 @@ batch_max_length: 34
 imgH: 64
 imgW: 600
 rgb: False
-contrast_adjust: False
+# contrast_adjust: False
 sensitive: True
 PAD: True
 contrast_adjust: 0.0
