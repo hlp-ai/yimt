@@ -10,16 +10,16 @@ import torch.backends.cudnn as cudnn
 from tqdm import tqdm
 import wandb
 
-from config.load_config import load_yaml, DotDict
-from model.craft import CRAFT
-from metrics.eval_det_iou import DetectionIoUEvaluator
-from utils.inference_boxes import (
+from .config.load_config import load_yaml, DotDict
+from .model.craft import CRAFT
+from .metrics.eval_det_iou import DetectionIoUEvaluator
+from .utils.inference_boxes import (
     test_net,
     load_icdar2015_gt,
     load_icdar2013_gt,
     load_synthtext_gt,
 )
-from utils.util import copyStateDict
+from .utils.util import copyStateDict
 
 
 
