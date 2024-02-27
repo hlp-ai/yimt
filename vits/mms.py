@@ -30,6 +30,7 @@ class TextMapper(object):
         self.symbols = [x.replace("\n", "") for x in open(vocab_file, encoding="utf-8").readlines()]
         self.SPACE_ID = self.symbols.index(" ")
         self._symbol_to_id = {s: i for i, s in enumerate(self.symbols)}
+        print(self._symbol_to_id)
         self._id_to_symbol = {i: s for i, s in enumerate(self.symbols)}
 
     def text_to_sequence(self, text, cleaner_names):
@@ -71,6 +72,7 @@ class TextMapper(object):
         text_norm = self.text_to_sequence(text, hps.data.text_cleaners)
         if hps.data.add_blank:
             text_norm = commons.intersperse(text_norm, 0)
+        print(text_norm)
         text_norm = torch.LongTensor(text_norm)
         return text_norm
 
