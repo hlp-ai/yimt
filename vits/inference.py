@@ -55,7 +55,7 @@ with torch.no_grad():
     x_tst_lengths = torch.LongTensor([stn_tst.size(0)]).cuda()
     sid = torch.LongTensor([4]).cuda()
     audio = net_g.infer(x_tst, x_tst_lengths, sid=sid, noise_scale=.667, noise_scale_w=0.8, length_scale=1)[0][0,0].data.cpu().float().numpy()
-ipd.display(ipd.Audio(audio, rate=hps.data.sampling_rate, normalize=False))
+# ipd.display(ipd.Audio(audio, rate=hps.data.sampling_rate, normalize=False))
 
 # ### Voice Conversion
 
