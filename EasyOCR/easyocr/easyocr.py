@@ -7,25 +7,16 @@ from .utils import group_text_box, get_image_list, calculate_md5, get_paragraph,
                    reformat_input_batched, merge_to_free
 from .config import *
 from bidi.algorithm import get_display
-import numpy as np
-import cv2
 import torch
 import os
 import sys
-from PIL import Image
 from logging import getLogger
 import yaml
 import json
-
-if sys.version_info[0] == 2:
-    from io import open
-    from six.moves.urllib.request import urlretrieve
-    from pathlib2 import Path
-else:
-    from urllib.request import urlretrieve
-    from pathlib import Path
+from pathlib import Path
 
 LOGGER = getLogger(__name__)
+
 
 class Reader(object):
 
@@ -168,8 +159,10 @@ class Reader(object):
             self.character = model['characters']
 
             model_path = os.path.join(self.model_storage_directory, model['filename'])
+            print(model_path)
             # check recognition model file
             if recognizer:
+                corrupt_msg = "model corrupt"
                 if os.path.isfile(model_path) == False:
                     if not self.download_enabled:
                         raise FileNotFoundError("Missing %s and downloads disabled" % model_path)

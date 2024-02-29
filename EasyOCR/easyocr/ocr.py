@@ -20,6 +20,6 @@ import easyocr
 # result = reader.readtext('./examples/thai.jpg')
 # print(result)
 
-reader = easyocr.Reader(['ta', 'en']) # this needs to run only once to load the model into memory
+reader = easyocr.Reader(['fr', 'en'], model_storage_directory=r'D:\kidden\github\yimt\pretrained\ocr\easyocr') # this needs to run only once to load the model into memory
 result = reader.readtext('./examples/french.jpg')
 print(result)
