@@ -1,4 +1,4 @@
-import easyocr
+from easyocr.reader import Reader
 
 
 class OCR:
@@ -8,7 +8,7 @@ class OCR:
             langs = [lang, 'en']
         else:
             langs = [lang]
-        self._reader = easyocr.Reader(langs, model_storage_directory=models_dir)
+        self._reader = Reader(langs, model_storage_directory=models_dir)
 
     def recognize(self, img_path):
         result = self._reader.readtext(img_path)
@@ -17,9 +17,9 @@ class OCR:
 
 if __name__ == "__main__":
     ocr_fr = OCR("fr")
-    r = ocr_fr.recognize('./examples/french.jpg')
+    r = ocr_fr.recognize('../examples/french.jpg')
     print(r)
 
     ocr_ja = OCR("ja")
-    r = ocr_ja.recognize('./examples/japanese.jpg')
+    r = ocr_ja.recognize('../examples/japanese.jpg')
     print(r)

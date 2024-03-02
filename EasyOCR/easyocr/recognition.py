@@ -7,7 +7,7 @@ import torchvision.transforms as transforms
 import numpy as np
 from collections import OrderedDict
 import importlib
-from .utils import CTCLabelConverter
+from easyocr.utils import CTCLabelConverter
 import math
 
 def custom_mean(x):

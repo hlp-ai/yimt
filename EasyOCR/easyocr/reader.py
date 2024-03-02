@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from .recognition import get_recognizer, get_text
-from .utils import group_text_box, get_image_list, calculate_md5, get_paragraph,\
+from easyocr.recognition import get_recognizer, get_text
+from easyocr.utils import group_text_box, get_image_list, calculate_md5, get_paragraph,\
                    download_and_unzip, printProgressBar, diff, reformat_input,\
                    make_rotated_img_list, set_result_with_confidence,\
                    reformat_input_batched, merge_to_free
-from .config import *
+from easyocr.config import *
 from bidi.algorithm import get_display
 import torch
 import os

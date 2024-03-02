@@ -1,5 +1,5 @@
 import torch.nn as nn
-from .modules import VGG_FeatureExtractor, BidirectionalLSTM
+from easyocr.model.modules import VGG_FeatureExtractor, BidirectionalLSTM
 
 class Model(nn.Module):
 

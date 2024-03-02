@@ -1,5 +1,5 @@
 import torch.nn as nn
-from .modules import ResNet_FeatureExtractor, BidirectionalLSTM
+from easyocr.model.modules import ResNet_FeatureExtractor, BidirectionalLSTM
 
 class Model(nn.Module):
 

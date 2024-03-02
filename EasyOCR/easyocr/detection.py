@@ -1,14 +1,12 @@
 import torch
 import torch.backends.cudnn as cudnn
-from torch.autograd import Variable
-from PIL import Image
 from collections import OrderedDict
 
 import cv2
 import numpy as np
-from .craft_utils import getDetBoxes, adjustResultCoordinates
-from .imgproc import resize_aspect_ratio, normalizeMeanVariance
-from .craft import CRAFT
+from easyocr.craft_utils import getDetBoxes, adjustResultCoordinates
+from easyocr.imgproc import resize_aspect_ratio, normalizeMeanVariance
+from easyocr.craft import CRAFT
 
 def copyStateDict(state_dict):
     if list(state_dict.keys())[0].startswith("module"):
