@@ -154,3 +154,8 @@ if __name__ == "__main__":
 
     audio, sr = tts_kor.synthesize("안녕하세요, 저는 지금 한국에 살고 있는 청년입니다. 여러분들과 소통하며 즐거운 시간을 보내고 싶어요.")
     write("./kor1.wav", sr, audio)
+
+    tts_eng = TTS("eng")
+
+    audio, sr = tts_eng.synthesize("He made the remarks while presiding over a group study session of the Political Bureau of the CPC Central Committee on Thursday.")
+    write("./eng1.wav", sr, audio)
