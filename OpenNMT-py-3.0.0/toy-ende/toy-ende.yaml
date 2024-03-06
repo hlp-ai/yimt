@@ -26,11 +26,11 @@ gpu_ranks: [0]
 
 # Where to save the checkpoints
 save_model: ./toy-ende/run/model
-save_checkpoint_steps: 500
+save_checkpoint_steps: 200
 keep_checkpoint: 2
 
-train_steps: 8000
-valid_steps: 500
+train_steps: 1000
+valid_steps: 200
 report_every: 100
 
 seed: 3435

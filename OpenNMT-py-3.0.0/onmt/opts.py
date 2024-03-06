@@ -1,7 +1,6 @@
 """ Implementation of all available options """
 import configargparse
 
-from onmt.models.sru import CheckSRU
 from onmt.transforms import AVAILABLE_TRANSFORMS
 from onmt.constants import ModelTask
 from onmt.modules.position_ffn import ACTIVATION_FUNCTIONS
@@ -334,10 +333,6 @@ def model_opts(parser):
     group.add('--bridge', '-bridge', action="store_true",
               help="Have an additional layer between the last encoder "
                    "state and the first decoder state")
-    group.add('--rnn_type', '-rnn_type', type=str, default='LSTM',
-              choices=['LSTM', 'GRU', 'SRU'],
-              action=CheckSRU,
-              help="The gate type to use in the RNNs")
     group.add('--context_gate', '-context_gate', type=str, default=None,
               choices=['source', 'target', 'both'],
               help="Type of context gate to use. "

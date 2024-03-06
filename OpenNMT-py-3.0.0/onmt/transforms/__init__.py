@@ -21,8 +21,7 @@ def get_transforms_cls(transform_names):
 
 
 __all__ = ["get_transforms_cls", "get_specials", "make_transforms",
-           "load_transforms", "save_transforms", "TransformPipe",
-           "prepare_transforms"]
+           "load_transforms", "save_transforms", "TransformPipe"]
 
 
 def register_transform(name):
