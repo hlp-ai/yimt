@@ -267,7 +267,7 @@ def model_opts(parser):
         "-model_task",
         "--model_task",
         default=ModelTask.SEQ2SEQ,
-        choices=[ModelTask.SEQ2SEQ, ModelTask.LANGUAGE_MODEL],
+        choices=[ModelTask.SEQ2SEQ],
         help="Type of task for the model either seq2seq or lm",
     )
 
@@ -282,17 +282,16 @@ def model_opts(parser):
               choices=['fp32', 'fp16'],
               help='Data type of the model.')
 
-    group.add('--encoder_type', '-encoder_type', type=str, default='rnn',
-              choices=['rnn', 'brnn', 'ggnn', 'mean', 'transformer', 'cnn',
-                       'transformer_lm'],
+    group.add('--encoder_type', '-encoder_type', type=str, default='transformer',
+              choices=['mean', 'transformer'],
               help="Type of encoder layer to use. Non-RNN layers "
                    "are experimental. Options are "
-                   "[rnn|brnn|ggnn|mean|transformer|cnn|transformer_lm].")
-    group.add('--decoder_type', '-decoder_type', type=str, default='rnn',
-              choices=['rnn', 'transformer', 'cnn', 'transformer_lm'],
+                   "[mean|transformer].")
+    group.add('--decoder_type', '-decoder_type', type=str, default='transformer',
+              choices=['transformer'],
               help="Type of decoder layer to use. Non-RNN layers "
                    "are experimental. Options are "
-                   "[rnn|transformer|cnn|transformer].")
+                   "[transformer].")
 
     # Freeze Encoder and/or Decoder
     group.add('--freeze_encoder', '-freeze_encoder',

@@ -187,48 +187,22 @@ tests_encoder = [[],
 for p in tests_encoder:
     _add_test(p, 'encoder_forward')
 
-tests_nmtmodel = [[('rnn_type', 'GRU')],
-                  [('layers', 10)],
-                  [('input_feed', 0)],
-                  [('decoder_type', 'transformer'),
+tests_nmtmodel = [[('decoder_type', 'transformer'),
                    ('encoder_type', 'transformer'),
                    ('src_word_vec_size', 16),
                    ('tgt_word_vec_size', 16),
                    ('hidden_size', 16)],
+
                   [('decoder_type', 'transformer'),
                    ('encoder_type', 'transformer'),
                    ('src_word_vec_size', 16),
                    ('tgt_word_vec_size', 16),
                    ('hidden_size', 16),
                    ('position_encoding', True)],
-                  [('coverage_attn', True)],
-                  [('copy_attn', True)],
-                  [('global_attention', 'mlp')],
-                  [('context_gate', 'both')],
-                  [('context_gate', 'target')],
-                  [('context_gate', 'source')],
-                  [('encoder_type', "brnn"),
-                   ('brnn_merge', 'sum')],
-                  [('encoder_type', "brnn")],
-                  [('decoder_type', 'cnn'),
-                   ('encoder_type', 'cnn')],
-                  [('encoder_type', 'rnn'),
-                   ('global_attention', None)],
-                  [('encoder_type', 'rnn'),
-                   ('global_attention', None),
-                   ('copy_attn', True),
-                   ('copy_attn_type', 'general')],
-                  [('encoder_type', 'rnn'),
-                   ('global_attention', 'mlp'),
-                   ('copy_attn', True),
-                   ('copy_attn_type', 'general')],
+
                   [],
                   ]
 
-if onmt.models.sru.check_sru_requirement():
-    #   """ Only do SRU test if requirment is safisfied. """
-    # SRU doesn't support input_feed.
-    tests_nmtmodel.append([('rnn_type', 'SRU'), ('input_feed', 0)])
 
 for p in tests_nmtmodel:
     _add_test(p, 'nmtmodel_forward')

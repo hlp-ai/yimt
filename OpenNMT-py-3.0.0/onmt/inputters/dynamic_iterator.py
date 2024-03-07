@@ -160,11 +160,6 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
             # bucket_size = batch_size
             bucket_size = 16384
             skip_empty_level = 'warning'
-        if task == CorpusTask.INFER and \
-           vocabs['data_task'] == ModelTask.LANGUAGE_MODEL:
-            # We only support
-            batch_size_multiple = 1
-            batch_size = 1
         return cls(
             corpora, corpora_info, transforms, vocabs, task, opt.batch_type,
             batch_size, batch_size_multiple, data_type=opt.data_type,

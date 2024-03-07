@@ -89,16 +89,6 @@ def numericalize(vocabs, example):
             numeric['tgt']['tgt_ids'] = \
                 vocabs['tgt']([DefaultTokens.BOS] + tgt_text
                               + [DefaultTokens.EOS])
-
-    elif vocabs['data_task'] == ModelTask.LANGUAGE_MODEL:
-        src_text = example['src']['src'].split()
-        numeric['src']['src_ids'] = \
-            vocabs['src']([DefaultTokens.BOS] + src_text)
-        if example['tgt'] is not None:
-            numeric['tgt']['tgt_ids'] = []
-            tgt_text = example['tgt']['tgt'].split()
-            numeric['tgt']['tgt_ids'] = \
-                vocabs['tgt'](tgt_text + [DefaultTokens.EOS])
     else:
         raise ValueError(
                 f"Something went wrong with task {vocabs['data_task']}"
@@ -282,8 +272,6 @@ def _addcopykeys(vocabs, example):
         if vocabs['data_task'] == ModelTask.SEQ2SEQ:
             tgt = [DefaultTokens.UNK] + example['tgt']['tgt'].split() \
                   + [DefaultTokens.UNK]
-        elif vocabs['data_task'] == ModelTask.LANGUAGE_MODEL:
-            tgt = example['tgt']['tgt'].split() \
-                  + [DefaultTokens.UNK]
+
         example['alignment'] = src_ex_vocab(tgt)
     return example

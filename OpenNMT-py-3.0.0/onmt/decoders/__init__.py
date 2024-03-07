@@ -1,9 +1,8 @@
 """Module defining decoders."""
 from onmt.decoders.decoder import DecoderBase
-from onmt.decoders.transformer import TransformerDecoder, TransformerLMDecoder
+from onmt.decoders.transformer import TransformerDecoder
 
 
-str2dec = {"transformer": TransformerDecoder,
-           "transformer_lm": TransformerLMDecoder}
+str2dec = {"transformer": TransformerDecoder}
 
-__all__ = ["DecoderBase", "TransformerDecoder", "str2dec", "TransformerLMDecoder"]
+__all__ = ["DecoderBase", "TransformerDecoder", "str2dec"]

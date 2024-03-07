@@ -1,5 +1,5 @@
 """ Modules for translation """
-from onmt.translate.translator import Translator, GeneratorLM
+from onmt.translate.translator import Translator
 from onmt.translate.translation import Translation, TranslationBuilder
 from onmt.translate.beam_search import BeamSearch, GNMTGlobalScorer
 from onmt.translate.beam_search import BeamSearchLM
@@ -13,4 +13,4 @@ __all__ = ['Translator', 'Translation', 'BeamSearch',
            'GNMTGlobalScorer', 'TranslationBuilder',
            'PenaltyBuilder', 'TranslationServer', 'ServerModelError',
            "DecodeStrategy", "GreedySearch", "GreedySearchLM",
-           "BeamSearchLM", "GeneratorLM"]
+           "BeamSearchLM"]
