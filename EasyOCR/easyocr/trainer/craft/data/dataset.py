@@ -21,8 +21,8 @@ from easyocr.trainer.craft.data.imgaug import (
     random_scale,
     random_crop,
 )
-from data.pseudo_label.make_charbox import PseudoCharBoxBuilder
-from utils.util import saveInput, saveImage
+from easyocr.trainer.craft.data.pseudo_label.make_charbox import PseudoCharBoxBuilder
+from easyocr.trainer.craft.utils.util import saveInput, saveImage
 
 
 class CraftBaseDataset(Dataset):

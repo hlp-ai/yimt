@@ -6,8 +6,8 @@ import numpy as np
 import cv2
 import torch
 
-from data import imgproc
-from data.pseudo_label.watershed import exec_watershed_by_version
+from easyocr.trainer.craft.data import imgproc
+from easyocr.trainer.craft.data.pseudo_label.watershed import exec_watershed_by_version
 
 
 class PseudoCharBoxBuilder:

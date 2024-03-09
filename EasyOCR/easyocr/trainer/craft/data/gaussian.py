@@ -1,8 +1,6 @@
 import numpy as np
 import cv2
 
-from easyocr.trainer.craft.data.boxEnlarge import enlargebox
-
 
 class GaussianBuilder(object):
     def __init__(self, init_size, sigma, enlarge_region, enlarge_affinity):
