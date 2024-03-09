@@ -10,9 +10,9 @@ import cv2
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 
-from data import imgproc
-from data.gaussian import GaussianBuilder
-from data.imgaug import (
+from easyocr.trainer.craft.data import imgproc
+from easyocr.trainer.craft.data.gaussian import GaussianBuilder
+from easyocr.trainer.craft.data.imgaug import (
     rescale,
     random_resize_crop_synth,
     random_resize_crop,

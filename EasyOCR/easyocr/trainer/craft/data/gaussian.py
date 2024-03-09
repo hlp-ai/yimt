@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 
-from data.boxEnlarge import enlargebox
+from easyocr.trainer.craft.data.boxEnlarge import enlargebox
 
 
 class GaussianBuilder(object):

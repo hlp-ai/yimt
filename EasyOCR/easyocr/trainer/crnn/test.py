@@ -5,7 +5,7 @@ import torch.utils.data
 import torch.nn.functional as F
 from nltk.metrics.distance import edit_distance
 
-from .utils import Averager
+from easyocr.trainer.crnn.utils import Averager
 
 
 def validation(model, criterion, evaluation_loader, converter, opt, device):

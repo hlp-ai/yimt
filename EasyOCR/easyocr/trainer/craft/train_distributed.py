@@ -12,13 +12,13 @@ import torch.nn as nn
 import torch.optim as optim
 import wandb
 
-from .config.load_config import load_yaml, DotDict
-from .data.dataset import SynthTextDataSet, CustomDataset
-from .loss.mseloss import Maploss_v2, Maploss_v3
-from .model.craft import CRAFT
-from .eval import main_eval
-from .metrics.eval_det_iou import DetectionIoUEvaluator
-from .utils.util import copyStateDict, save_parser
+from easyocr.trainer.craft.config.load_config import load_yaml, DotDict
+from easyocr.trainer.craft.data.dataset import SynthTextDataSet, CustomDataset
+from easyocr.trainer.craft.loss.mseloss import Maploss_v2, Maploss_v3
+from easyocr.trainer.craft.model.craft import CRAFT
+from easyocr.trainer.craft.eval import main_eval
+from easyocr.trainer.craft.metrics.eval_det_iou import DetectionIoUEvaluator
+from easyocr.trainer.craft.utils.util import copyStateDict, save_parser
 
 
 class Trainer(object):

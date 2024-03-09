@@ -8,9 +8,9 @@ import numpy as np
 import torch
 from torch.autograd import Variable
 
-from utils.craft_utils import getDetBoxes, adjustResultCoordinates
-from data import imgproc
-from data.dataset import SynthTextDataSet
+from easyocr.trainer.craft.utils.craft_utils import getDetBoxes, adjustResultCoordinates
+from easyocr.trainer.craft.data import imgproc
+from easyocr.trainer.craft.data.dataset import SynthTextDataSet
 import math
 import xml.etree.ElementTree as elemTree
 

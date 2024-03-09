@@ -4,8 +4,8 @@ import os
 import cv2
 import numpy as np
 
-from data import imgproc
-from utils import craft_utils
+from easyocr.trainer.craft.data import imgproc
+from easyocr.trainer.craft.utils import craft_utils
 
 
 def copyStateDict(state_dict):

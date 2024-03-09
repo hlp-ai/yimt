@@ -1,8 +1,8 @@
 import torch.nn as nn
-from .modules.transformation import TPS_SpatialTransformerNetwork
-from .modules.feature_extraction import VGG_FeatureExtractor, RCNN_FeatureExtractor, ResNet_FeatureExtractor
-from .modules.sequence_modeling import BidirectionalLSTM
-from .modules.prediction import Attention
+from easyocr.trainer.crnn.modules.transformation import TPS_SpatialTransformerNetwork
+from easyocr.trainer.crnn.modules.feature_extraction import VGG_FeatureExtractor, RCNN_FeatureExtractor, ResNet_FeatureExtractor
+from easyocr.trainer.crnn.modules.sequence_modeling import BidirectionalLSTM
+from easyocr.trainer.crnn.modules.prediction import Attention
 
 class Model(nn.Module):
 

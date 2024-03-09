@@ -1,8 +1,8 @@
 import os
 import torch.backends.cudnn as cudnn
 import yaml
-from .train import train
-from .utils import AttrDict
+from easyocr.trainer.crnn.train import train
+from easyocr.trainer.crnn.utils import AttrDict
 import pandas as pd
 
 

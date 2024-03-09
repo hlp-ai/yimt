@@ -5,7 +5,7 @@ import torch
 import cv2
 import math
 import numpy as np
-from data import imgproc
+from easyocr.trainer.craft.data import imgproc
 
 """ auxilary functions """
 # unwarp corodinates
