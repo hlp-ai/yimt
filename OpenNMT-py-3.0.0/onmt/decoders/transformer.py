@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 
 from onmt.decoders.decoder import DecoderBase
-from onmt.modules import MultiHeadedAttention, AverageAttention
+from onmt.modules import MultiHeadedAttention
 from onmt.modules.position_ffn import PositionwiseFeedForward
 from onmt.modules.position_ffn import ActivationFunction
 from onmt.utils.misc import sequence_mask
@@ -41,8 +41,7 @@ class TransformerDecoderLayerBase(nn.Module):
                 feed-forward
             attention_dropout (float): dropout in context_attn  (and
                 self-attn(avg))
-            self_attn_type (string): type of self-attention scaled-dot,
-                average
+            self_attn_type (string): type of self-attention scaled-dot
             max_relative_positions (int):
                 Max distance between inputs in relative positions
                 representations
@@ -68,10 +67,6 @@ class TransformerDecoderLayerBase(nn.Module):
                 max_relative_positions=max_relative_positions,
                 attn_type="self",
                 add_qkvbias=add_qkvbias
-            )
-        elif self_attn_type == "average":
-            self.self_attn = AverageAttention(
-                d_model, dropout=attention_dropout, aan_useffn=aan_useffn
             )
 
         self.feed_forward = PositionwiseFeedForward(d_model, d_ff, dropout,
@@ -151,10 +146,6 @@ class TransformerDecoderLayerBase(nn.Module):
                 layer_in_norm,
                 layer_in_norm,
                 mask=dec_mask
-            )
-        elif self.self_attn_type == "average":
-            return self.self_attn(
-                layer_in_norm, mask=dec_mask, step=step
             )
         else:
             raise ValueError(
@@ -334,16 +325,12 @@ class TransformerDecoderBase(DecoderBase):
                     y = fn(layer.context_attn.layer_cache[1]['values'], 0)
                     layer.context_attn.layer_cache = True, {'keys': x,
                                                             'values': y}
-            if isinstance(layer.self_attn, AverageAttention):
-                if layer.self_attn.layer_cache[1]['prev_g'].numel() != 0:
-                    x = fn(layer.self_attn.layer_cache[1]['prev_g'], 0)
-                    layer.self_attn.layer_cache = True, {'prev_g': x}
-            else:
-                if layer.self_attn.layer_cache[1]['keys'].numel() != 0:
-                    x = fn(layer.self_attn.layer_cache[1]['keys'], 0)
-                    y = fn(layer.self_attn.layer_cache[1]['values'], 0)
-                    layer.self_attn.layer_cache = True, {'keys': x,
-                                                         'values': y}
+
+            if layer.self_attn.layer_cache[1]['keys'].numel() != 0:
+                x = fn(layer.self_attn.layer_cache[1]['keys'], 0)
+                y = fn(layer.self_attn.layer_cache[1]['values'], 0)
+                layer.self_attn.layer_cache = True, {'keys': x,
+                                                     'values': y}
 
     def detach_state(self):
         raise NotImplementedError
@@ -493,13 +480,9 @@ class TransformerDecoder(TransformerDecoderBase):
                 {'keys': torch.tensor([], device=enc_out.device),
                  'values': torch.tensor([], device=enc_out.device)}
                 )
-            if isinstance(layer.self_attn, AverageAttention):
-                layer.self_attn.layer_cache = True, {'prev_g': torch.zeros(
-                     (batch_size, 1, depth), device=enc_out.device
-                ).to(enc_out.dtype)}
-            else:
-                layer.self_attn.layer_cache = (
-                    True,
-                    {'keys': torch.tensor([], device=enc_out.device),
-                     'values': torch.tensor([], device=enc_out.device)}
-                    )
+
+            layer.self_attn.layer_cache = (
+                True,
+                {'keys': torch.tensor([], device=enc_out.device),
+                 'values': torch.tensor([], device=enc_out.device)}
+            )
