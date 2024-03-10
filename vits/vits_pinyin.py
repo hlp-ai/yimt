@@ -77,6 +77,8 @@ class VITS_PinYin:
             sub_p, sub_c = self.get_phoneme4pinyin(pinyins)
             phonemes.extend(sub_p)
             phonemes.append("sp")
+            phonemes.append("sp")
+            phonemes.append("sp")
             count_phone.extend(sub_c)
             count_phone.append(1)
             chars.append(subtext)
