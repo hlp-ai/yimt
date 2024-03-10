@@ -11,7 +11,7 @@ import onmt.modules
 from onmt.encoders import str2enc
 from onmt.decoders import str2dec
 from onmt.inputters.inputter import dict_to_vocabs
-from onmt.modules import Embeddings, CopyGenerator
+from onmt.modules import Embeddings
 from onmt.modules.util_class import Cast
 from onmt.utils.misc import use_gpu
 from onmt.utils.logging import logger
@@ -236,25 +236,18 @@ def build_base_model(model_opt, vocabs, gpu, checkpoint=None, gpu_id=None):
     model = build_task_specific_model(model_opt, vocabs)
 
     # Build Generator.
-    if not model_opt.copy_attn:
-        if model_opt.generator_function == "sparsemax":
-            gen_func = onmt.modules.sparse_activations.LogSparsemax(dim=-1)
-        else:
-            gen_func = nn.LogSoftmax(dim=-1)
-        generator = nn.Sequential(
-            nn.Linear(model_opt.dec_hid_size,
-                      len(vocabs['tgt'])),
-            Cast(torch.float32),
-            gen_func
-        )
-        if model_opt.share_decoder_embeddings:
-            generator[0].weight = model.decoder.embeddings.word_lut.weight
+    if model_opt.generator_function == "sparsemax":
+        gen_func = onmt.modules.sparse_activations.LogSparsemax(dim=-1)
     else:
-        vocab_size = len(vocabs['tgt'])
-        pad_idx = vocabs['tgt'][DefaultTokens.PAD]
-        generator = CopyGenerator(model_opt.dec_hid_size, vocab_size, pad_idx)
-        if model_opt.share_decoder_embeddings:
-            generator.linear.weight = model.decoder.embeddings.word_lut.weight
+        gen_func = nn.LogSoftmax(dim=-1)
+    generator = nn.Sequential(
+        nn.Linear(model_opt.dec_hid_size,
+                  len(vocabs['tgt'])),
+        Cast(torch.float32),
+        gen_func
+    )
+    if model_opt.share_decoder_embeddings:
+        generator[0].weight = model.decoder.embeddings.word_lut.weight
 
     # Load the model states from checkpoint or initialize them.
     if checkpoint is None or model_opt.update_vocab:

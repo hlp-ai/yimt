@@ -26,8 +26,7 @@ def translate(opt):
     transforms_cls = get_transforms_cls(opt._all_transform)
 
     infer_iter = build_dynamic_dataset_iter(
-        opt, transforms_cls, translator.vocabs, task=CorpusTask.INFER,
-        copy=translator.copy_attn)
+        opt, transforms_cls, translator.vocabs, task=CorpusTask.INFER)
 
     data_transform = [
         infer_iter.transforms[name] for name in

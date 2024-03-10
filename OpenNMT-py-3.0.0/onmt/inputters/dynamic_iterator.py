@@ -99,7 +99,6 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
         batch_size_multiple (int): make batch size multiply of this;
         data_type (str): input data type, currently only text;
         bucket_size (int): accum this number of examples in a dynamic dataset;
-        copy (Bool): if True, will add specific items for copy_attn
         skip_empty_level (str): security level when encouter empty line;
         stride (int): iterate data files with this stride;
         offset (int): iterate data files with this offset.
@@ -112,7 +111,7 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
 
     def __init__(self, corpora, corpora_info, transforms, vocabs, task,
                  batch_type, batch_size, batch_size_multiple, data_type="text",
-                 bucket_size=2048, copy=False,
+                 bucket_size=2048,
                  skip_empty_level='warning', stride=1, offset=0):
         super(DynamicDatasetIter).__init__()
         self.corpora = corpora
@@ -127,7 +126,6 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
         self.device = 'cpu'
         self.sort_key = text_sort_key
         self.bucket_size = bucket_size
-        self.copy = copy
         if stride <= 0:
             raise ValueError(f"Invalid argument for stride={stride}.")
         self.stride = stride
@@ -163,7 +161,7 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
         return cls(
             corpora, corpora_info, transforms, vocabs, task, opt.batch_type,
             batch_size, batch_size_multiple, data_type=opt.data_type,
-            bucket_size=bucket_size, copy=copy,
+            bucket_size=bucket_size,
             skip_empty_level=skip_empty_level,
             stride=stride, offset=offset
         )
@@ -194,8 +192,6 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
         for item in tuple_bucket:
             example = process(self.task, item)
             if example is not None:
-                if self.copy:
-                    example = _addcopykeys(self.vocabs, example)
                 bucket.append(numericalize(self.vocabs, example))
         return bucket
 

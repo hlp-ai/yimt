@@ -93,10 +93,10 @@ class BeamSearchBase(DecodeStrategy):
     def initialize(self, *args, **kwargs):
         raise NotImplementedError
 
-    def initialize_(self, enc_out, src_len, src_map, device,
+    def initialize_(self, enc_out, src_len, device,
                     target_prefix):
         super(BeamSearchBase, self).initialize(
-            enc_out, src_len, src_map, device, target_prefix)
+            enc_out, src_len, device, target_prefix)
 
         self.best_scores = torch.full(
             [self.batch_size], -1e10, dtype=torch.float, device=device)
@@ -327,64 +327,22 @@ class BeamSearch(BeamSearchBase):
     """
         Beam search for seq2seq/encoder-decoder models
     """
-    def initialize(self, enc_out, src_len, src_map=None, device=None,
+    def initialize(self, enc_out, src_len, device=None,
                    target_prefix=None):
         """Initialize for decoding.
         Repeat src objects `beam_size` times.
         """
 
-        (fn_map_state, enc_out, src_map,
+        (fn_map_state, enc_out,
             target_prefix) = self.initialize_tile(
-                enc_out, src_len, src_map, target_prefix)
+                enc_out, src_len, target_prefix)
         if device is None:
             device = self.get_device_from_enc_out(enc_out)
 
         super(BeamSearch, self).initialize_(
-            enc_out, self.src_len, src_map, device, target_prefix)
+            enc_out, self.src_len, device, target_prefix)
 
-        return fn_map_state, enc_out, self.src_len, src_map
-
-
-class BeamSearchLM(BeamSearchBase):
-    """
-        Beam search for language/decoder only models
-    """
-    def initialize(self, src, src_len, src_map=None, device=None,
-                   target_prefix=None):
-        """Initialize for decoding.
-        Repeat src objects `beam_size` times.
-        """
-        (fn_map_state, _, src_map,
-            target_prefix) = self.initialize_tile(
-                None, src_len, src_map, target_prefix)
-        if device is None:
-            device = src.device
-
-        super(BeamSearchLM, self).initialize_(
-            None, self.src_len, src_map=src_map, device=device,
-            target_prefix=target_prefix)
-
-        return fn_map_state, src, self.src_len, src_map
-
-    def advance(self, log_probs, attn):
-        super(BeamSearchLM, self).advance(log_probs, attn)
-
-        # in LM task src_len is associated with currently generated src
-        # and therefore needs to follow the generation
-        self.src_len += 1
-
-    def remove_finished_batches(self, _B_new, _B_old, non_finished,
-                                predictions, attention, step):
-        super(BeamSearchLM, self).remove_finished_batches(
-            _B_new, _B_old, non_finished, predictions, attention, step)
-
-        # in LM task src_len is associated with currently generated src
-        # and therefore needs to follow the generation
-        non_finished = non_finished.to(self.topk_ids.device)
-        self.src_len = self.src_len.view(
-            _B_old, self.beam_size) \
-            .index_select(0, non_finished) \
-            .view(_B_new * self.beam_size)
+        return fn_map_state, enc_out, self.src_len
 
 
 class GNMTGlobalScorer(object):

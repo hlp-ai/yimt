@@ -168,7 +168,6 @@ def _add_test(param_setting, methodname):
 '''
 TEST PARAMETERS
 '''
-opt.brnn = False
 
 test_embeddings = [[],
                    [('decoder_type', 'transformer')]

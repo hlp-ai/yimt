@@ -10,7 +10,6 @@ import onmt
 from onmt.modules.sparse_losses import SparsemaxLoss
 from onmt.modules.sparse_activations import LogSparsemax
 from onmt.constants import ModelTask, DefaultTokens
-from onmt.modules.copy_generator import collapse_copy_scores
 
 
 class LossCompute(nn.Module):
@@ -27,7 +26,6 @@ class LossCompute(nn.Module):
         criterion (:obj:`nn. loss function`) : NLLoss or customed loss
         generator (:obj:`nn.Module`) :
         normalization (str "tokens" or "sents")
-        copy_attn (bool): whether copy attention mechanism is on/off
         lambda_coverage: Hyper-param to apply coverage attention if any
         lambda_align: Hyper-param for alignment loss
         tgt_shift_index: 1 for NMT, 0 for LM
@@ -36,7 +34,7 @@ class LossCompute(nn.Module):
              distribution over the target vocabulary.
     """
     def __init__(self, criterion, generator, normalization="tokens",
-                 copy_attn=False, lambda_coverage=0.0, lambda_align=0.0,
+                 lambda_coverage=0.0, lambda_align=0.0,
                  tgt_shift_index=1, vocab=None):
         super(LossCompute, self).__init__()
         self.criterion = criterion
@@ -45,7 +43,6 @@ class LossCompute(nn.Module):
         self.lambda_coverage = lambda_coverage
         self.lambda_align = lambda_align
         self.tgt_shift_index = tgt_shift_index
-        self.copy_attn = copy_attn
         self.vocab = vocab  # target vocab for copy_attn need
 
     @classmethod
@@ -69,23 +66,17 @@ class LossCompute(nn.Module):
 
         tgt_shift_idx = 1 if opt.model_task == ModelTask.SEQ2SEQ else 0
 
-        if opt.copy_attn:
-            criterion = onmt.modules.CopyGeneratorLoss(
-                len(vocab), opt.copy_attn_force,
-                unk_index=unk_idx, ignore_index=padding_idx
+        if opt.label_smoothing > 0 and train:
+            criterion = LabelSmoothingLoss(
+                opt.label_smoothing, len(vocab),
+                ignore_index=padding_idx
             )
+        elif isinstance(model.generator[-1], LogSparsemax):
+            criterion = SparsemaxLoss(ignore_index=padding_idx,
+                                      reduction='sum')
         else:
-            if opt.label_smoothing > 0 and train:
-                criterion = LabelSmoothingLoss(
-                    opt.label_smoothing, len(vocab),
-                    ignore_index=padding_idx
-                )
-            elif isinstance(model.generator[-1], LogSparsemax):
-                criterion = SparsemaxLoss(ignore_index=padding_idx,
-                                          reduction='sum')
-            else:
-                criterion = nn.NLLLoss(ignore_index=padding_idx,
-                                       reduction='sum')
+            criterion = nn.NLLLoss(ignore_index=padding_idx,
+                                   reduction='sum')
 
         # if the loss function operates on vectors of raw logits instead
         # of probabilities, only the first part of the generator needs to
@@ -97,7 +88,6 @@ class LossCompute(nn.Module):
 
         compute = cls(criterion, loss_gen,
                       normalization=opt.normalization,
-                      copy_attn=opt.copy_attn,
                       lambda_coverage=opt.lambda_coverage,
                       lambda_align=opt.lambda_align,
                       tgt_shift_index=tgt_shift_idx,
@@ -125,44 +115,6 @@ class LossCompute(nn.Module):
         align_loss = -align_head.clamp(min=1e-18).log().mul(ref_align).sum()
         align_loss *= self.lambda_align
         return align_loss
-
-    def _compute_copy_loss(self, batch, output, target, align, attns):
-        """Compute the copy attention loss.
-        Args:
-            batch: the current batch.
-            output: the predict output from the model.
-            target: the validate target to compare output with.
-            align:
-            attns: dictionary of attention distributions
-              `[tgt_len x batch x src_len]`
-        Returns:
-            A tuple with the loss and a :obj:`onmt.utils.Statistics` instance.
-        """
-        scores = self.generator(self._bottle(output),
-                                self._bottle(attns['copy']),
-                                batch['src_map'])
-        loss = self.criterion(scores, align, target).sum()
-
-        # this block does not depend on the loss value computed above
-        # and is used only for stats
-        scores_data = collapse_copy_scores(
-            self._unbottle(scores.clone(), len(batch['srclen'])),
-            batch, self.vocab, None)
-        scores_data = self._bottle(scores_data)
-        # Correct target copy token instead of <unk>
-        # tgt[i] = align[i] + len(tgt_vocab)
-        # for i such that tgt[i] == 0 and align[i] != 0
-        target_data = target.clone()
-        unk = self.criterion.unk_index
-        correct_mask = (target_data == unk) & (align != unk)
-        offset_align = align[correct_mask] + len(self.vocab)
-        target_data[correct_mask] += offset_align
-
-        # Compute sum of perplexities for stats
-        stats = self._stats(len(batch['srclen']), loss.item(),
-                            scores_data, target_data)
-
-        return loss, stats
 
     def _bottle(self, _v):
         return _v.view(-1, _v.size(2))
@@ -205,37 +157,29 @@ class LossCompute(nn.Module):
         target = batch['tgt'][:, trunc_range[0]:trunc_range[1],
                               0].contiguous().view(-1)
 
-        if self.copy_attn:
-            align = batch['alignment'][
-                :, trunc_range[0]:trunc_range[1]
-                ].contiguous().view(-1)
-            loss, stats = self._compute_copy_loss(batch, output, target,
-                                                  align, attns)
-        else:
+        scores = self.generator(self._bottle(output))
+        loss = self.criterion(scores, target)
 
-            scores = self.generator(self._bottle(output))
-            loss = self.criterion(scores, target)
+        if self.lambda_align != 0.0:
+            align_head = attns['align']
+            if align_head.dtype != loss.dtype:  # Fix FP16
+                align_head = align_head.to(loss.dtype)
+            align_idx = batch['align']
+            batch_size, pad_tgt_size, _ = batch['tgt'].size()
+            _, pad_src_size, _ = batch['src'].size()
+            align_matrix_size = [batch_size, pad_tgt_size, pad_src_size]
+            ref_align = onmt.utils.make_batch_align_matrix(
+                align_idx, align_matrix_size, normalize=True
+            )
+            ref_align = ref_align[:, trunc_range[0]:trunc_range[1], :]
+            if ref_align.dtype != loss.dtype:
+                ref_align = ref_align.to(loss.dtype)
+            align_loss = self._compute_alignement_loss(
+                align_head=align_head, ref_align=ref_align)
+            loss += align_loss
 
-            if self.lambda_align != 0.0:
-                align_head = attns['align']
-                if align_head.dtype != loss.dtype:  # Fix FP16
-                    align_head = align_head.to(loss.dtype)
-                align_idx = batch['align']
-                batch_size, pad_tgt_size, _ = batch['tgt'].size()
-                _, pad_src_size, _ = batch['src'].size()
-                align_matrix_size = [batch_size, pad_tgt_size, pad_src_size]
-                ref_align = onmt.utils.make_batch_align_matrix(
-                    align_idx, align_matrix_size, normalize=True
-                )
-                ref_align = ref_align[:, trunc_range[0]:trunc_range[1], :]
-                if ref_align.dtype != loss.dtype:
-                    ref_align = ref_align.to(loss.dtype)
-                align_loss = self._compute_alignement_loss(
-                    align_head=align_head, ref_align=ref_align)
-                loss += align_loss
-
-            stats = self._stats(len(batch['srclen']), loss.item(),
-                                scores, target)
+        stats = self._stats(len(batch['srclen']), loss.item(),
+                            scores, target)
 
         if self.lambda_coverage != 0.0:
             coverage_loss = self._compute_coverage_loss(
