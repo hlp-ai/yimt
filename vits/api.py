@@ -104,15 +104,31 @@ class TTS:
         print(f"Run inference with {self.device}")
 
         self.lang = lang
-        ckpt_dir = os.path.join(models_dir, lang)
+        self.ckpt_dir = os.path.join(models_dir, lang)
 
-        vocab_file = f"{ckpt_dir}/vocab.txt"
-        config_file = f"{ckpt_dir}/config.json"
+        vocab_file = f"{self.ckpt_dir}/vocab.txt"
+        config_file = f"{self.ckpt_dir}/config.json"
         assert os.path.isfile(config_file), f"{config_file} doesn't exist"
 
         self.hps = utils.get_hparams_from_file(config_file)
         self.text_mapper = TextMapper(vocab_file)
 
+        self._load_model()
+
+        # self.net_g = SynthesizerTrn(
+        #     len(self.text_mapper.symbols),
+        #     self.hps.data.filter_length // 2 + 1,
+        #     self.hps.train.segment_size // self.hps.data.hop_length,
+        #     **self.hps.model)
+        # self.net_g.to(self.device)
+        # _ = self.net_g.eval()
+        #
+        # g_pth = f"{self.ckpt_dir}/G_100000.pth"
+        # print(f"load {g_pth}")
+        #
+        # _ = utils.load_checkpoint(g_pth, self.net_g, None)
+
+    def _load_model(self):
         self.net_g = SynthesizerTrn(
             len(self.text_mapper.symbols),
             self.hps.data.filter_length // 2 + 1,
@@ -121,14 +137,29 @@ class TTS:
         self.net_g.to(self.device)
         _ = self.net_g.eval()
 
-        g_pth = f"{ckpt_dir}/G_100000.pth"
+        g_pth = f"{self.ckpt_dir}/G_100000.pth"
         print(f"load {g_pth}")
 
         _ = utils.load_checkpoint(g_pth, self.net_g, None)
 
+
+    def preprocess_text(self, txt, text_mapper, hps, uroman_dir=None, lang=None,
+                        perl_path=f"c:/Strawberry/perl/bin/perl.exe"):
+        txt = preprocess_char(txt, lang=lang)
+        print(hps.data.training_files)
+        is_uroman = hps.data.training_files.split('.')[-1] == 'uroman'
+        if is_uroman:
+            uroman_pl = os.path.join(uroman_dir, "bin", "uroman.pl")
+            print(f"uromanize")
+            txt = text_mapper.uromanize(txt, uroman_pl, perl_path=perl_path)
+            print(f"uroman text: {txt}")
+        txt = txt.lower()
+        txt = text_mapper.filter_oov(txt)
+        return txt
+
     def synthesize(self, txt, uroman_dir="D:/kidden/github/yimt/vits/uroman", perl_path=f"c:/Strawberry/perl/bin/perl.exe"):
         print(f"text: {txt}")
-        txt = preprocess_text(txt, self.text_mapper, self.hps, lang=self.lang, uroman_dir=uroman_dir, perl_path=perl_path)
+        txt = self.preprocess_text(txt, self.text_mapper, self.hps, lang=self.lang, uroman_dir=uroman_dir, perl_path=perl_path)
         stn_tst = self.text_mapper.get_text(txt, self.hps)
         with torch.no_grad():
             x_tst = stn_tst.unsqueeze(0).to(self.device)
