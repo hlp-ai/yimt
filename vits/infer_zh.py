@@ -51,7 +51,7 @@ net_g.eval()
 net_g.to(device)
 
 
-item = "不知道这个测试能否行"
+item = "不知道这个测试能否行，这里有停顿吗？"
 phonemes, _ = tts_front.chinese_to_phonemes(item)
 input_ids = cleaned_text_to_sequence(phonemes)
 with torch.no_grad():
