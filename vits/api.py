@@ -1,4 +1,6 @@
 import re
+import tempfile
+
 import torch
 from scipy.io.wavfile import write
 
@@ -46,13 +48,13 @@ class TextMapper(object):
             sequence += [symbol_id]
         return sequence
 
-    def uromanize(self, text, uroman_pl):
+    def uromanize(self, text, uroman_pl, perl_path=f"c:/Strawberry/perl/bin/perl.exe"):
         iso = "xxx"
-        txt_fn = "D:/kidden/github/yimt/vits/src.txt"
-        roman_fn = "D:/kidden/github/yimt/vits/roman.txt"
+        txt_fn = tempfile.NamedTemporaryFile().name  # "D:/kidden/github/yimt/vits/src.txt"
+        roman_fn = tempfile.NamedTemporaryFile().name  # "D:/kidden/github/yimt/vits/roman.txt"
         with open(txt_fn, "w", encoding="utf-8") as f:
             f.write("\n".join([text]))
-        cmd = f"c:/Strawberry/perl/bin/perl.exe " + uroman_pl
+        cmd = perl_path + " " + uroman_pl
         cmd += f" -l {iso} "
         cmd += f" < {txt_fn} > {roman_fn}"
         print(cmd)
@@ -81,14 +83,14 @@ class TextMapper(object):
         return txt_filt
 
 
-def preprocess_text(txt, text_mapper, hps, uroman_dir=None, lang=None):
+def preprocess_text(txt, text_mapper, hps, uroman_dir=None, lang=None, perl_path=f"c:/Strawberry/perl/bin/perl.exe"):
     txt = preprocess_char(txt, lang=lang)
     print(hps.data.training_files)
     is_uroman = hps.data.training_files.split('.')[-1] == 'uroman'
     if is_uroman:
         uroman_pl = os.path.join(uroman_dir, "bin", "uroman.pl")
         print(f"uromanize")
-        txt = text_mapper.uromanize(txt, uroman_pl)
+        txt = text_mapper.uromanize(txt, uroman_pl, perl_path=perl_path)
         print(f"uroman text: {txt}")
     txt = txt.lower()
     txt = text_mapper.filter_oov(txt)
@@ -124,9 +126,9 @@ class TTS:
 
         _ = utils.load_checkpoint(g_pth, self.net_g, None)
 
-    def synthesize(self, txt):
+    def synthesize(self, txt, uroman_dir="D:/kidden/github/yimt/vits/uroman", perl_path=f"c:/Strawberry/perl/bin/perl.exe"):
         print(f"text: {txt}")
-        txt = preprocess_text(txt, self.text_mapper, self.hps, lang=self.lang, uroman_dir="D:/kidden/github/yimt/vits/uroman")
+        txt = preprocess_text(txt, self.text_mapper, self.hps, lang=self.lang, uroman_dir=uroman_dir, perl_path=perl_path)
         stn_tst = self.text_mapper.get_text(txt, self.hps)
         with torch.no_grad():
             x_tst = stn_tst.unsqueeze(0).to(self.device)
