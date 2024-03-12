@@ -36,7 +36,7 @@ seed: 3435
 decoder_type: transformer
 encoder_type: transformer
 word_vec_size: 128
-rnn_size: 128
+hidden_size: 128
 layers: 2
 transformer_ff: 256
 heads: 8
