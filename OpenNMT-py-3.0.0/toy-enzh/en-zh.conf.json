@@ -1,0 +1,19 @@
+{
+    "models_root": "D:\\kidden\\github\\yimt\\OpenNMT-py-3.0.0\\toy-enzh\\run",
+    "models": [
+        {
+            "id": 100,
+            "model": "model_step_5500.pt",
+            "timeout": 600,
+            "on_timeout": "to_cpu",
+            "load": true,
+            "opt": {
+                "beam_size": 5
+            },
+            "tokenizer": {
+                "type": "sentencepiece",
+                "model": "en.train-sp-4800.model"
+            }
+        }
+    ]
+}
