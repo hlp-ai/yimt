@@ -2,52 +2,51 @@ import io
 import os
 import numpy as np
 
-try:
-    import tensorflow  # required in Colab to avoid protobuf compatibility issues
-except ImportError:
-    pass
-
 import torch
 import pandas as pd
 import urllib
 import tarfile
 import whisper
-import torchaudio
 
 from scipy.io import wavfile
 from tqdm.notebook import tqdm
 
+from whisper.tokenizer import get_tokenizer
 
 pd.options.display.max_rows = 100
 pd.options.display.max_colwidth = 1000
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
-# %% [markdown]
-# # Loading the Fleurs dataset
-# 
-# Select the language of the Fleur dataset to download. Please note that the transcription and translation performance varies widely depending on the language. Appendix D.2 in the paper contains the performance breakdown by language.
+# Loading the Fleurs dataset
 
-# %%
-import ipywidgets as widgets
+# Select the language of the Fleur dataset to download. Please note that the transcription and translation performance varies widely depending on the language.
+# Appendix D.2 in the paper contains the performance breakdown by language.
 
-languages = {"af_za": "Afrikaans", "am_et": "Amharic", "ar_eg": "Arabic", "as_in": "Assamese", "az_az": "Azerbaijani", "be_by": "Belarusian", "bg_bg": "Bulgarian", "bn_in": "Bengali", "bs_ba": "Bosnian", "ca_es": "Catalan", "cmn_hans_cn": "Chinese", "cs_cz": "Czech", "cy_gb": "Welsh", "da_dk": "Danish", "de_de": "German", "el_gr": "Greek", "en_us": "English", "es_419": "Spanish", "et_ee": "Estonian", "fa_ir": "Persian", "fi_fi": "Finnish", "fil_ph": "Tagalog", "fr_fr": "French", "gl_es": "Galician", "gu_in": "Gujarati", "ha_ng": "Hausa", "he_il": "Hebrew", "hi_in": "Hindi", "hr_hr": "Croatian", "hu_hu": "Hungarian", "hy_am": "Armenian", "id_id": "Indonesian", "is_is": "Icelandic", "it_it": "Italian", "ja_jp": "Japanese", "jv_id": "Javanese", "ka_ge": "Georgian", "kk_kz": "Kazakh", "km_kh": "Khmer", "kn_in": "Kannada", "ko_kr": "Korean", "lb_lu": "Luxembourgish", "ln_cd": "Lingala", "lo_la": "Lao", "lt_lt": "Lithuanian", "lv_lv": "Latvian", "mi_nz": "Maori", "mk_mk": "Macedonian", "ml_in": "Malayalam", "mn_mn": "Mongolian", "mr_in": "Marathi", "ms_my": "Malay", "mt_mt": "Maltese", "my_mm": "Myanmar", "nb_no": "Norwegian", "ne_np": "Nepali", "nl_nl": "Dutch", "oc_fr": "Occitan", "pa_in": "Punjabi", "pl_pl": "Polish", "ps_af": "Pashto", "pt_br": "Portuguese", "ro_ro": "Romanian", "ru_ru": "Russian", "sd_in": "Sindhi", "sk_sk": "Slovak", "sl_si": "Slovenian", "sn_zw": "Shona", "so_so": "Somali", "sr_rs": "Serbian", "sv_se": "Swedish", "sw_ke": "Swahili", "ta_in": "Tamil", "te_in": "Telugu", "tg_tj": "Tajik", "th_th": "Thai", "tr_tr": "Turkish", "uk_ua": "Ukrainian", "ur_pk": "Urdu", "uz_uz": "Uzbek", "vi_vn": "Vietnamese", "yo_ng": "Yoruba"}
-selection = widgets.Dropdown(
-    options=[("Select language", None), ("----------", None)] + sorted([(f"{v} ({k})", k) for k, v in languages.items()]),
-    value="ko_kr",
-    description='Language:',
-    disabled=False,
-)
+languages = {"af_za": "Afrikaans", "am_et": "Amharic", "ar_eg": "Arabic", "as_in": "Assamese", "az_az": "Azerbaijani",
+             "be_by": "Belarusian", "bg_bg": "Bulgarian", "bn_in": "Bengali", "bs_ba": "Bosnian", "ca_es": "Catalan",
+             "cmn_hans_cn": "Chinese", "cs_cz": "Czech", "cy_gb": "Welsh", "da_dk": "Danish", "de_de": "German",
+             "el_gr": "Greek", "en_us": "English", "es_419": "Spanish", "et_ee": "Estonian", "fa_ir": "Persian",
+             "fi_fi": "Finnish", "fil_ph": "Tagalog", "fr_fr": "French", "gl_es": "Galician", "gu_in": "Gujarati",
+             "ha_ng": "Hausa", "he_il": "Hebrew", "hi_in": "Hindi", "hr_hr": "Croatian", "hu_hu": "Hungarian",
+             "hy_am": "Armenian", "id_id": "Indonesian", "is_is": "Icelandic", "it_it": "Italian", "ja_jp": "Japanese",
+             "jv_id": "Javanese", "ka_ge": "Georgian", "kk_kz": "Kazakh", "km_kh": "Khmer", "kn_in": "Kannada",
+             "ko_kr": "Korean", "lb_lu": "Luxembourgish", "ln_cd": "Lingala", "lo_la": "Lao", "lt_lt": "Lithuanian",
+             "lv_lv": "Latvian", "mi_nz": "Maori", "mk_mk": "Macedonian", "ml_in": "Malayalam", "mn_mn": "Mongolian",
+             "mr_in": "Marathi", "ms_my": "Malay", "mt_mt": "Maltese", "my_mm": "Myanmar", "nb_no": "Norwegian",
+             "ne_np": "Nepali", "nl_nl": "Dutch", "oc_fr": "Occitan", "pa_in": "Punjabi", "pl_pl": "Polish",
+             "ps_af": "Pashto", "pt_br": "Portuguese", "ro_ro": "Romanian", "ru_ru": "Russian", "sd_in": "Sindhi",
+             "sk_sk": "Slovak", "sl_si": "Slovenian", "sn_zw": "Shona", "so_so": "Somali", "sr_rs": "Serbian",
+             "sv_se": "Swedish", "sw_ke": "Swahili", "ta_in": "Tamil", "te_in": "Telugu", "tg_tj": "Tajik",
+             "th_th": "Thai", "tr_tr": "Turkish", "uk_ua": "Ukrainian", "ur_pk": "Urdu", "uz_uz": "Uzbek",
+             "vi_vn": "Vietnamese", "yo_ng": "Yoruba"}
 
-selection
-
-# %%
-lang = selection.value
+lang = "lo_la"
 language = languages[lang]
 
 assert lang is not None, "Please select a language"
 print(f"Selected language: {language} ({lang})")
 
-# %%
+
 def download(url: str, target_path: str):
     with urllib.request.urlopen(url) as source, open(target_path, "wb") as output:
         with tqdm(total=int(source.info().get("Content-Length")), ncols=80, unit='iB', unit_scale=True, unit_divisor=1024) as loop:
@@ -97,27 +96,22 @@ class Fleurs(torch.utils.data.Dataset):
         
         return (audio, text)
 
-# %%
+
 dataset = Fleurs(lang, subsample_rate=10)  # subsample 10% of the dataset for a quick demo
 
-# %% [markdown]
-# # Running inference on the dataset using a medium Whisper model
-# 
+# Running inference on the dataset using a medium Whisper model
 # The following will take a few minutes to transcribe and translate utterances in the dataset.
 
-# %%
 model = whisper.load_model("medium")
 print(
     f"Model is {'multilingual' if model.is_multilingual else 'English-only'} "
     f"and has {sum(np.prod(p.shape) for p in model.parameters()):,} parameters."
 )
 
-# %%
 options = dict(language=language, beam_size=5, best_of=5)
 transcribe_options = dict(task="transcribe", **options)
 translate_options = dict(task="translate", **options)
 
-# %%
 references = []
 transcriptions = []
 translations = []
@@ -130,30 +124,21 @@ for audio, text in tqdm(dataset):
     translations.append(translation)
     references.append(text)
 
-# %%
 data = pd.DataFrame(dict(reference=references, transcription=transcriptions, translation=translations))
-data
 
-# %% [markdown]
-# # Word-level timestamps using attention weights
-# 
+# Word-level timestamps using attention weights
 # Below, we use the cross-attention weights to determine more granular, word-level timestamps. It uses a set of heuristics and dynamic time warping (DTW) to find the alignment between the audio and the transcript.
 
 # %% pip install dtw-python
 
-# %%
 import string
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import matplotlib.ticker as ticker
-
-from IPython.display import display, HTML
-from whisper.tokenizer import get_tokenizer
 from dtw import dtw
 from scipy.ndimage import median_filter
 
 
-# %%
 AUDIO_SAMPLES_PER_TOKEN = whisper.audio.HOP_LENGTH * 2
 AUDIO_TIME_PER_TOKEN = AUDIO_SAMPLES_PER_TOKEN / whisper.audio.SAMPLE_RATE
 
@@ -162,7 +147,6 @@ qk_scale = 1.0
 
 tokenizer = get_tokenizer(model.is_multilingual, language=languages[lang])
 
-# %%
 # This part downloads a repackaged version of the Noto Sans font (either CJK or non-CJK)
 # to render various languages in Matplotlib figures.
 
@@ -178,7 +162,7 @@ if not os.path.exists(font):
 prop = fm.FontProperties(fname=font)
 props = {'fontproperties': prop}
 
-# %%
+
 def split_tokens_on_unicode(tokens: torch.Tensor):
     words = []
     word_tokens = []
@@ -194,7 +178,7 @@ def split_tokens_on_unicode(tokens: torch.Tensor):
     
     return words, word_tokens
 
-# %%
+
 def split_tokens_on_spaces(tokens: torch.Tensor):
     subwords, subword_tokens_list = split_tokens_on_unicode(tokens)
     words = []
@@ -213,7 +197,7 @@ def split_tokens_on_spaces(tokens: torch.Tensor):
     
     return words, word_tokens
 
-# %%
+
 if languages[lang] in {"Chinese", "Japanese", "Thai", "Lao", "Myanmar"}:
     # These languages don't typically use spaces, so it is difficult to split words
     # without morpheme analysis. Here, we instead split words at any
@@ -222,7 +206,7 @@ if languages[lang] in {"Chinese", "Japanese", "Thai", "Lao", "Myanmar"}:
 else:
     split_tokens = split_tokens_on_spaces
 
-# %%
+
 # install hooks on the cross attention layers to retrieve the attention weights
 QKs = [None] * model.dims.n_text_layer
 
@@ -231,7 +215,7 @@ for i, block in enumerate(model.decoder.blocks):
         lambda _, ins, outs, index=i: QKs.__setitem__(index, outs[-1])
     )
 
-# %%
+
 # for the first 10 examples in the dataset
 for (audio, label), transcription in zip(dataset, transcriptions[:10]):
     print(transcription)
@@ -316,7 +300,4 @@ for (audio, label), transcription in zip(dataset, transcriptions[:10]):
         if not word.startswith("<|") and word.strip() not in ".,!?、。"
     ]
 
-    display(pd.DataFrame(data))
-    display(HTML("<hr>"))
-
-
+    print(data)
