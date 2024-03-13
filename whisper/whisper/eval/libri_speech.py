@@ -1,14 +1,5 @@
-# # Loading the LibriSpeech dataset
-# 
-# The following will load the test-clean split of the LibriSpeech corpus using torchaudio.
-
 import os
 import numpy as np
-
-try:
-    import tensorflow  # required in Colab to avoid protobuf compatibility issues
-except ImportError:
-    pass
 
 import torch
 import pandas as pd
@@ -17,6 +8,9 @@ import torchaudio
 
 from tqdm.notebook import tqdm
 
+import jiwer
+
+from whisper.whisper.normalizers import EnglishTextNormalizer
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -50,10 +44,8 @@ dataset = LibriSpeech("test-clean")
 loader = torch.utils.data.DataLoader(dataset, batch_size=16)
 
 
-# # Running inference on the dataset using a base Whisper model
-# 
+# Running inference on the dataset using a base Whisper model
 # The following will take a few minutes to transcribe all utterances in the dataset.
-
 
 model = whisper.load_model("base.en")
 print(
@@ -76,24 +68,15 @@ for mels, texts in tqdm(loader):
 
 
 data = pd.DataFrame(dict(hypothesis=hypotheses, reference=references))
-data
 
 
-# # Calculating the word error rate
-# 
+# Calculating the word error rate
 # Now, we use our English normalizer implementation to standardize the transcription and calculate the WER.
-
-
-import jiwer
-from whisper.normalizers import EnglishTextNormalizer
 
 normalizer = EnglishTextNormalizer()
 
-
 data["hypothesis_clean"] = [normalizer(text) for text in data["hypothesis"]]
 data["reference_clean"] = [normalizer(text) for text in data["reference"]]
-data
-
 
 wer = jiwer.wer(list(data["reference_clean"]), list(data["hypothesis_clean"]))
 
