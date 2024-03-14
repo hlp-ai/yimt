@@ -10,7 +10,8 @@ class ASR:
 
     def recognize_file(self, wave_fn):
         # TODO: 不使用FFMPEG
-        audio = whisper.load_audio(wave_fn)
+        # audio = whisper.load_audio(wave_fn)
+        audio = whisper.load_audio_librosa(wave_fn)
 
         return self.recognize(audio)
 

@@ -3,6 +3,7 @@ from functools import lru_cache
 from subprocess import CalledProcessError, run
 from typing import Optional, Union
 
+import librosa
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -60,6 +61,27 @@ def load_audio(file: str, sr: int = SAMPLE_RATE):
         raise RuntimeError(f"Failed to load audio: {e.stderr.decode()}") from e
 
     return np.frombuffer(out, np.int16).flatten().astype(np.float32) / 32768.0
+
+
+def load_audio_librosa(file: str, sr: int = SAMPLE_RATE):
+    """
+    Open an audio file and read as mono waveform, resampling as necessary
+
+    Parameters
+    ----------
+    file: str
+        The audio file to open
+
+    sr: int
+        The sample rate to resample the audio if necessary
+
+    Returns
+    -------
+    A NumPy array containing the audio waveform, in float32 dtype.
+    """
+
+    audio, sr = librosa.load(file, sr=sr)
+    return audio
 
 
 def pad_or_trim(array, length: int = N_SAMPLES, *, axis: int = -1):
