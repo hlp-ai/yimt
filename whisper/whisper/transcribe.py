@@ -18,7 +18,6 @@ from .audio import (
     pad_or_trim,
 )
 from .decoding import DecodingOptions, DecodingResult
-from .timing import add_word_timestamps
 from .tokenizer import LANGUAGES, TO_LANGUAGE_CODE, get_tokenizer
 from .utils import (
     exact_div,
@@ -46,7 +45,6 @@ def transcribe(
     no_speech_threshold: Optional[float] = 0.6,
     condition_on_previous_text: bool = True,
     initial_prompt: Optional[str] = None,
-    word_timestamps: bool = False,
     prepend_punctuations: str = "\"'“¿([{-",
     append_punctuations: str = "\"'.。,，!！?？:：”)]}、",
     clip_timestamps: Union[str, List[float]] = "0",
@@ -382,83 +380,6 @@ def transcribe(
                 )
                 seek += segment_size
 
-            if word_timestamps:
-                add_word_timestamps(
-                    segments=current_segments,
-                    model=model,
-                    tokenizer=tokenizer,
-                    mel=mel_segment,
-                    num_frames=segment_size,
-                    prepend_punctuations=prepend_punctuations,
-                    append_punctuations=append_punctuations,
-                    last_speech_timestamp=last_speech_timestamp,
-                )
-
-                if not single_timestamp_ending:
-                    last_word_end = get_end(current_segments)
-                    if last_word_end is not None and last_word_end > time_offset:
-                        seek = round(last_word_end * FRAMES_PER_SECOND)
-
-                # skip silence before possible hallucinations
-                if hallucination_silence_threshold is not None:
-                    threshold = hallucination_silence_threshold
-                    if not single_timestamp_ending:
-                        last_word_end = get_end(current_segments)
-                        if last_word_end is not None and last_word_end > time_offset:
-                            remaining_duration = window_end_time - last_word_end
-                            if remaining_duration > threshold:
-                                seek = round(last_word_end * FRAMES_PER_SECOND)
-                            else:
-                                seek = previous_seek + segment_size
-
-                    # if first segment might be a hallucination, skip leading silence
-                    first_segment = next_words_segment(current_segments)
-                    if first_segment is not None and is_segment_anomaly(first_segment):
-                        gap = first_segment["start"] - time_offset
-                        if gap > threshold:
-                            seek = previous_seek + round(gap * FRAMES_PER_SECOND)
-                            continue
-
-                    # skip silence before any possible hallucination that is surrounded
-                    # by silence or more hallucinations
-                    hal_last_end = last_speech_timestamp
-                    for si in range(len(current_segments)):
-                        segment = current_segments[si]
-                        if not segment["words"]:
-                            continue
-                        if is_segment_anomaly(segment):
-                            next_segment = next_words_segment(
-                                current_segments[si + 1 :]
-                            )
-                            if next_segment is not None:
-                                hal_next_start = next_segment["words"][0]["start"]
-                            else:
-                                hal_next_start = time_offset + segment_duration
-                            silence_before = (
-                                segment["start"] - hal_last_end > threshold
-                                or segment["start"] < threshold
-                                or segment["start"] - time_offset < 2.0
-                            )
-                            silence_after = (
-                                hal_next_start - segment["end"] > threshold
-                                or is_segment_anomaly(next_segment)
-                                or window_end_time - segment["end"] < 2.0
-                            )
-                            if silence_before and silence_after:
-                                seek = round(
-                                    max(time_offset + 1, segment["start"])
-                                    * FRAMES_PER_SECOND
-                                )
-                                if content_duration - segment["end"] < threshold:
-                                    seek = content_frames
-                                current_segments[si:] = []
-                                break
-                        hal_last_end = segment["end"]
-
-                last_word_end = get_end(current_segments)
-                if last_word_end is not None:
-                    last_speech_timestamp = last_word_end
-
             if verbose:
                 for segment in current_segments:
                     start, end, text = segment["start"], segment["end"], segment["text"]
@@ -536,7 +457,6 @@ def cli():
     parser.add_argument("--compression_ratio_threshold", type=optional_float, default=2.4, help="if the gzip compression ratio is higher than this value, treat the decoding as failed")
     parser.add_argument("--logprob_threshold", type=optional_float, default=-1.0, help="if the average log probability is lower than this value, treat the decoding as failed")
     parser.add_argument("--no_speech_threshold", type=optional_float, default=0.6, help="if the probability of the <|nospeech|> token is higher than this value AND the decoding has failed due to `logprob_threshold`, consider the segment as silence")
-    parser.add_argument("--word_timestamps", type=str2bool, default=False, help="(experimental) extract word-level timestamps and refine the results based on them")
     parser.add_argument("--prepend_punctuations", type=str, default="\"\'“¿([{-", help="if word_timestamps is True, merge these punctuation symbols with the next word")
     parser.add_argument("--append_punctuations", type=str, default="\"\'.。,，!！?？:：”)]}、", help="if word_timestamps is True, merge these punctuation symbols with the previous word")
     parser.add_argument("--highlight_words", type=str2bool, default=False, help="(requires --word_timestamps True) underline each word as it is spoken in srt and vtt")
