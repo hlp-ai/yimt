@@ -170,9 +170,6 @@ def transcribe(
 
     punctuation = "\"'“¿([{-\"'.。,，!！?？:：”)]}、"
 
-    if word_timestamps and task == "translate":
-        warnings.warn("Word-level timestamps on translations may not be reliable.")
-
     def decode_with_fallback(segment: torch.Tensor) -> DecodingResult:
         temperatures = (
             [temperature] if isinstance(temperature, (int, float)) else temperature
