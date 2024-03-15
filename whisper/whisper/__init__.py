@@ -8,11 +8,10 @@ from typing import List, Optional, Union
 import torch
 from tqdm import tqdm
 
-from .audio import load_audio, log_mel_spectrogram, pad_or_trim
+from .audio import load_audio, load_audio_librosa, log_mel_spectrogram, pad_or_trim
 from .decoding import DecodingOptions, DecodingResult, decode, detect_language
 from .model import ModelDimensions, Whisper
 from .transcribe import transcribe
-from .version import __version__
 
 _MODELS = {
     "tiny.en": "https://openaipublic.azureedge.net/main/whisper/models/d3dd57d32accea0b295c96e26691aa14d8822fac7d9d27d5dc00b4ca2826dd03/tiny.en.pt",
