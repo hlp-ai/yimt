@@ -128,3 +128,12 @@ early_stopping_criteria: ppl
 # Decoding
 replace_unk: true
 max_length: 250
+
+tensorboard: true
+tensorboard_log_dir: ./logs
+
+train_eval_steps: 200
+dump_preds: ./preds
+
+report_every: 100
+valid_metrics: [BLEU]
