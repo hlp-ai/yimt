@@ -44,8 +44,7 @@ with codecs.open(args.output, "w", encoding="utf-8") as output_file:
         for hyp in nbest:
             bleu = 0
             for ref in nbest:
-                bleu = bleu + sacrebleu.sentence_bleu(hyp, [ref]).score /\
-                       args.nbest_order
+                bleu = bleu + sacrebleu.sentence_bleu(hyp, [ref]).score / args.nbest_order
                 texts.append(hyp)
                 scores.append(bleu)
         max_index = scores.index(max(scores))
