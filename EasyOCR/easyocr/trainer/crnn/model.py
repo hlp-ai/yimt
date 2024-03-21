@@ -2,7 +2,6 @@ import torch.nn as nn
 
 from easyocr.model.modules import VGG_FeatureExtractor, ResNet_FeatureExtractor, BidirectionalLSTM
 from easyocr.trainer.crnn.modules.transformation import TPS_SpatialTransformerNetwork
-from easyocr.trainer.crnn.modules.feature_extraction import RCNN_FeatureExtractor
 from easyocr.trainer.crnn.modules.prediction import Attention
 
 class Model(nn.Module):
@@ -23,8 +22,6 @@ class Model(nn.Module):
         """ FeatureExtraction """
         if opt.FeatureExtraction == 'VGG':
             self.FeatureExtraction = VGG_FeatureExtractor(opt.input_channel, opt.output_channel)
-        elif opt.FeatureExtraction == 'RCNN':
-            self.FeatureExtraction = RCNN_FeatureExtractor(opt.input_channel, opt.output_channel)
         elif opt.FeatureExtraction == 'ResNet':
             self.FeatureExtraction = ResNet_FeatureExtractor(opt.input_channel, opt.output_channel)
         else:
