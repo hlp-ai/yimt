@@ -1,6 +1,7 @@
 number: '0123456789'
 symbol: "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ €"
 lang_char: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+
 experiment_name: 'en_filtered'
 train_data: 'all_data'
 valid_data: 'all_data/en_val'
@@ -10,6 +11,7 @@ batch_size: 32 #32
 num_iter: 300000
 valInterval: 20000
 saved_model: '' #'saved_models/en_filtered/iter_300000.pth'
+
 FT: False
 optim: False # default is Adadelta
 lr: 1.
@@ -17,6 +19,7 @@ beta1: 0.9
 rho: 0.95
 eps: 0.00000001
 grad_clip: 5
+
 #Data processing
 select_data: 'en_train_filtered' # this is dataset folder in train_data
 batch_ratio: '1' 
@@ -25,11 +28,13 @@ batch_max_length: 34
 imgH: 64
 imgW: 600
 rgb: False
+
 # contrast_adjust: False
 sensitive: True
 PAD: True
 contrast_adjust: 0.0
 data_filtering_off: False
+
 # Model Architecture
 Transformation: 'None'
 FeatureExtraction: 'VGG'
