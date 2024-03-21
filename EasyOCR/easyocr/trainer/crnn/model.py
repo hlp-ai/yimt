@@ -2,7 +2,6 @@ import torch.nn as nn
 
 from easyocr.model.modules import VGG_FeatureExtractor, ResNet_FeatureExtractor, BidirectionalLSTM
 from easyocr.trainer.crnn.modules.transformation import TPS_SpatialTransformerNetwork
-from easyocr.trainer.crnn.modules.prediction import Attention
 
 class Model(nn.Module):
 
@@ -42,8 +41,6 @@ class Model(nn.Module):
         """ Prediction """
         if opt.Prediction == 'CTC':
             self.Prediction = nn.Linear(self.SequenceModeling_output, opt.num_class)
-        elif opt.Prediction == 'Attn':
-            self.Prediction = Attention(self.SequenceModeling_output, opt.hidden_size, opt.num_class)
         else:
             raise Exception('Prediction is neither CTC or Attn')
 
