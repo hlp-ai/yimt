@@ -1,4 +1,6 @@
 import os
+import sys
+
 import torch.backends.cudnn as cudnn
 import yaml
 from easyocr.trainer.crnn.train import train
@@ -29,6 +31,8 @@ def get_config(file_path):
     return opt
 
 
-opt = get_config("config_files/en_filtered_config.yaml")
-train(opt, amp=False)
+if __name__ == "__main__":
+    conf_file = sys.argv[1]  # "config_files/en_filtered_config.yaml"
+    opt = get_config("config_files/en_filtered_config.yaml")
+    train(opt, amp=False)
 

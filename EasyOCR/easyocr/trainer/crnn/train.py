@@ -17,6 +17,7 @@ from easyocr.trainer.crnn.model import Model
 from easyocr.trainer.crnn.test import validation
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+
 def count_parameters(model):
     print("Modules, Parameters")
     total_params = 0
@@ -28,6 +29,7 @@ def count_parameters(model):
         print(name, param)
     print(f"Total Trainable Params: {total_params}")
     return total_params
+
 
 def train(opt, show_number = 2, amp=False):
     """ dataset preparation """
