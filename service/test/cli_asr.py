@@ -18,6 +18,7 @@ json1 = {"base64": encoded_data.decode('utf-8'),
 try:
     response1 = requests.post(url=END_POINT+"/asr", headers=headers1, json=json1)
     print(response1.text)
-    jstr = json.loads(response1.text)
+    obj = json.loads(response1.text)
+    print(obj)
 except requests.exceptions.RequestException as e:
     print(f"请求失败, 错误信息：{e}")
