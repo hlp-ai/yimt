@@ -19,3 +19,8 @@ class AudioRecognizers:
     @staticmethod
     def supported_languages():
         return ["en", "zh"]
+
+
+if __name__ == '__main__':
+    s = AudioRecognizers()
+    print(s.recognize_file(r"D:\dataset\LJSpeech-1.1\wavs\LJ001-0001.wav"))
