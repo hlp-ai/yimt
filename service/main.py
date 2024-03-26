@@ -9,6 +9,7 @@ from html import unescape
 from flask import (Flask, abort, jsonify, render_template, request, send_file, url_for, g)
 from werkzeug.utils import secure_filename
 
+from service.asr import AudioRecognizers
 from service.ocr import TextRecognizers
 
 
@@ -38,7 +39,8 @@ def run_ocr(image_path, source_lang, queue):
 def create_app():
     app = Flask(__name__)
 
-    recognizers = TextRecognizers()
+    text_recognizers = TextRecognizers()
+    audio_recognizers = AudioRecognizers()
 
     @app.errorhandler(400)
     def invalid_api(e):
@@ -90,7 +92,7 @@ def create_app():
         with open(filepath, "wb") as image_file:
             image_file.write(image_data)
 
-        result = recognizers.recognize(filepath, lang)
+        result = text_recognizers.recognize(filepath, lang)
         if result is None:
             abort(400, description="NO OCR")
 
@@ -100,54 +102,30 @@ def create_app():
         #
         # return jsonify({"result":str})
 
-    # @app.post("/asr")
-    # # @access_check
-    # def translate_audio2text():
-    #     json = get_json_dict(request)
-    #     audio_64_string = json.get("base64")
-    #     format = json.get("format")
-    #     rate = json.get("rate")
-    #     channel = json.get("channel")
-    #     token = json.get("token")
-    #     len = json.get("len")
-    #     source_lang = json.get("source")
-    #     target_lang = json.get("target")
-    #
-    #     from_audio_formats = ["pcm", "wav", "amr", "m4a"]
-    #     q = "audio2text"  # for test
-    #
-    #     if not format:
-    #         abort(400, description="Invalid request: missing format parameter")
-    #     if not audio_64_string:
-    #         abort(400, description="Invalid request: missing base64 parameter")
-    #     if not rate:
-    #         abort(400, description="Invalid request: missing rate parameter")
-    #     if not channel:
-    #         abort(400, description="Invalid request: missing channel parameter")
-    #     if not len:
-    #         abort(400, description="Invalid request: missing len parameter")
-    #     if not source_lang:
-    #         abort(400, description="Invalid request: missing source parameter")
-    #     if not target_lang:
-    #         abort(400, description="Invalid request: missing target parameter")
-    #     if source_lang == "auto":
-    #         source_lang = detect_lang(q)
-    #     if source_lang not in from_langs:
-    #         abort(400, description="Source language %s is not supported" % source_lang)
-    #     if target_lang not in to_langs:
-    #         abort(400, description="Target language %s is not supported" % target_lang)
-    #
-    #     if format not in from_audio_formats:
-    #         abort(400, description="Audio format %s is not supported" % format)
-    #
-    #     import base64
-    #     audio_data = base64.b64decode(audio_64_string)
-    #     with open("decoded_audio.wav", "wb") as audio_file:
-    #         audio_file.write(audio_data)
-    #     resp = {
-    #         'translatedText': "test text for 'audio to text' "
-    #     }
-    #     return jsonify(resp)
+    @app.post("/asr")
+    # @access_check
+    def audio2text():
+        json = get_json_dict(request)
+        audio_64_string = json.get("base64")
+        format = json.get("format")
+        rate = json.get("rate")
+        channel = json.get("channel")
+        token = json.get("token")
+        len = json.get("len")
+        lang = json.get("lang")
+        q = "audio2text"  # for test
+
+        if not audio_64_string:
+            abort(400, description="Invalid request: missing base64 parameter")
+
+        import base64
+        audio_data = base64.b64decode(audio_64_string)
+        temp_audio_file = "temp_audo.wav"
+        with open(temp_audio_file, "wb") as audio_file:
+            audio_file.write(audio_data)
+
+        result = audio_recognizers.recognize_file(temp_audio_file)
+        return jsonify(result)
     #
     # @app.post("/tts")
     # # @access_check
