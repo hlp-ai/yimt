@@ -1,15 +1,12 @@
 import re
-import tempfile
 import torch
-import commons
-import utils
-from models import SynthesizerTrn
+from vits import commons
+from vits import utils
+from vits.models import SynthesizerTrn
 from scipy.io.wavfile import write
 import argparse
-from torch.multiprocessing import Pool, get_start_method, set_start_method
 
 import os
-import subprocess
 import locale
 
 locale.getpreferredencoding = lambda: "UTF-8"

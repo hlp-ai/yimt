@@ -1,17 +1,15 @@
-import os
-import sys
 import numpy as np
 
 import torch
-import utils
+from vits import utils
 import argparse
 
 from scipy.io import wavfile
 
-from models import SynthesizerTrn
-from text.zh_symbols import symbols
-from text.zh_symbols import cleaned_text_to_sequence
-from vits_pinyin import VITS_PinYin
+from vits.models import SynthesizerTrn
+from vits.text.zh_symbols import symbols
+from vits.text.zh_symbols import cleaned_text_to_sequence
+from vits.vits_pinyin import VITS_PinYin
 
 parser = argparse.ArgumentParser(description='Inference code for bert vits models')
 parser.add_argument('--config', type=str, required=True)

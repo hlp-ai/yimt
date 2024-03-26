@@ -4,13 +4,13 @@ import tempfile
 import torch
 from scipy.io.wavfile import write
 
-import commons
+from vits import commons
 
 import os
 import locale
 
-import utils
-from models import SynthesizerTrn
+from vits import utils
+from vits.models import SynthesizerTrn
 
 locale.getpreferredencoding = lambda: "UTF-8"
 
@@ -157,7 +157,7 @@ class TTS:
         txt = text_mapper.filter_oov(txt)
         return txt
 
-    def synthesize(self, txt, uroman_dir="D:/kidden/github/yimt/vits/uroman", perl_path=f"c:/Strawberry/perl/bin/perl.exe"):
+    def synthesize(self, txt, uroman_dir="D:/kidden/github/yimt/tts/vits/uroman", perl_path=f"c:/Strawberry/perl/bin/perl.exe"):
         print(f"text: {txt}")
         txt = self.preprocess_text(txt, self.text_mapper, self.hps, lang=self.lang, uroman_dir=uroman_dir, perl_path=perl_path)
         stn_tst = self.text_mapper.get_text(txt, self.hps)

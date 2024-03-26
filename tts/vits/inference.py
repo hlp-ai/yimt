@@ -1,12 +1,12 @@
 import torch
 from torch.utils.data import DataLoader
 
-import commons
-import utils
-from data_utils import TextAudioSpeakerLoader, TextAudioSpeakerCollate
-from models import SynthesizerTrn
-from text.symbols import symbols
-from text import text_to_sequence
+from vits import commons
+from vits import utils
+from vits.data_utils import TextAudioSpeakerLoader, TextAudioSpeakerCollate
+from vits.models import SynthesizerTrn
+from vits.text.symbols import symbols
+from vits.text import text_to_sequence
 
 
 def get_text(text, hps):

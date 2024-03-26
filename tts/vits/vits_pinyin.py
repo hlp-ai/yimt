@@ -5,7 +5,7 @@ import re
 from pypinyin import lazy_pinyin, Style
 from pypinyin.core import load_phrases_dict
 
-from text.zh_symbols import pinyin_dict
+from vits.text.zh_symbols import pinyin_dict
 
 
 def is_chinese(uchar):
