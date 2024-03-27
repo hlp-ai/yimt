@@ -1,6 +1,10 @@
 
 import gradio as gr
 
+from service.tts import AudioGenerators
+
+audio_gen = AudioGenerators()
+
 
 def ocr(img):
     return "OCR"
@@ -11,7 +15,8 @@ def asr(audio):
 
 
 def tts(txt):
-    return "TTS"
+    r = audio_gen.generate(txt, "eng")
+    return r[0]["sr"], r[0]["audio"]
 
 
 ocr_face = gr.Interface(fn=ocr,
