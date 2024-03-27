@@ -1,16 +1,11 @@
-import io
-import json
 import os
 import tempfile
-import uuid
-from functools import wraps
-from html import unescape
 
-from flask import (Flask, abort, jsonify, render_template, request, send_file, url_for, g)
-from werkzeug.utils import secure_filename
+from flask import Flask, abort, jsonify, request
 
 from service.asr import AudioRecognizers
 from service.ocr import TextRecognizers
+from service.tts import AudioGenerators
 
 
 def get_upload_dir():
@@ -41,6 +36,7 @@ def create_app():
 
     text_recognizers = TextRecognizers()
     audio_recognizers = AudioRecognizers()
+    audio_generators = AudioGenerators()
 
     @app.errorhandler(400)
     def invalid_api(e):
@@ -98,10 +94,6 @@ def create_app():
 
         return jsonify(result)
 
-        # str = json.dumps(result)
-        #
-        # return jsonify({"result":str})
-
     @app.post("/asr")
     # @access_check
     def audio2text():
@@ -113,7 +105,6 @@ def create_app():
         token = json.get("token")
         len = json.get("len")
         lang = json.get("lang")
-        q = "audio2text"  # for test
 
         if not audio_64_string:
             abort(400, description="Invalid request: missing base64 parameter")
@@ -126,35 +117,34 @@ def create_app():
 
         result = audio_recognizers.recognize_file(temp_audio_file)
         return jsonify(result)
-    #
-    # @app.post("/tts")
-    # # @access_check
-    # def text2speech():
-    #     json = get_json_dict(request)
-    #     token = json.get("token")
-    #     text = json.get("text")
-    #     source_lang = json.get("lang")
-    #
-    #     if not text:
-    #         abort(400, description="Invalid request: missing text parameter")
-    #     if not source_lang:
-    #         abort(400, description="Invalid request: missing source language parameter")
-    #     if source_lang == "auto":
-    #         source_lang = detect_lang(text)
-    #     # if source_lang not in from_langs:
-    #     #     abort(400, description="Source language %s is not supported" % source_lang)
-    #
-    #     result = tts_fn(text, source_lang)
-    #     if result is None:
-    #         abort(400, description="NO TTS")
-    #
-    #     import base64
-    #     audio_64_string = base64.b64encode(result[0].numpy().tobytes())
-    #     resp = {
-    #         'base64': audio_64_string.decode('utf-8'),
-    #         'rate': result[1]
-    #     }
-    #     return jsonify(resp)
+
+    @app.post("/tts")
+    # @access_check
+    def text2speech():
+        json = get_json_dict(request)
+        token = json.get("token")
+        text = json.get("text")
+        lang = json.get("lang")
+
+        if not text:
+            abort(400, description="Invalid request: missing text parameter")
+        if not lang:
+            abort(400, description="Invalid request: missing language parameter")
+
+        result = audio_generators.generate(text, lang)
+        if result is None:
+            abort(400, description="NO TTS")
+
+        import base64
+        output = []
+        for r in result:
+            audio_64_string = base64.b64encode(r["audio"].tobytes())
+            output.append({
+                'base64': audio_64_string.decode('utf-8'),
+                'rate': r["sr"]
+            })
+
+        return jsonify(output)
 
     return app
 

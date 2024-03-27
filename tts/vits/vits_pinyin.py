@@ -28,9 +28,9 @@ def clean_chinese(text: str):
     return text_clean
 
 
-def load_pinyin_dict():
+def load_pinyin_dict(piyin_fn="./text/pinyin-local.txt"):
     my_dict={}
-    with open("./text/pinyin-local.txt", "r", encoding='utf-8') as f:
+    with open(piyin_fn, "r", encoding='utf-8') as f:
         content = f.readlines()
         for line in content:
             cuts = line.strip().split()
@@ -44,8 +44,8 @@ def load_pinyin_dict():
 
 
 class VITS_PinYin:
-    def __init__(self, bert_path, device, hasBert=True):
-        load_pinyin_dict()
+    def __init__(self, piyin_fn="./text/pinyin-local.txt"):
+        load_pinyin_dict(piyin_fn)
         # self.hasBert = hasBert
         # if self.hasBert:
         #     self.prosody = TTSProsody(bert_path, device)

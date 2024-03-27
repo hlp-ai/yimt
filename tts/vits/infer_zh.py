@@ -23,7 +23,7 @@ class TTS_ZH:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         # pinyin
-        self.tts_front = VITS_PinYin("./bert", self.device, hasBert=False)
+        self.tts_front = VITS_PinYin(r"D:\kidden\github\yimt\tts\vits\text\pinyin-local.txt")
 
         # config
         self.hps = utils.get_hparams_from_file(config_path)
@@ -41,7 +41,7 @@ class TTS_ZH:
         self.net_g.to(self.device)
 
     def synthesize(self, txt):
-        phonemes, _ = self.tts_front.chinese_to_phonemes(item)
+        phonemes, _ = self.tts_front.chinese_to_phonemes(txt)
         input_ids = cleaned_text_to_sequence(phonemes)
         with torch.no_grad():
             x_tst = torch.LongTensor(input_ids).unsqueeze(0).to(self.device)
