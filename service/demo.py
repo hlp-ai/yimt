@@ -1,13 +1,16 @@
 
 import gradio as gr
 
+from service.ocr import TextRecognizers
 from service.tts import AudioGenerators
 
 audio_gen = AudioGenerators()
+img_recognizer = TextRecognizers()
 
 
 def ocr(img):
-    return "OCR"
+    r = img_recognizer.recognize(img, "en")
+    return r[0]
 
 
 def asr(audio):
