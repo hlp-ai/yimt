@@ -115,19 +115,6 @@ class TTS:
 
         self._load_model()
 
-        # self.net_g = SynthesizerTrn(
-        #     len(self.text_mapper.symbols),
-        #     self.hps.data.filter_length // 2 + 1,
-        #     self.hps.train.segment_size // self.hps.data.hop_length,
-        #     **self.hps.model)
-        # self.net_g.to(self.device)
-        # _ = self.net_g.eval()
-        #
-        # g_pth = f"{self.ckpt_dir}/G_100000.pth"
-        # print(f"load {g_pth}")
-        #
-        # _ = utils.load_checkpoint(g_pth, self.net_g, None)
-
     def _load_model(self):
         self.net_g = SynthesizerTrn(
             len(self.text_mapper.symbols),
