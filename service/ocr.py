@@ -18,7 +18,9 @@ class TextRecognizers:
         if lang in self._recognizers:
             recognizer = self._recognizers[lang]
         else:
+            print("Loading OCR for {}...".format(lang))
             recognizer = OCR(lang, self.models_dir)
+            self._recognizers[lang] = recognizer
 
         output = recognizer.recognize(img)
         result = []

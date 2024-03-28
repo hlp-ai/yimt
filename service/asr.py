@@ -4,6 +4,7 @@ from whisper.api import ASR
 class AudioRecognizers:
 
     def __init__(self, model_path=r"D:\kidden\github\yimt\pretrained\asr\whisper\medium.pt"):
+        print("Loading ASR...")
         self._model = ASR(model_path)
 
     def recognize_file(self, wave_fn):

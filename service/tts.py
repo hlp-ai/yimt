@@ -11,6 +11,7 @@ class AudioGenerators:
         if lang in self.generators:
             generator = self.generators[lang]
         else:
+            print("Loading TTS for {}...".format(lang))
             if lang == "zh":
                 generator = TTS_ZH(config_path=r"D:\kidden\github\yimt\pretrained\tts\zho\config.json",
                  model_path=r"D:\kidden\github\yimt\pretrained\tts\zho\G_100000.pth")
