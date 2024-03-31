@@ -11,7 +11,7 @@ import torch.utils.data
 from torch.cuda.amp import autocast, GradScaler
 import numpy as np
 
-from easyocr.trainer.crnn.utils import CTCLabelConverter, AttnLabelConverter, Averager
+from easyocr.trainer.crnn.utils import CTCLabelConverter, Averager
 from easyocr.trainer.crnn.dataset import hierarchical_dataset, AlignCollate, Batch_Balanced_Dataset
 from easyocr.trainer.crnn.model import Model
 from easyocr.trainer.crnn.test import validation
@@ -55,10 +55,8 @@ def train(opt, show_number = 2, amp=False):
     log.close()
     
     """ model configuration """
-    if 'CTC' in opt.Prediction:
-        converter = CTCLabelConverter(opt.character)
-    else:
-        converter = AttnLabelConverter(opt.character)
+    converter = CTCLabelConverter(opt.character)
+
     opt.num_class = len(converter.character)
 
     if opt.rgb:
