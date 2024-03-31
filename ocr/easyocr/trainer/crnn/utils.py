@@ -3,10 +3,12 @@ import pickle
 import numpy as np
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+
 class AttrDict(dict):
     def __init__(self, *args, **kwargs):
         super(AttrDict, self).__init__(*args, **kwargs)
         self.__dict__ = self
+
 
 ##### https://github.com/githubharald/CTCDecoder/blob/master/src/BeamSearch.py
 class BeamEntry:
@@ -18,6 +20,7 @@ class BeamEntry:
         self.prText = 1 # LM score
         self.lmApplied = False # flag if LM was already applied to this beam
         self.labeling = () # beam-labeling
+
 
 class BeamState:
     "information about the beams at specific time-step"
@@ -56,6 +59,7 @@ class BeamState:
                 print('not in dict: ', text)
         return best_text
 
+
 def applyLM(parentBeam, childBeam, classes, lm):
     "calculate LM score of child beam by taking score from parent beam and bigram probability of last two chars"
     if lm and not childBeam.lmApplied:
@@ -66,10 +70,12 @@ def applyLM(parentBeam, childBeam, classes, lm):
         childBeam.prText = parentBeam.prText * bigramProb # probability of char sequence
         childBeam.lmApplied = True # only apply LM once per beam entry
 
+
 def addBeam(beamState, labeling):
     "add beam if it does not yet exist"
     if labeling not in beamState.entries:
         beamState.entries[labeling] = BeamEntry()
+
 
 def ctcBeamSearch(mat, classes, ignore_idx, lm, beamWidth=25, dict_list = []):
     "beam search as described by the paper of Hwang et al. and the paper of Graves et al."
@@ -165,6 +171,7 @@ def ctcBeamSearch(mat, classes, ignore_idx, lm, beamWidth=25, dict_list = []):
     return res
 #####
 
+
 def consecutive(data, mode ='first', stepsize=1):
     group = np.split(data, np.where(np.diff(data) != stepsize)[0]+1)
     group = [item for item in group if len(item)>0]
@@ -172,6 +179,7 @@ def consecutive(data, mode ='first', stepsize=1):
     if mode == 'first': result = [l[0] for l in group]
     elif mode == 'last': result = [l[-1] for l in group]
     return result
+
 
 def word_segmentation(mat, separator_idx =  {'th': [1,2],'en': [3,4]}, separator_idx_list = [1,2,3,4]):
     result = []
@@ -203,6 +211,7 @@ def word_segmentation(mat, separator_idx =  {'th': [1,2],'en': [3,4]}, separator
     if start_idx <= len(mat)-1:
         result.append( ['', [start_idx, len(mat)-1] ] )
     return result
+
 
 class CTCLabelConverter(object):
     """ Convert between text-label and text-index """

@@ -37,9 +37,11 @@ data_filtering_off: False
 
 # Model Architecture
 Transformation: 'None'
+# 以下3个模块不再可配置，固定值
 FeatureExtraction: 'VGG'
 SequenceModeling: 'BiLSTM'
 Prediction: 'CTC'
+
 num_fiducial: 20
 input_channel: 1
 output_channel: 256

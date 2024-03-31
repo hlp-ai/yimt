@@ -1,6 +1,6 @@
 import torch.nn as nn
 
-from easyocr.model.modules import VGG_FeatureExtractor, ResNet_FeatureExtractor, BidirectionalLSTM
+from easyocr.model.modules import VGG_FeatureExtractor, BidirectionalLSTM
 
 class Model(nn.Module):
 
@@ -13,8 +13,6 @@ class Model(nn.Module):
         """ FeatureExtraction """
         if opt.FeatureExtraction == 'VGG':
             self.FeatureExtraction = VGG_FeatureExtractor(opt.input_channel, opt.output_channel)
-        elif opt.FeatureExtraction == 'ResNet':
-            self.FeatureExtraction = ResNet_FeatureExtractor(opt.input_channel, opt.output_channel)
         else:
             raise Exception('No FeatureExtraction module specified')
         self.FeatureExtraction_output = opt.output_channel  # int(imgH/16-1) * 512
