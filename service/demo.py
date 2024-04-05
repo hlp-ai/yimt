@@ -21,7 +21,7 @@ def ocr_func(img, lang):
 
 def asr_func(audio_fn):
     r = audio_reconginzer.recognize_file(audio_fn)
-    return r[0]["text"]
+    return r[0]["text"], r[0]["lang"]
 
 
 def tts_func(txt, lang):
@@ -41,7 +41,7 @@ ocr_face = gr.Interface(fn=ocr_func,
 
 asr_face = gr.Interface(fn=asr_func,
                      inputs=gr.Audio(type="filepath"),
-                     outputs=gr.Textbox(),
+                     outputs=[gr.Textbox(), gr.Textbox()],
                      title="请输入声音")
 
 tts_face = gr.Interface(fn=tts_func,
