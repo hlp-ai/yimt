@@ -7,11 +7,20 @@ from easyocr.config import all_lang_list
 class TextRecognizers:
 
     def __init__(self, models_dir='D:\kidden\github\yimt\pretrained\ocr\easyocr'):
-        self.models_dir = models_dir
-
-        self._recognizers = {}
+        self.models_dir = models_dir  # 模型根目录
+        self._recognizers = {}  # 语言到识别器字典
 
     def recognize(self, img, lang):
+        """ 对给定语言的图片进行OCR
+
+        参数:
+          img: 图片文件路径
+          lang: 图片语言
+
+        返回:
+          None: 语言不支持
+          文本框识别列表，每个文本框包括4坐标位置、文本和分数
+        """
         if lang not in self.supported_languages():
             return None
 
@@ -33,6 +42,7 @@ class TextRecognizers:
 
     @staticmethod
     def supported_languages():
+        """支持的语言列表"""
         return all_lang_list
 
 
