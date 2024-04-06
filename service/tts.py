@@ -33,7 +33,7 @@ class AudioGenerators:
 
     @staticmethod
     def supported_languages():
-        return ["eng", "zho", "fra", "kor"]
+        return ["eng", "zho", "fra", "kor", "rus"]
 
 
 if __name__ == '__main__':
