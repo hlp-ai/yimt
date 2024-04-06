@@ -19,11 +19,11 @@ def save_wav(wav, path, rate):
 
 class TTS_ZH:
 
-    def __init__(self, config_path, model_path):
+    def __init__(self, config_path, model_path, pinyin_fn=r"D:\kidden\github\yimt\tts\vits\text\pinyin-local.txt"):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         # pinyin
-        self.tts_front = VITS_PinYin(r"D:\kidden\github\yimt\tts\vits\text\pinyin-local.txt")
+        self.tts_front = VITS_PinYin(pinyin_fn)
 
         # config
         self.hps = utils.get_hparams_from_file(config_path)

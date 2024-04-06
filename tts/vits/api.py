@@ -99,7 +99,7 @@ def preprocess_text(txt, text_mapper, hps, uroman_dir=None, lang=None, perl_path
 
 class TTS:
 
-    def __init__(self, lang, models_dir=r"D:\kidden\github\yimt\tts\vits\models"):
+    def __init__(self, lang, models_dir=r"D:\kidden\github\yimt\pretrained\tts\vits"):
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
         print(f"Run inference with {self.device}")
 
@@ -128,7 +128,6 @@ class TTS:
         print(f"load {g_pth}")
 
         _ = utils.load_checkpoint(g_pth, self.net_g, None)
-
 
     def preprocess_text(self, txt, text_mapper, hps, uroman_dir=None, lang=None,
                         perl_path=f"c:/Strawberry/perl/bin/perl.exe"):
