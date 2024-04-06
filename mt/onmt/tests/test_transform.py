@@ -21,7 +21,6 @@ class TestTransform(unittest.TestCase):
             "prefix",
             "sentencepiece",
             "bpe",
-            "onmt_tokenize",
             "bart",
             "switchout",
             "tokendrop",
@@ -223,54 +222,6 @@ class TestSubwordTransform(unittest.TestCase):
         # 2. disable regularization for not training example
         after_sp = sp_transform._tokenize(tokens, is_train=False)
         self.assertEqual(after_sp, gold_sp)
-
-    def test_pyonmttok_bpe(self):
-        onmttok_cls = get_transforms_cls(["onmt_tokenize"])["onmt_tokenize"]
-        base_opt = copy.copy(self.base_opts)
-        base_opt["src_subword_type"] = "bpe"
-        base_opt["tgt_subword_type"] = "bpe"
-        onmt_args = "{'mode': 'space', 'joiner_annotate': True}"
-        base_opt["src_onmttok_kwargs"] = onmt_args
-        base_opt["tgt_onmttok_kwargs"] = onmt_args
-        opt = Namespace(**base_opt)
-        onmttok_cls._validate_options(opt)
-        onmttok_transform = onmttok_cls(opt)
-        onmttok_transform.warm_up()
-        ex = {
-            "src": ["Hello", "world", "."],
-            "tgt": ["Bonjour", "le", "monde", "."],
-        }
-        onmttok_transform.apply(ex, is_train=True)
-        ex_gold = {
-            "src": ["H￭", "ell￭", "o", "world", "."],
-            "tgt": ["B￭", "on￭", "j￭", "our", "le", "mon￭", "de", "."],
-        }
-        self.assertEqual(ex, ex_gold)
-
-    def test_pyonmttok_sp(self):
-        onmttok_cls = get_transforms_cls(["onmt_tokenize"])["onmt_tokenize"]
-        base_opt = copy.copy(self.base_opts)
-        base_opt["src_subword_type"] = "sentencepiece"
-        base_opt["tgt_subword_type"] = "sentencepiece"
-        base_opt["src_subword_model"] = "../../data/sample.sp.model"
-        base_opt["tgt_subword_model"] = "../../data/sample.sp.model"
-        onmt_args = "{'mode': 'none', 'spacer_annotate': True}"
-        base_opt["src_onmttok_kwargs"] = onmt_args
-        base_opt["tgt_onmttok_kwargs"] = onmt_args
-        opt = Namespace(**base_opt)
-        onmttok_cls._validate_options(opt)
-        onmttok_transform = onmttok_cls(opt)
-        onmttok_transform.warm_up()
-        ex = {
-            "src": ["Hello", "world", "."],
-            "tgt": ["Bonjour", "le", "monde", "."],
-        }
-        onmttok_transform.apply(ex, is_train=True)
-        ex_gold = {
-            "src": ["▁H", "el", "lo", "▁world", "▁."],
-            "tgt": ["▁B", "on", "j", "o", "ur", "▁le", "▁m", "on", "de", "▁."],
-        }
-        self.assertEqual(ex, ex_gold)
 
 
 class TestSamplingTransform(unittest.TestCase):

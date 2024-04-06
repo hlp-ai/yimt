@@ -128,6 +128,7 @@ early_stopping_criteria: ppl
 # Decoding
 replace_unk: true
 max_length: 250
+beam_size: 5
 
 tensorboard: true
 tensorboard_log_dir: ./logs
