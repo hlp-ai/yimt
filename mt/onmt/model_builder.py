@@ -236,10 +236,7 @@ def build_base_model(model_opt, vocabs, gpu, checkpoint=None, gpu_id=None):
     model = build_task_specific_model(model_opt, vocabs)
 
     # Build Generator.
-    if model_opt.generator_function == "sparsemax":
-        gen_func = onmt.modules.sparse_activations.LogSparsemax(dim=-1)
-    else:
-        gen_func = nn.LogSoftmax(dim=-1)
+    gen_func = nn.LogSoftmax(dim=-1)
     generator = nn.Sequential(
         nn.Linear(model_opt.dec_hid_size,
                   len(vocabs['tgt'])),

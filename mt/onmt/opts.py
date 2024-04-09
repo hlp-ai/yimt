@@ -379,11 +379,6 @@ def model_opts(parser):
 
     # Generator and loss options.
     group = parser.add_argument_group('Generator')
-    group.add('--generator_function', '-generator_function', default="softmax",
-              choices=["softmax", "sparsemax"],
-              help="Which function to use for generating "
-                   "probabilities over the target vocabulary (choices: "
-                   "softmax, sparsemax)")
     group.add('--coverage_attn', '-coverage_attn', action="store_true",
               help='Train a coverage attention layer.')
     group.add('--lambda_coverage', '-lambda_coverage', type=float, default=0.0,
