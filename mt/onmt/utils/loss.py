@@ -7,8 +7,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 import onmt
-from onmt.modules.sparse_losses import SparsemaxLoss
-from onmt.modules.sparse_activations import LogSparsemax
 from onmt.constants import ModelTask, DefaultTokens
 
 
@@ -71,9 +69,6 @@ class LossCompute(nn.Module):
                 opt.label_smoothing, len(vocab),
                 ignore_index=padding_idx
             )
-        elif isinstance(model.generator[-1], LogSparsemax):
-            criterion = SparsemaxLoss(ignore_index=padding_idx,
-                                      reduction='sum')
         else:
             criterion = nn.NLLLoss(ignore_index=padding_idx,
                                    reduction='sum')
@@ -82,9 +77,7 @@ class LossCompute(nn.Module):
         # of probabilities, only the first part of the generator needs to
         # be passed to the NMTLossCompute. At the moment, the only
         # supported loss function of this kind is the sparsemax loss.
-        use_raw_logits = isinstance(criterion, SparsemaxLoss)
-        loss_gen = model.generator[0] if use_raw_logits \
-            else model.generator
+        loss_gen = model.generator
 
         compute = cls(criterion, loss_gen,
                       normalization=opt.normalization,
