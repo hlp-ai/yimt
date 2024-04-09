@@ -219,7 +219,7 @@ class Inference(object):
             logger (logging.Logger or NoneType): See :func:`__init__()`.
         """
         # TODO: maybe add dynamic part
-        cls.validate_task(model_opt.model_task)
+        # cls.validate_task(model_opt.model_task)
 
         return cls(
             model,

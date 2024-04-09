@@ -62,7 +62,7 @@ class LossCompute(nn.Module):
             assert opt.coverage_attn, "--coverage_attn needs to be set in " \
                 "order to use --lambda_coverage != 0"
 
-        tgt_shift_idx = 1 if opt.model_task == ModelTask.SEQ2SEQ else 0
+        tgt_shift_idx = 1
 
         if opt.label_smoothing > 0 and train:
             criterion = LabelSmoothingLoss(

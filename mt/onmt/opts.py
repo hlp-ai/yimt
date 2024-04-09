@@ -261,16 +261,6 @@ def model_opts(parser):
                    "embedding sizes will be set to N^feat_vec_exponent "
                    "where N is the number of values the feature takes.")
 
-    # Model Task Options
-    group = parser.add_argument_group("Model- Task")
-    group.add(
-        "-model_task",
-        "--model_task",
-        default=ModelTask.SEQ2SEQ,
-        choices=[ModelTask.SEQ2SEQ],
-        help="Type of task for the model either seq2seq or lm",
-    )
-
     # Encoder-Decoder Options
     group = parser.add_argument_group('Model- Encoder-Decoder')
     group.add('--model_dtype', '-model_dtype', default='fp32',
