@@ -296,18 +296,6 @@ def model_opts(parser):
               f' {ACTIVATION_FUNCTIONS.keys()}. Default to'
               f' {ActivationFunction.relu}.')
 
-    group.add('--input_feed', '-input_feed', type=int, default=1,
-              help="Feed the context vector at each time step as "
-                   "additional input (via concatenation with the word "
-                   "embeddings) to the decoder.")
-    group.add('--bridge', '-bridge', action="store_true",
-              help="Have an additional layer between the last encoder "
-                   "state and the first decoder state")
-    group.add('--context_gate', '-context_gate', type=str, default=None,
-              choices=['source', 'target', 'both'],
-              help="Type of context gate to use. "
-                   "Do not select for no context gate.")
-
     # Attention options
     group = parser.add_argument_group('Model- Attention')
     group.add('--global_attention', '-global_attention',
