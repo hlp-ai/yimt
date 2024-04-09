@@ -314,9 +314,6 @@ def model_opts(parser):
               help="Size of encoder rnn hidden states.")
     group.add('--dec_hid_size', '-dec_hid_size', type=int, default=500,
               help="Size of decoder rnn hidden states.")
-    group.add('--cnn_kernel_width', '-cnn_kernel_width', type=int, default=3,
-              help="Size of windows in the cnn, the kernel_size is "
-                   "(cnn_kernel_width, 1) in conv layer")
 
     group.add('--pos_ffn_activation_fn', '-pos_ffn_activation_fn',
               type=str, default=ActivationFunction.relu,
