@@ -66,14 +66,10 @@ class TestModel(unittest.TestCase):
         vocabs = self.get_vocabs()
         emb = build_embeddings(opt, vocabs)
         test_src, _, __ = self.get_batch(source_l=source_l, bsize=bsize)
-        if opt.decoder_type == 'transformer':
-            input = torch.cat([test_src, test_src], 1)
-            res = emb(input)
-            compare_to = torch.zeros(bsize, source_l * 2,
-                                     opt.src_word_vec_size)
-        else:
-            res = emb(test_src)
-            compare_to = torch.zeros(bsize, source_l, opt.src_word_vec_size)
+        input = torch.cat([test_src, test_src], 1)
+        res = emb(input)
+        compare_to = torch.zeros(bsize, source_l * 2,
+                                 opt.src_word_vec_size)
 
         self.assertEqual(res.size(), compare_to.size())
 

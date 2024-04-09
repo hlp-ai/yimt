@@ -232,8 +232,6 @@ class ArgumentParser(cfargparse.ArgumentParser, DataOptsCheckerMixin):
             "The encoder and decoder rnns must be the same size for now"
 
         if model_opt.lambda_align > 0.0:
-            assert model_opt.decoder_type == 'transformer', \
-                "Only transformer is supported to joint learn alignment."
             assert model_opt.alignment_layer < model_opt.dec_layers and \
                 model_opt.alignment_layer >= -model_opt.dec_layers, \
                 "N° alignment_layer should be smaller than number of layers."

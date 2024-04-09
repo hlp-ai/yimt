@@ -69,7 +69,7 @@ def build_encoder(opt, embeddings):
         opt: the option in current environment.
         embeddings (Embeddings): vocab embeddings for this encoder.
     """
-    enc_type = opt.encoder_type
+    enc_type = "transformer"
     return str2enc[enc_type].from_opt(opt, embeddings)
 
 
@@ -80,8 +80,7 @@ def build_decoder(opt, embeddings):
         opt: the option in current environment.
         embeddings (Embeddings): vocab embeddings for this decoder.
     """
-    dec_type = "ifrnn" if opt.decoder_type == "rnn" and opt.input_feed \
-               else opt.decoder_type
+    dec_type = "transformer"
     return str2dec[dec_type].from_opt(opt, embeddings)
 
 
