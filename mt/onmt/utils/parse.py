@@ -226,18 +226,11 @@ class ArgumentParser(cfargparse.ArgumentParser, DataOptsCheckerMixin):
 
     @classmethod
     def validate_model_opts(cls, model_opt):
-        assert model_opt.model_type in ["text"], \
-            "Unsupported model type %s" % model_opt.model_type
-
         # encoder and decoder should be same sizes
         same_size = model_opt.enc_hid_size == model_opt.dec_hid_size
         assert same_size, \
             "The encoder and decoder rnns must be the same size for now"
 
-        if model_opt.share_embeddings:
-            if model_opt.model_type != "text":
-                raise AssertionError(
-                    "--share_embeddings requires --model_type text.")
         if model_opt.lambda_align > 0.0:
             assert model_opt.decoder_type == 'transformer', \
                 "Only transformer is supported to joint learn alignment."
