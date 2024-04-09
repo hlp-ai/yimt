@@ -334,24 +334,6 @@ def model_opts(parser):
               help="Type of context gate to use. "
                    "Do not select for no context gate.")
 
-    # The following options (bridge_extra_node to n_steps) are used
-    # for training with --encoder_type ggnn (Gated Graph Neural Network).
-    group.add('--bridge_extra_node', '-bridge_extra_node',
-              type=bool, default=True,
-              help='Graph encoder bridges only extra node to decoder as input')
-    group.add('--bidir_edges', '-bidir_edges', type=bool, default=True,
-              help='Graph encoder autogenerates bidirectional edges')
-    group.add('--state_dim', '-state_dim', type=int, default=512,
-              help='Number of state dimensions in the graph encoder')
-    group.add('--n_edge_types', '-n_edge_types', type=int, default=2,
-              help='Number of edge types in the graph encoder')
-    group.add('--n_node', '-n_node', type=int, default=2,
-              help='Number of nodes in the graph encoder')
-    group.add('--n_steps', '-n_steps', type=int, default=2,
-              help='Number of steps to advance graph encoder')
-    group.add('--src_ggnn_size', '-src_ggnn_size', type=int, default=0,
-              help='Vocab size plus feature space for embedding input')
-
     # Attention options
     group = parser.add_argument_group('Model- Attention')
     group.add('--global_attention', '-global_attention',
