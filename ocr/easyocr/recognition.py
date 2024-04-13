@@ -1,6 +1,5 @@
 from PIL import Image
 import torch
-import torch.backends.cudnn as cudnn
 import torch.utils.data
 import torch.nn.functional as F
 import torchvision.transforms as transforms
@@ -10,22 +9,26 @@ import importlib
 from easyocr.utils import CTCLabelConverter
 import math
 
+
 def custom_mean(x):
-    return x.prod()**(2.0/np.sqrt(len(x)))
+    return x.prod() ** (2.0 / np.sqrt(len(x)))
+
 
 def contrast_grey(img):
     high = np.percentile(img, 90)
-    low  = np.percentile(img, 10)
-    return (high-low)/np.maximum(10, high+low), high, low
+    low = np.percentile(img, 10)
+    return (high - low) / np.maximum(10, high + low), high, low
 
-def adjust_contrast_grey(img, target = 0.4):
+
+def adjust_contrast_grey(img, target=0.4):
     contrast, high, low = contrast_grey(img)
     if contrast < target:
         img = img.astype(int)
-        ratio = 200./np.maximum(10, high-low)
-        img = (img - low + 25)*ratio
-        img = np.maximum(np.full(img.shape, 0) ,np.minimum(np.full(img.shape, 255), img)).astype(np.uint8)
+        ratio = 200. / np.maximum(10, high - low)
+        img = (img - low + 25) * ratio
+        img = np.maximum(np.full(img.shape, 0), np.minimum(np.full(img.shape, 255), img)).astype(np.uint8)
     return img
+
 
 class NormalizePAD(object):
 
@@ -46,6 +49,7 @@ class NormalizePAD(object):
 
         return Pad_img
 
+
 class ListDataset(torch.utils.data.Dataset):
 
     def __init__(self, image_list):
@@ -59,9 +63,10 @@ class ListDataset(torch.utils.data.Dataset):
         img = self.image_list[index]
         return Image.fromarray(img, 'L')
 
+
 class AlignCollate(object):
 
-    def __init__(self, imgH=32, imgW=100, keep_ratio_with_pad=False, adjust_contrast = 0.):
+    def __init__(self, imgH=32, imgW=100, keep_ratio_with_pad=False, adjust_contrast=0.):
         self.imgH = imgH
         self.imgW = imgW
         self.keep_ratio_with_pad = keep_ratio_with_pad
@@ -81,7 +86,7 @@ class AlignCollate(object):
             #### augmentation here - change contrast
             if self.adjust_contrast > 0:
                 image = np.array(image.convert("L"))
-                image = adjust_contrast_grey(image, target = self.adjust_contrast)
+                image = adjust_contrast_grey(image, target=self.adjust_contrast)
                 image = Image.fromarray(image, 'L')
 
             ratio = w / float(h)
@@ -96,8 +101,9 @@ class AlignCollate(object):
         image_tensors = torch.cat([t.unsqueeze(0) for t in resized_images], 0)
         return image_tensors
 
-def recognizer_predict(model, converter, test_loader, batch_max_length,\
-                       ignore_idx, char_group_idx, decoder = 'greedy', beamWidth= 5, device = 'cpu'):
+
+def recognizer_predict(model, converter, test_loader, batch_max_length, \
+                       ignore_idx, char_group_idx, decoder='greedy', beamWidth=5, device='cpu'):
     model.eval()
     result = []
     with torch.no_grad():
@@ -116,9 +122,9 @@ def recognizer_predict(model, converter, test_loader, batch_max_length,\
             ######## filter ignore_char, rebalance
             preds_prob = F.softmax(preds, dim=2)
             preds_prob = preds_prob.cpu().detach().numpy()
-            preds_prob[:,:,ignore_idx] = 0.
+            preds_prob[:, :, ignore_idx] = 0.
             pred_norm = preds_prob.sum(axis=2)
-            preds_prob = preds_prob/np.expand_dims(pred_norm, axis=-1)
+            preds_prob = preds_prob / np.expand_dims(pred_norm, axis=-1)
             preds_prob = torch.from_numpy(preds_prob).float().to(device)
 
             if decoder == 'greedy':
@@ -137,9 +143,9 @@ def recognizer_predict(model, converter, test_loader, batch_max_length,\
             values = preds_prob.max(axis=2)
             indices = preds_prob.argmax(axis=2)
             preds_max_prob = []
-            for v,i in zip(values, indices):
-                max_probs = v[i!=0]
-                if len(max_probs)>0:
+            for v, i in zip(values, indices):
+                max_probs = v[i != 0]
+                if len(max_probs) > 0:
                     preds_max_prob.append(max_probs)
                 else:
                     preds_max_prob.append(np.array([0]))
@@ -150,10 +156,10 @@ def recognizer_predict(model, converter, test_loader, batch_max_length,\
 
     return result
 
-def get_recognizer(recog_network, network_params, character,\
-                   separator_list, dict_list, model_path,\
-                   device = 'cpu', quantize = True):
 
+def get_recognizer(recog_network, network_params, character, \
+                   separator_list, dict_list, model_path, \
+                   device='cpu', quantize=True):
     converter = CTCLabelConverter(character, separator_list, dict_list)
     num_class = len(converter.character)
 
@@ -183,16 +189,19 @@ def get_recognizer(recog_network, network_params, character,\
 
     return model, converter
 
-def get_text(character, imgH, imgW, recognizer, converter, image_list,\
-             ignore_char = '',decoder = 'greedy', beamWidth =5, batch_size=1, contrast_ths=0.1,\
-             adjust_contrast=0.5, filter_ths = 0.003, workers = 1, device = 'cpu'):
-    batch_max_length = int(imgW/10)
+
+def get_text(character, imgH, imgW, recognizer, converter, image_list, \
+             ignore_char='', decoder='greedy', beamWidth=5, batch_size=1, contrast_ths=0.1, \
+             adjust_contrast=0.5, filter_ths=0.003, workers=1, device='cpu'):
+    batch_max_length = int(imgW / 10)
 
     char_group_idx = {}
     ignore_idx = []
     for char in ignore_char:
-        try: ignore_idx.append(character.index(char)+1)
-        except: pass
+        try:
+            ignore_idx.append(character.index(char) + 1)
+        except:
+            pass
 
     coord = [item[0] for item in image_list]
     img_list = [item[1] for item in image_list]
@@ -203,31 +212,32 @@ def get_text(character, imgH, imgW, recognizer, converter, image_list,\
         num_workers=int(workers), collate_fn=AlignCollate_normal, pin_memory=True)
 
     # predict first round
-    result1 = recognizer_predict(recognizer, converter, test_loader,batch_max_length,\
-                                 ignore_idx, char_group_idx, decoder, beamWidth, device = device)
+    result1 = recognizer_predict(recognizer, converter, test_loader, batch_max_length, \
+                                 ignore_idx, char_group_idx, decoder, beamWidth, device=device)
 
     # predict second round
-    low_confident_idx = [i for i,item in enumerate(result1) if (item[1] < contrast_ths)]
+    low_confident_idx = [i for i, item in enumerate(result1) if (item[1] < contrast_ths)]
     if len(low_confident_idx) > 0:
         img_list2 = [img_list[i] for i in low_confident_idx]
-        AlignCollate_contrast = AlignCollate(imgH=imgH, imgW=imgW, keep_ratio_with_pad=True, adjust_contrast=adjust_contrast)
+        AlignCollate_contrast = AlignCollate(imgH=imgH, imgW=imgW, keep_ratio_with_pad=True,
+                                             adjust_contrast=adjust_contrast)
         test_data = ListDataset(img_list2)
         test_loader = torch.utils.data.DataLoader(
-                        test_data, batch_size=batch_size, shuffle=False,
-                        num_workers=int(workers), collate_fn=AlignCollate_contrast, pin_memory=True)
-        result2 = recognizer_predict(recognizer, converter, test_loader, batch_max_length,\
-                                     ignore_idx, char_group_idx, decoder, beamWidth, device = device)
+            test_data, batch_size=batch_size, shuffle=False,
+            num_workers=int(workers), collate_fn=AlignCollate_contrast, pin_memory=True)
+        result2 = recognizer_predict(recognizer, converter, test_loader, batch_max_length, \
+                                     ignore_idx, char_group_idx, decoder, beamWidth, device=device)
 
     result = []
     for i, zipped in enumerate(zip(coord, result1)):
         box, pred1 = zipped
         if i in low_confident_idx:
             pred2 = result2[low_confident_idx.index(i)]
-            if pred1[1]>pred2[1]:
-                result.append( (box, pred1[0], pred1[1]) )
+            if pred1[1] > pred2[1]:
+                result.append((box, pred1[0], pred1[1]))
             else:
-                result.append( (box, pred2[0], pred2[1]) )
+                result.append((box, pred2[0], pred2[1]))
         else:
-            result.append( (box, pred1[0], pred1[1]) )
+            result.append((box, pred1[0], pred1[1]))
 
     return result
