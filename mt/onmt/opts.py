@@ -1,7 +1,6 @@
 """ Implementation of all available options """
 import configargparse
 
-from onmt.modules.sru import CheckSRU
 from onmt.transforms import AVAILABLE_TRANSFORMS
 from onmt.constants import ModelTask
 from onmt.modules.position_ffn import ACTIVATION_FUNCTIONS
@@ -633,19 +632,19 @@ def model_opts(parser):
         "--encoder_type",
         "-encoder_type",
         type=str,
-        default="rnn",
+        default="transformer",
         help="Type of encoder layer to use. Non-RNN layers "
         "are experimental. Default options are "
-        "[rnn|brnn|ggnn|mean|transformer|cnn|transformer_lm].",
+        "[mean|transformer|cnn|transformer_lm].",
     )
     group.add(
         "--decoder_type",
         "-decoder_type",
         type=str,
-        default="rnn",
+        default="transformer",
         help="Type of decoder layer to use. Non-RNN layers "
         "are experimental. Default options are "
-        "[rnn|transformer|cnn|transformer].",
+        "[transformer|transformer].",
     )
 
     # Freeze Encoder and/or Decoder
@@ -700,14 +699,6 @@ def model_opts(parser):
         default=500,
         help="Size of decoder rnn hidden states.",
     )
-    group.add(
-        "--cnn_kernel_width",
-        "-cnn_kernel_width",
-        type=int,
-        default=3,
-        help="Size of windows in the cnn, the kernel_size is "
-        "(cnn_kernel_width, 1) in conv layer",
-    )
 
     group.add(
         "--layer_norm",
@@ -733,92 +724,6 @@ def model_opts(parser):
         " function to use in PositionwiseFeedForward layer. Choices are"
         f" {ACTIVATION_FUNCTIONS.keys()}. Default to"
         f" {ActivationFunction.relu}.",
-    )
-
-    group.add(
-        "--input_feed",
-        "-input_feed",
-        type=int,
-        default=1,
-        help="Feed the context vector at each time step as "
-        "additional input (via concatenation with the word "
-        "embeddings) to the decoder.",
-    )
-    group.add(
-        "--bridge",
-        "-bridge",
-        action="store_true",
-        help="Have an additional layer between the last encoder "
-        "state and the first decoder state",
-    )
-    group.add(
-        "--rnn_type",
-        "-rnn_type",
-        type=str,
-        default="LSTM",
-        choices=["LSTM", "GRU", "SRU"],
-        action=CheckSRU,
-        help="The gate type to use in the RNNs",
-    )
-    group.add(
-        "--context_gate",
-        "-context_gate",
-        type=str,
-        default=None,
-        choices=["source", "target", "both"],
-        help="Type of context gate to use. " "Do not select for no context gate.",
-    )
-
-    # The following options (bridge_extra_node to n_steps) are used
-    # for training with --encoder_type ggnn (Gated Graph Neural Network).
-    group.add(
-        "--bridge_extra_node",
-        "-bridge_extra_node",
-        type=bool,
-        default=True,
-        help="Graph encoder bridges only extra node to decoder as input",
-    )
-    group.add(
-        "--bidir_edges",
-        "-bidir_edges",
-        type=bool,
-        default=True,
-        help="Graph encoder autogenerates bidirectional edges",
-    )
-    group.add(
-        "--state_dim",
-        "-state_dim",
-        type=int,
-        default=512,
-        help="Number of state dimensions in the graph encoder",
-    )
-    group.add(
-        "--n_edge_types",
-        "-n_edge_types",
-        type=int,
-        default=2,
-        help="Number of edge types in the graph encoder",
-    )
-    group.add(
-        "--n_node",
-        "-n_node",
-        type=int,
-        default=2,
-        help="Number of nodes in the graph encoder",
-    )
-    group.add(
-        "--n_steps",
-        "-n_steps",
-        type=int,
-        default=2,
-        help="Number of steps to advance graph encoder",
-    )
-    group.add(
-        "--src_ggnn_size",
-        "-src_ggnn_size",
-        type=int,
-        default=0,
-        help="Vocab size plus feature space for embedding input",
     )
 
     # Attention options
