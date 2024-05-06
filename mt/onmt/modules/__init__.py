@@ -20,7 +20,6 @@ __all__ = [
     "ConvMultiStepAttention",
     "CopyGenerator",
     "CopyGeneratorLoss",
-    "CopyGeneratorLMLossCompute",
     "MultiHeadedAttention",
     "Embeddings",
     "PositionalEncoding",
