@@ -8,7 +8,6 @@ tgt_vocab: ./toy-enzh/zh.vocab
 # Prevent overwriting existing files in the folder
 overwrite: False
 
-
 # Corpus opts:
 data:
     corpus_1:
@@ -21,6 +20,8 @@ data:
 # Train on a single GPU
 world_size: 1
 gpu_ranks: [0]
+
+vocab_size_multiple: 16
 
 # Where to save the checkpoints
 save_model: ./toy-enzh/run/model
@@ -41,6 +42,7 @@ heads: 8
 
 accum_count: 4
 optim: adam
+model_type: fp16
 adam_beta1: 0.9
 adam_beta2: 0.998
 decay_method: noam

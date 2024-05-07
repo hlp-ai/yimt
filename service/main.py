@@ -1,7 +1,9 @@
 import os
 import tempfile
+import numpy as np
 
 from flask import Flask, abort, jsonify, request
+from pydub import AudioSegment
 
 from service.asr import AudioRecognizers
 from service.ocr import TextRecognizers
@@ -129,7 +131,20 @@ def create_app():
         with open(temp_audio_file, "wb") as audio_file:
             audio_file.write(audio_data)
 
-        result = audio_recognizers.recognize_file(temp_audio_file)
+        if format == "amr":
+            audio = AudioSegment.from_file(temp_audio_file)
+            # print(len(song)) #时长，单位：毫秒
+            # print(song.frame_rate) #采样频率，单位：赫兹
+            # print(song.sample_width) #量化位数，单位：字节
+            # print(song.channels) #声道数，常见的MP3多是双声道的，声道越多文件也会越大。
+            wav = np.array(audio.get_array_of_samples())
+            wav = wav / 32768
+            wav = wav.astype(np.float32)
+            result = audio_recognizers.recognize(wav)
+        else:
+            result = audio_recognizers.recognize_file(temp_audio_file)
+
+        print(result)
         return jsonify(result[0])
 
     @app.post("/tts")
