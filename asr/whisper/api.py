@@ -51,3 +51,10 @@ if __name__ == '__main__':
     print(time.time() - start)
     print(lang)
     print(txt)
+
+    audio_file = input("输入WAV文件路径")
+    start = time.time()
+    lang, txt = asr.recognize_file(audio_file)
+    print(time.time() - start)
+    print(lang)
+    print(txt)
