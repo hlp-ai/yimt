@@ -6,7 +6,7 @@ from flask import Flask, abort, jsonify, request
 from pydub import AudioSegment
 from scipy.io.wavfile import write
 
-from service.asr import AudioRecognizers
+from service.asr import AudioRecognizers, amr2wav
 from service.ocr import TextRecognizers
 from service.tts import AudioGenerators
 
@@ -133,16 +133,19 @@ def create_app():
             audio_file.write(audio_data)
 
         if format == "amr":
-            audio = AudioSegment.from_file(temp_audio_file)
-            # print(len(song)) #时长，单位：毫秒
-            # print(song.frame_rate) #采样频率，单位：赫兹
-            # print(song.sample_width) #量化位数，单位：字节
-            # print(song.channels) #声道数，常见的MP3多是双声道的，声道越多文件也会越大。
-            print(audio.frame_rate, audio.channels)
-            wav = np.array(audio.get_array_of_samples())
-            wav = wav / 32768
-            wav = wav.astype(np.float32)
-            result = audio_recognizers.recognize(wav)
+            print("转换AMR文件...")
+            temp_wav_file = "temp_audo.wav"
+            amr2wav(temp_audio_file, temp_wav_file)
+            # audio = AudioSegment.from_file(temp_audio_file)
+            # # print(len(song)) #时长，单位：毫秒
+            # # print(song.frame_rate) #采样频率，单位：赫兹
+            # # print(song.sample_width) #量化位数，单位：字节
+            # # print(song.channels) #声道数，常见的MP3多是双声道的，声道越多文件也会越大。
+            # print(audio.frame_rate, audio.channels)
+            # wav = np.array(audio.get_array_of_samples())
+            # wav = wav / 32768
+            # wav = wav.astype(np.float32)
+            result = audio_recognizers.recognize_file(temp_wav_file)
         else:
             result = audio_recognizers.recognize_file(temp_audio_file)
 
