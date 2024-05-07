@@ -66,24 +66,31 @@ def create_app():
         response.headers.add("Access-Control-Max-Age", 60 * 60 * 24 * 20)
         return response
 
-
     @app.post("/ocr")
     # @access_check
     def image2text():
         json_dict = get_json_dict(request)
         image_64_string = json_dict.get("base64")
+        format = json_dict.get("format")
         token = json_dict.get("token")
         lang = json_dict.get("lang")
 
         if not lang:
             abort(400, description="Invalid request: missing lang parameter")
+        else:
+            if lang == "zh":
+                lang = "ch_sim"
         if not image_64_string:
             abort(400, description="Invalid request: missing base64 parameter")
+
+        if not format:
+            format = "jpg"
 
         import base64
         image_data = base64.b64decode(image_64_string)
 
-        filepath = os.path.join(get_upload_dir(), "decoded_image.png")
+        # filepath = os.path.join(get_upload_dir(), "decoded_image.{}".format(format))
+        filepath = "decoded_image.{}".format(format)
 
         with open(filepath, "wb") as image_file:
             image_file.write(image_data)
@@ -92,7 +99,7 @@ def create_app():
         if result is None:
             abort(400, description="NO OCR")
 
-        return jsonify(result)
+        return jsonify(result[0])
 
     @app.post("/asr")
     # @access_check
@@ -107,16 +114,16 @@ def create_app():
         lang = json.get("lang")
 
         if not audio_64_string:
-            abort(400, description="Invalid request: missing base64 parameter")
+            abort(400, description="Invalid request: missing audio base64 parameter")
 
         import base64
         audio_data = base64.b64decode(audio_64_string)
-        temp_audio_file = "temp_audo.wav"
+        temp_audio_file = "temp_audo.{}".format(format)
         with open(temp_audio_file, "wb") as audio_file:
             audio_file.write(audio_data)
 
         result = audio_recognizers.recognize_file(temp_audio_file)
-        return jsonify(result)
+        return jsonify(result[0])
 
     @app.post("/tts")
     # @access_check
@@ -151,4 +158,4 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
-    app.run(host="127.0.0.1", port=6666)
+    app.run(host="0.0.0.0", port=5555)
