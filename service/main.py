@@ -4,6 +4,7 @@ import numpy as np
 
 from flask import Flask, abort, jsonify, request
 from pydub import AudioSegment
+from scipy.io.wavfile import write
 
 from service.asr import AudioRecognizers
 from service.ocr import TextRecognizers
@@ -137,6 +138,7 @@ def create_app():
             # print(song.frame_rate) #采样频率，单位：赫兹
             # print(song.sample_width) #量化位数，单位：字节
             # print(song.channels) #声道数，常见的MP3多是双声道的，声道越多文件也会越大。
+            print(audio.frame_rate, audio.channels)
             wav = np.array(audio.get_array_of_samples())
             wav = wav / 32768
             wav = wav.astype(np.float32)
@@ -165,15 +167,21 @@ def create_app():
             abort(400, description="NO TTS")
 
         import base64
-        output = []
-        for r in result:
-            audio_64_string = base64.b64encode(r["audio"].tobytes())
-            output.append({
-                'base64': audio_64_string.decode('utf-8'),
-                'rate': r["sr"]
-            })
+        r = result[0]
 
-        return jsonify(output)
+        print("写临时声音文件...")
+        tmp_file = "./temp.wav"
+        write(tmp_file, r["sr"], r["audio"])
+
+        audio_64_string = base64.b64encode(open(tmp_file, "rb").read())
+
+        # audio_64_string = base64.b64encode(r["audio"].tobytes())
+
+        return jsonify({
+                'base64': audio_64_string.decode('utf-8'),
+                'rate': r["sr"],
+                "type": "wav"
+            })
 
     return app
 
