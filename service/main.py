@@ -96,10 +96,17 @@ def create_app():
             image_file.write(image_data)
 
         result = text_recognizers.recognize(filepath, lang)
+        print(result)
         if result is None:
             abort(400, description="NO OCR")
 
-        return jsonify(result[0])
+        text = ""
+        for p in result:
+            text += p[-1] + "\n"
+
+        print(text)
+
+        return jsonify({"text": text})
 
     @app.post("/asr")
     # @access_check
