@@ -12,7 +12,7 @@ from onmt.train_single import prepare_transforms_vocabs
 from onmt.constants import CorpusName
 
 
-SAVE_DATA_PREFIX = "data/test_data_prepare"
+SAVE_DATA_PREFIX = "../../data/test_data_prepare"
 
 
 def get_default_opts():
@@ -21,11 +21,11 @@ def get_default_opts():
 
     default_opts = [
         "-config",
-        "data/data.yaml",
+        "../../data/data.yaml",
         "-src_vocab",
-        "data/vocab-train.src",
+        "../../data/vocab-train.src",
         "-tgt_vocab",
-        "data/vocab-train.tgt",
+        "../../data/vocab-train.tgt",
     ]
 
     opt = parser.parse_known_args(default_opts)[0]
