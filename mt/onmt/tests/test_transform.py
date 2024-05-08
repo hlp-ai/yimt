@@ -45,8 +45,8 @@ class TestTransform(unittest.TestCase):
         corpora = yaml.safe_load(
             """
             trainset:
-                path_src: data/src-train.txt
-                path_tgt: data/tgt-train.txt
+                path_src: ../../data/src-train.txt
+                path_tgt: ../../data/tgt-train.txt
                 transforms: ["prefix"]
                 weight: 1
                 src_prefix: "｟_pf_src｠"
@@ -64,8 +64,8 @@ class TestTransform(unittest.TestCase):
         corpora = yaml.safe_load(
             """
             trainset:
-                path_src: data/src-train.txt
-                path_tgt: data/tgt-train.txt
+                path_src: ../../data/src-train.txt
+                path_tgt: ../../data/tgt-train.txt
                 transforms: [prefix, filtertoolong]
                 weight: 1
                 src_prefix: "｟_pf_src｠"
@@ -103,8 +103,8 @@ class TestMiscTransform(unittest.TestCase):
         corpora = yaml.safe_load(
             """
             trainset:
-                path_src: data/src-train.txt
-                path_tgt: data/tgt-train.txt
+                path_src: ../../data/src-train.txt
+                path_tgt: ../../data/tgt-train.txt
                 transforms: [prefix]
                 weight: 1
                 src_prefix: "｟_pf_src｠"
@@ -149,8 +149,8 @@ class TestSubwordTransform(unittest.TestCase):
         cls.base_opts = {
             "seed": 3431,
             "share_vocab": False,
-            "src_subword_model": "data/sample.bpe",
-            "tgt_subword_model": "data/sample.bpe",
+            "src_subword_model": "../../data/sample.bpe",
+            "tgt_subword_model": "../../data/sample.bpe",
             "src_subword_nbest": 1,
             "tgt_subword_nbest": 1,
             "src_subword_alpha": 0.0,
@@ -211,8 +211,8 @@ class TestSubwordTransform(unittest.TestCase):
     def test_sentencepiece(self):
         sp_cls = get_transforms_cls(["sentencepiece"])["sentencepiece"]
         base_opt = copy.copy(self.base_opts)
-        base_opt["src_subword_model"] = "data/sample.sp.model"
-        base_opt["tgt_subword_model"] = "data/sample.sp.model"
+        base_opt["src_subword_model"] = "../../data/sample.sp.model"
+        base_opt["tgt_subword_model"] = "../../data/sample.sp.model"
         opt = Namespace(**base_opt)
         sp_cls._validate_options(opt)
         sp_transform = sp_cls(opt)
@@ -357,8 +357,8 @@ class TestSubwordTransform(unittest.TestCase):
         base_opt = copy.copy(self.base_opts)
         base_opt["src_subword_type"] = "sentencepiece"
         base_opt["tgt_subword_type"] = "sentencepiece"
-        base_opt["src_subword_model"] = "data/sample.sp.model"
-        base_opt["tgt_subword_model"] = "data/sample.sp.model"
+        base_opt["src_subword_model"] = "../../data/sample.sp.model"
+        base_opt["tgt_subword_model"] = "../../data/sample.sp.model"
         onmt_args = "{'mode': 'none', 'spacer_annotate': True}"
         base_opt["src_onmttok_kwargs"] = onmt_args
         base_opt["tgt_onmttok_kwargs"] = onmt_args
