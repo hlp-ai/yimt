@@ -2,46 +2,6 @@
 # # Should be done rarely, indicates a major breaking change. 
 my_python=python
 
-############### TEST regular RNN choose either -rnn_type LSTM / GRU / SRU and set input_feed 0 for SRU
-if false; then
-$my_python build_vocab.py \
-    -config data/data.yaml -save_data data/data \
-    -src_vocab data/data.vocab.src -tgt_vocab data/data.vocab.tgt \
-    -overwrite true
-$my_python train.py \
-    -config data/data.yaml -src_vocab data/data.vocab.src -tgt_vocab data/data.vocab.tgt \
-    -src_vocab_size 1000 -tgt_vocab_size 1000 \
-    -save_model tmp -world_size 1 -gpu_ranks 0 \
-    -rnn_type LSTM -input_feed 0 \
-    -hidden_size 256 -word_vec_size 256 \
-    -layers 1 -train_steps 10000 \
-    -optim adam  -learning_rate 0.001
-    # -truncated_decoder 5 
-    # -label_smoothing 0.1
-
-mv tmp*10000.pt onmt/tests/test_model.pt
-rm tmp*.pt
-fi
-
-
-############### TEST CNN 
-if false; then
-$my_python build_vocab.py \
-    -config data/data.yaml -save_data data/data \
-    -src_vocab data/data.vocab.src -tgt_vocab data/data.vocab.tgt \
-    -overwrite true
-$my_python train.py \
-    -config data/data.yaml -src_vocab data/data.vocab.src -tgt_vocab data/data.vocab.tgt \
-    -src_vocab_size 1000 -tgt_vocab_size 1000 \
-    -save_model /tmp/tmp -world_size 1 -gpu_ranks 0 \
-    -encoder_type cnn -decoder_type cnn \
-    -hidden_size 256 -word_vec_size 256 \
-    -layers 2 -train_steps 10000 \
-    -optim adam  -learning_rate 0.001
-
-mv /tmp/tmp*10000.pt onmt/tests/test_model.pt
-rm /tmp/tmp*.pt
-fi
 
 ################# MORPH DATA
 if false; then
