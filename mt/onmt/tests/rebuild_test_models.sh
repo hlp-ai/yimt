@@ -3,28 +3,6 @@
 my_python=python
 
 
-################# MORPH DATA
-if false; then
-$my_python build_vocab.py \
-    -config data/morph_data.yaml -save_data data/data \
-    -src_vocab data/morph_data.vocab.src -tgt_vocab data/morph_data.vocab.tgt \
-    -overwrite true -n_sample 10000
-fi
-if false; then
-$my_python train.py \
-    -config data/morph_data.yaml -src_vocab data/morph_data.vocab.src -tgt_vocab data/morph_data.vocab.tgt \
-    -save_model tmp -world_size 1 -gpu_ranks 0 \
-    -hidden_size 400 -word_vec_size 100 \
-    -layers 1 -train_steps 8000 \
-    -optim adam  -learning_rate 0.001
-
-
-mv tmp*8000.pt onmt/tests/test_model2.pt
-
-rm tmp*.pt
-fi
-
-
 ############### TEST TRANSFORMER
 if false; then
 $my_python build_vocab.py \

@@ -86,33 +86,6 @@ rm_tmp_checkpoints(){
 }
 
 
-### MORPH DATA
-###############################################
-morph(){
-    ################# MORPH DATA
-    rm -f "$DATA_DIR"/morph/*.pt
-    $PYTHON_BIN preprocess.py -train_src "$DATA_DIR"/morph/src.train \
-                         -train_tgt "$DATA_DIR"/morph/tgt.train \
-                         -valid_src "$DATA_DIR"/morph/src.valid \
-                         -valid_tgt "$DATA_DIR"/morph/tgt.valid \
-                         -save_data "$DATA_DIR"/morph/data 
-
-    $PYTHON_BIN train.py -data "$DATA_DIR"/morph/data \
-                    -save_model "$MODEL_PATH" \
-                    -gpuid $GPUID \
-                    -hidden_size 400 \
-                    -word_vec_size 100 \
-                    -layers 1 \
-                    -train_steps 10000 \
-                    -optim adam  \
-                    -learning_rate 0.001
-
-    mv_best_checkpoint
-    maybe_translate
-    rm_tmp_checkpoints
-}
-
-
 ### TRANSFORMER
 ###############################################
 transformer(){
