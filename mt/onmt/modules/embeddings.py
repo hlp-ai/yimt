@@ -128,25 +128,25 @@ class Embeddings(nn.Module):
         word_padding_idx,
         position_encoding=False,
         position_encoding_type="SinusoidalInterleaved",
-        feat_merge="concat",
-        feat_vec_exponent=0.7,
-        feat_vec_size=-1,
-        feat_padding_idx=[],
-        feat_vocab_sizes=[],
+        # feat_merge="concat",
+        # feat_vec_exponent=0.7,
+        # feat_vec_size=-1,
+        # feat_padding_idx=[],
+        # feat_vocab_sizes=[],
         dropout=0,
         sparse=False,
         freeze_word_vecs=False,
     ):
-        self._validate_args(
-            feat_merge,
-            feat_vocab_sizes,
-            feat_vec_exponent,
-            feat_vec_size,
-            feat_padding_idx,
-        )
-
-        if feat_padding_idx is None:
-            feat_padding_idx = []
+        # self._validate_args(
+        #     feat_merge,
+        #     feat_vocab_sizes,
+        #     feat_vec_exponent,
+        #     feat_vec_size,
+        #     feat_padding_idx,
+        # )
+        #
+        # if feat_padding_idx is None:
+        #     feat_padding_idx = []
         self.word_padding_idx = word_padding_idx
 
         self.word_vec_size = word_vec_size
@@ -156,17 +156,17 @@ class Embeddings(nn.Module):
         emb_dims = [word_vec_size]
         pad_indices = [word_padding_idx]
 
-        # Dimensions and padding for feature embedding matrices
-        # (these have no effect if feat_vocab_sizes is empty)
-        if feat_merge == "sum":
-            feat_dims = [word_vec_size] * len(feat_vocab_sizes)
-        elif feat_vec_size > 0:
-            feat_dims = [feat_vec_size] * len(feat_vocab_sizes)
-        else:
-            feat_dims = [int(vocab**feat_vec_exponent) for vocab in feat_vocab_sizes]
-        vocab_sizes.extend(feat_vocab_sizes)
-        emb_dims.extend(feat_dims)
-        pad_indices.extend(feat_padding_idx)
+        # # Dimensions and padding for feature embedding matrices
+        # # (these have no effect if feat_vocab_sizes is empty)
+        # if feat_merge == "sum":
+        #     feat_dims = [word_vec_size] * len(feat_vocab_sizes)
+        # elif feat_vec_size > 0:
+        #     feat_dims = [feat_vec_size] * len(feat_vocab_sizes)
+        # else:
+        #     feat_dims = [int(vocab**feat_vec_exponent) for vocab in feat_vocab_sizes]
+        # vocab_sizes.extend(feat_vocab_sizes)
+        # emb_dims.extend(feat_dims)
+        # pad_indices.extend(feat_padding_idx)
 
         # The embedding matrix look-up tables. The first look-up table
         # is for words. Subsequent ones are for features, if any exist.
@@ -181,13 +181,15 @@ class Embeddings(nn.Module):
             )
             for vocab, dim, pad in emb_params
         ]
-        emb_luts = Elementwise(feat_merge, embeddings)
+        # emb_luts = Elementwise(feat_merge, embeddings)
+        emb_luts = Elementwise(None, embeddings)
 
         # The final output size of word + feature vectors. This can vary
         # from the word vector size if and only if features are defined.
         # This is the attribute you should access if you need to know
         # how big your embeddings are going to be.
-        self.embedding_size = sum(emb_dims) if feat_merge == "concat" else word_vec_size
+        # self.embedding_size = sum(emb_dims) if feat_merge == "concat" else word_vec_size
+        self.embedding_size = word_vec_size
 
         # The sequence of operations that converts the input sequence
         # into a sequence of embeddings. At minimum this consists of
@@ -198,10 +200,10 @@ class Embeddings(nn.Module):
         self.make_embedding = nn.Sequential()
         self.make_embedding.add_module("emb_luts", emb_luts)
 
-        if feat_merge == "mlp" and len(feat_vocab_sizes) > 0:
-            in_dim = sum(emb_dims)
-            mlp = nn.Sequential(nn.Linear(in_dim, word_vec_size), nn.ReLU())
-            self.make_embedding.add_module("mlp", mlp)
+        # if feat_merge == "mlp" and len(feat_vocab_sizes) > 0:
+        #     in_dim = sum(emb_dims)
+        #     mlp = nn.Sequential(nn.Linear(in_dim, word_vec_size), nn.ReLU())
+        #     self.make_embedding.add_module("mlp", mlp)
 
         self.position_encoding = position_encoding
         self.dropout = nn.Dropout(p=dropout)
@@ -214,47 +216,47 @@ class Embeddings(nn.Module):
         if freeze_word_vecs:
             self.word_lut.weight.requires_grad = False
 
-    def _validate_args(
-        self,
-        feat_merge,
-        feat_vocab_sizes,
-        feat_vec_exponent,
-        feat_vec_size,
-        feat_padding_idx,
-    ):
-        if feat_merge == "sum":
-            # features must use word_vec_size
-            if feat_vec_exponent != 0.7:
-                warnings.warn(
-                    "Merging with sum, but got non-default "
-                    "feat_vec_exponent. It will be unused."
-                )
-            if feat_vec_size != -1:
-                warnings.warn(
-                    "Merging with sum, but got non-default "
-                    "feat_vec_size. It will be unused."
-                )
-        elif feat_vec_size > 0:
-            # features will use feat_vec_size
-            if feat_vec_exponent != -1:
-                warnings.warn(
-                    "Not merging with sum and positive "
-                    "feat_vec_size, but got non-default "
-                    "feat_vec_exponent. It will be unused."
-                )
-        else:
-            if feat_vec_exponent <= 0:
-                raise ValueError(
-                    "Using feat_vec_exponent to determine "
-                    "feature vec size, but got feat_vec_exponent "
-                    "less than or equal to 0."
-                )
-        n_feats = len(feat_vocab_sizes)
-        if n_feats != len(feat_padding_idx):
-            raise ValueError(
-                "Got unequal number of feat_vocab_sizes and "
-                "feat_padding_idx ({:d} != {:d})".format(n_feats, len(feat_padding_idx))
-            )
+    # def _validate_args(
+    #     self,
+    #     feat_merge,
+    #     feat_vocab_sizes,
+    #     feat_vec_exponent,
+    #     feat_vec_size,
+    #     feat_padding_idx,
+    # ):
+    #     if feat_merge == "sum":
+    #         # features must use word_vec_size
+    #         if feat_vec_exponent != 0.7:
+    #             warnings.warn(
+    #                 "Merging with sum, but got non-default "
+    #                 "feat_vec_exponent. It will be unused."
+    #             )
+    #         if feat_vec_size != -1:
+    #             warnings.warn(
+    #                 "Merging with sum, but got non-default "
+    #                 "feat_vec_size. It will be unused."
+    #             )
+    #     elif feat_vec_size > 0:
+    #         # features will use feat_vec_size
+    #         if feat_vec_exponent != -1:
+    #             warnings.warn(
+    #                 "Not merging with sum and positive "
+    #                 "feat_vec_size, but got non-default "
+    #                 "feat_vec_exponent. It will be unused."
+    #             )
+    #     else:
+    #         if feat_vec_exponent <= 0:
+    #             raise ValueError(
+    #                 "Using feat_vec_exponent to determine "
+    #                 "feature vec size, but got feat_vec_exponent "
+    #                 "less than or equal to 0."
+    #             )
+    #     n_feats = len(feat_vocab_sizes)
+    #     if n_feats != len(feat_padding_idx):
+    #         raise ValueError(
+    #             "Got unequal number of feat_vocab_sizes and "
+    #             "feat_padding_idx ({:d} != {:d})".format(n_feats, len(feat_padding_idx))
+    #         )
 
     @property
     def word_lut(self):

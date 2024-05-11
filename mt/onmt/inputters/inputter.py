@@ -73,23 +73,23 @@ def build_vocab(opt, specials):
             tgt_vocab = _pad_vocab_to_multiple(tgt_vocab, opt.vocab_size_multiple)
         vocabs["tgt"] = tgt_vocab
 
-    if opt.n_src_feats > 0:
-        src_feats_vocabs = []
-        for i in range(opt.n_src_feats):
-            src_f_vocab = _read_vocab_file(f"{opt.src_vocab}_feat{i}", 1)
-            src_f_vocab = pyonmttok.build_vocab_from_tokens(
-                src_f_vocab,
-                maximum_size=0,
-                minimum_frequency=1,
-                special_tokens=default_specials,
-            )
-            src_f_vocab.default_id = src_f_vocab[DefaultTokens.UNK]
-            if opt.vocab_size_multiple > 1:
-                src_f_vocab = _pad_vocab_to_multiple(
-                    src_f_vocab, opt.vocab_size_multiple
-                )
-            src_feats_vocabs.append(src_f_vocab)
-        vocabs["src_feats"] = src_feats_vocabs
+    # if opt.n_src_feats > 0:
+    #     src_feats_vocabs = []
+    #     for i in range(opt.n_src_feats):
+    #         src_f_vocab = _read_vocab_file(f"{opt.src_vocab}_feat{i}", 1)
+    #         src_f_vocab = pyonmttok.build_vocab_from_tokens(
+    #             src_f_vocab,
+    #             maximum_size=0,
+    #             minimum_frequency=1,
+    #             special_tokens=default_specials,
+    #         )
+    #         src_f_vocab.default_id = src_f_vocab[DefaultTokens.UNK]
+    #         if opt.vocab_size_multiple > 1:
+    #             src_f_vocab = _pad_vocab_to_multiple(
+    #                 src_f_vocab, opt.vocab_size_multiple
+    #             )
+    #         src_feats_vocabs.append(src_f_vocab)
+    #     vocabs["src_feats"] = src_feats_vocabs
 
     vocabs["data_task"] = opt.data_task
     vocabs["decoder_start_token"] = opt.decoder_start_token
@@ -134,10 +134,10 @@ def vocabs_to_dict(vocabs):
     vocabs_dict = {}
     vocabs_dict["src"] = vocabs["src"].ids_to_tokens
     vocabs_dict["tgt"] = vocabs["tgt"].ids_to_tokens
-    if "src_feats" in vocabs.keys():
-        vocabs_dict["src_feats"] = [
-            feat_vocab.ids_to_tokens for feat_vocab in vocabs["src_feats"]
-        ]
+    # if "src_feats" in vocabs.keys():
+    #     vocabs_dict["src_feats"] = [
+    #         feat_vocab.ids_to_tokens for feat_vocab in vocabs["src_feats"]
+    #     ]
     vocabs_dict["data_task"] = vocabs["data_task"]
     if "decoder_start_token" in vocabs.keys():
         vocabs_dict["decoder_start_token"] = vocabs["decoder_start_token"]
@@ -162,8 +162,8 @@ def dict_to_vocabs(vocabs_dict):
         vocabs["tgt"] = vocabs["src"]
     else:
         vocabs["tgt"] = pyonmttok.build_vocab_from_tokens(vocabs_dict["tgt"])
-    if "src_feats" in vocabs_dict.keys():
-        vocabs["src_feats"] = []
-        for feat_vocab in vocabs_dict["src_feats"]:
-            vocabs["src_feats"].append(pyonmttok.build_vocab_from_tokens(feat_vocab))
+    # if "src_feats" in vocabs_dict.keys():
+    #     vocabs["src_feats"] = []
+    #     for feat_vocab in vocabs_dict["src_feats"]:
+    #         vocabs["src_feats"].append(pyonmttok.build_vocab_from_tokens(feat_vocab))
     return vocabs

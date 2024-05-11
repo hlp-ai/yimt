@@ -180,8 +180,8 @@ def get_corpora(opts, task=CorpusTask.TRAIN, src=None, tgt=None, align=None):
                         corpus_dict["path_src"],
                         corpus_dict["path_tgt"],
                         corpus_dict["path_align"],
-                        n_src_feats=opts.n_src_feats,
-                        src_feats_defaults=opts.src_feats_defaults,
+                        # n_src_feats=opts.n_src_feats,
+                        # src_feats_defaults=opts.src_feats_defaults,
                     )
                 else:
                     corpora_dict[corpus_id] = BlockwiseCorpus(
@@ -196,8 +196,8 @@ def get_corpora(opts, task=CorpusTask.TRAIN, src=None, tgt=None, align=None):
                 opts.data[CorpusName.VALID]["path_src"],
                 opts.data[CorpusName.VALID]["path_tgt"] if tgt is None else None,
                 opts.data[CorpusName.VALID]["path_align"],
-                n_src_feats=opts.n_src_feats,
-                src_feats_defaults=opts.src_feats_defaults,
+                # n_src_feats=opts.n_src_feats,
+                # src_feats_defaults=opts.src_feats_defaults,
             )
         else:
             return None

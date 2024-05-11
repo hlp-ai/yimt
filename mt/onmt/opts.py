@@ -261,20 +261,20 @@ def _add_dataset_opts(parser, build_vocab_only=False):
         )
 
 
-def _add_features_opts(parser):
-    group = parser.add_argument_group("Features")
-    group.add(
-        "-n_src_feats",
-        "--n_src_feats",
-        type=int,
-        default=0,
-        help="Number of source feats.",
-    )
-    group.add(
-        "-src_feats_defaults",
-        "--src_feats_defaults",
-        help="Default features to apply in source in case " "there are not annotated",
-    )
+# def _add_features_opts(parser):
+#     group = parser.add_argument_group("Features")
+#     group.add(
+#         "-n_src_feats",
+#         "--n_src_feats",
+#         type=int,
+#         default=0,
+#         help="Number of source feats.",
+#     )
+#     group.add(
+#         "-src_feats_defaults",
+#         "--src_feats_defaults",
+#         help="Default features to apply in source in case " "there are not annotated",
+#     )
 
 
 def _add_vocab_opts(parser, build_vocab_only=False):
@@ -329,7 +329,7 @@ def _add_vocab_opts(parser, build_vocab_only=False):
         " typically <unk> <blank> <s> </s> ",
     )
 
-    _add_features_opts(parser)
+    # _add_features_opts(parser)
 
     if not build_vocab_only:
         group.add(
@@ -570,34 +570,34 @@ def model_opts(parser):
         help="Update source and target existing vocabularies",
     )
 
-    group = parser.add_argument_group("Model-Embedding Features")
-    group.add(
-        "--feat_merge",
-        "-feat_merge",
-        type=str,
-        default="concat",
-        choices=["concat", "sum", "mlp"],
-        help="Merge action for incorporating features embeddings. "
-        "Options [concat|sum|mlp].",
-    )
-    group.add(
-        "--feat_vec_size",
-        "-feat_vec_size",
-        type=int,
-        default=-1,
-        help="If specified, feature embedding sizes "
-        "will be set to this. Otherwise, feat_vec_exponent "
-        "will be used.",
-    )
-    group.add(
-        "--feat_vec_exponent",
-        "-feat_vec_exponent",
-        type=float,
-        default=0.7,
-        help="If -feat_merge_size is not set, feature "
-        "embedding sizes will be set to N^feat_vec_exponent "
-        "where N is the number of values the feature takes.",
-    )
+    # group = parser.add_argument_group("Model-Embedding Features")
+    # group.add(
+    #     "--feat_merge",
+    #     "-feat_merge",
+    #     type=str,
+    #     default="concat",
+    #     choices=["concat", "sum", "mlp"],
+    #     help="Merge action for incorporating features embeddings. "
+    #     "Options [concat|sum|mlp].",
+    # )
+    # group.add(
+    #     "--feat_vec_size",
+    #     "-feat_vec_size",
+    #     type=int,
+    #     default=-1,
+    #     help="If specified, feature embedding sizes "
+    #     "will be set to this. Otherwise, feat_vec_exponent "
+    #     "will be used.",
+    # )
+    # group.add(
+    #     "--feat_vec_exponent",
+    #     "-feat_vec_exponent",
+    #     type=float,
+    #     default=0.7,
+    #     help="If -feat_merge_size is not set, feature "
+    #     "embedding sizes will be set to N^feat_vec_exponent "
+    #     "where N is the number of values the feature takes.",
+    # )
 
     # Model Task Options
     group = parser.add_argument_group("Model- Task")
@@ -1811,8 +1811,8 @@ def translate_opts(parser):
         action="store_true",
         help="Report pytorch profiling stats",
     )
-    # Adding options related to source and target features
-    _add_features_opts(parser)
+    # # Adding options related to source and target features
+    # _add_features_opts(parser)
 
     # Adding options relate to decoding strategy
     _add_decoding_opts(parser)

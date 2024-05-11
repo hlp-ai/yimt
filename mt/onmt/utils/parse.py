@@ -84,13 +84,13 @@ class DataOptsCheckerMixin(object):
                     )
                 corpus["weight"] = 1
 
-            # Check features
-            if opt.n_src_feats > 0:
-                if "inferfeats" not in corpus["transforms"]:
-                    raise ValueError(
-                        "'inferfeats' transform is required "
-                        "when setting source features"
-                    )
+            # # Check features
+            # if opt.n_src_feats > 0:
+            #     if "inferfeats" not in corpus["transforms"]:
+            #         raise ValueError(
+            #             "'inferfeats' transform is required "
+            #             "when setting source features"
+            #         )
 
         logger.info(f"Parsed {len(corpora)} corpora from -data.")
         opt.data = corpora
@@ -181,13 +181,13 @@ class DataOptsCheckerMixin(object):
             opt.decoder_type == "transformer"
         ), "Only transformer decoder is supported for LM task"
 
-    @classmethod
-    def _validate_source_features_opts(cls, opt):
-        if opt.src_feats_defaults is not None:
-            assert opt.n_src_feats == len(
-                opt.src_feats_defaults.split("￨")
-            ), "The number source features defaults does not match \
-                -n_src_feats"
+    # @classmethod
+    # def _validate_source_features_opts(cls, opt):
+    #     if opt.src_feats_defaults is not None:
+    #         assert opt.n_src_feats == len(
+    #             opt.src_feats_defaults.split("￨")
+    #         ), "The number source features defaults does not match \
+    #             -n_src_feats"
 
     @classmethod
     def validate_prepare_opts(cls, opt, build_vocab_only=False):
@@ -201,7 +201,7 @@ class DataOptsCheckerMixin(object):
         cls._get_all_transform(opt)
         cls._validate_transforms_opts(opt)
         cls._validate_vocab_opts(opt, build_vocab_only=build_vocab_only)
-        cls._validate_source_features_opts(opt)
+        # cls._validate_source_features_opts(opt)
 
     @classmethod
     def validate_model_opts(cls, opt):
@@ -292,14 +292,14 @@ class ArgumentParser(cfargparse.ArgumentParser, DataOptsCheckerMixin):
                 )
             )
 
-        if model_opt.feat_merge == "concat" and model_opt.feat_vec_size > 0:
-            assert (
-                model_opt.feat_vec_size * model_opt.n_src_feats
-            ) + model_opt.src_word_vec_size == model_opt.hidden_size, (
-                "(feat_vec_size * n_src_feats) + "
-                "src_word_vec_size should be equal to hidden_size with "
-                "-feat_merge concat mode."
-            )
+        # if model_opt.feat_merge == "concat" and model_opt.feat_vec_size > 0:
+        #     assert (
+        #         model_opt.feat_vec_size * model_opt.n_src_feats
+        #     ) + model_opt.src_word_vec_size == model_opt.hidden_size, (
+        #         "(feat_vec_size * n_src_feats) + "
+        #         "src_word_vec_size should be equal to hidden_size with "
+        #         "-feat_merge concat mode."
+        #     )
 
         if model_opt.position_encoding and model_opt.max_relative_positions != 0:
             raise ValueError(

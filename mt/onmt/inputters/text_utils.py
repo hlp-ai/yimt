@@ -67,11 +67,11 @@ def clean_example(maybe_example):
     maybe_example["src"] = {"src": " ".join(maybe_example["src"])}
     # Make features part of src like
     # {'src': {'src': ..., 'feats': [...., ....]}}
-    if "src_feats" in maybe_example:
-        maybe_example["src"]["feats"] = [
-            " ".join(x) for x in maybe_example["src_feats"]
-        ]
-        del maybe_example["src_feats"]
+    # if "src_feats" in maybe_example:
+    #     maybe_example["src"]["feats"] = [
+    #         " ".join(x) for x in maybe_example["src_feats"]
+    #     ]
+    #     del maybe_example["src_feats"]
     if maybe_example["tgt"] is not None:
         maybe_example["tgt"] = {"tgt": " ".join(maybe_example["tgt"])}
     if "align" in maybe_example:
@@ -144,11 +144,11 @@ def numericalize(vocabs, example):
     else:
         raise ValueError(f"Something went wrong with task {vocabs['data_task']}")
 
-    if "feats" in example["src"]:
-        numeric_feats = []
-        for fv, feat in zip(vocabs["src_feats"], example["src"]["feats"]):
-            numeric_feats.append(fv(feat.split(" ")))
-        numeric["src"]["feats"] = numeric_feats
+    # if "feats" in example["src"]:
+    #     numeric_feats = []
+    #     for fv, feat in zip(vocabs["src_feats"], example["src"]["feats"]):
+    #         numeric_feats.append(fv(feat.split(" ")))
+    #     numeric["src"]["feats"] = numeric_feats
     return numeric
 
 

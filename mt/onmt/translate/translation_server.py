@@ -200,17 +200,17 @@ class CTranslate2Translator(object):
         self.translator.load_model()
 
 
-def parse_features_opts(conf):
-    features_opt = conf.get("features", None)
-    if features_opt is not None:
-        features_opt["n_src_feats"] = features_opt.get("n_src_feats", 0)
-        features_opt["src_feats_defaults"] = features_opt.get(
-            "src_feats_defaults", None
-        )
-        features_opt["reversible_tokenization"] = features_opt.get(
-            "reversible_tokenization", "joiner"
-        )
-    return features_opt
+# def parse_features_opts(conf):
+#     features_opt = conf.get("features", None)
+#     if features_opt is not None:
+#         features_opt["n_src_feats"] = features_opt.get("n_src_feats", 0)
+#         features_opt["src_feats_defaults"] = features_opt.get(
+#             "src_feats_defaults", None
+#         )
+#         features_opt["reversible_tokenization"] = features_opt.get(
+#             "reversible_tokenization", "joiner"
+#         )
+#     return features_opt
 
 
 class TranslationServer(object):
@@ -250,7 +250,7 @@ class TranslationServer(object):
                 "ct2_model": conf.get("ct2_model", None),
                 "ct2_translator_args": conf.get("ct2_translator_args", {}),
                 "ct2_translate_batch_args": conf.get("ct2_translate_batch_args", {}),
-                "features_opt": parse_features_opts(conf),
+                # "features_opt": parse_features_opts(conf),
             }
             kwargs = {k: v for (k, v) in kwargs.items() if v is not None}
             model_id = conf.get("id", None)
@@ -567,19 +567,26 @@ class ServerModel(object):
             # every segment becomes a dict for flexibility purposes
             seg_dict = self.maybe_preprocess(inp)
             all_preprocessed.append(seg_dict)
-            for seg, ref, feats in zip_longest(
-                seg_dict["seg"], seg_dict["ref"], seg_dict["src_feats"]
+
+            # for seg, ref, feats in zip_longest(
+            #         seg_dict["seg"], seg_dict["ref"], seg_dict["src_feats"]
+            # ):
+            for seg, ref in zip_longest(
+                seg_dict["seg"], seg_dict["ref"]
             ):
+
                 tok = self.maybe_tokenize(seg)
                 if ref is not None:
                     ref = self.maybe_tokenize(ref, side="tgt")
-                feats = self.maybe_transform_feats(seg, tok, feats)
-                texts.append((tok, ref, feats))
+                # feats = self.maybe_transform_feats(seg, tok, feats)
+                # texts.append((tok, ref, feats))
+                texts.append((tok, ref))
             tail_spaces.append(whitespaces_after)
 
         empty_indices = []
         examples = []
-        for i, (tok, ref_tok, feats) in enumerate(texts):
+        # for i, (tok, ref_tok, feats) in enumerate(texts):
+        for i, (tok, ref_tok) in enumerate(texts):
             if tok == "":
                 empty_indices.append(i)
             else:
@@ -587,8 +594,8 @@ class ServerModel(object):
                     "src": {"src": tok},
                     "tgt": {"tgt": ref_tok} if ref_tok is not None else None,
                 }
-                if feats is not None:
-                    ex["src"]["feats"] = feats
+                # if feats is not None:
+                #     ex["src"]["feats"] = feats
                 examples.append(ex)
 
         scores = []
@@ -781,21 +788,21 @@ class ServerModel(object):
             sequence = deepcopy(sequence)
             src, src_feats = parse_features(
                 sequence["src"].strip(),
-                n_feats=(
-                    self.features_opt["n_src_feats"]
-                    if self.features_opt is not None
-                    else 0
-                ),
-                defaults=(
-                    self.features_opt["src_feats_defaults"]
-                    if self.features_opt is not None
-                    else None
-                ),
+                # n_feats=(
+                #     self.features_opt["n_src_feats"]
+                #     if self.features_opt is not None
+                #     else 0
+                # ),
+                # defaults=(
+                #     self.features_opt["src_feats_defaults"]
+                #     if self.features_opt is not None
+                #     else None
+                # ),
             )
             sequence["seg"] = [src]
             sequence.pop("src")
             sequence["ref"] = [sequence.get("ref", None)]
-            sequence["src_feats"] = [src_feats]
+            # sequence["src_feats"] = [src_feats]
             sequence["n_seg"] = 1
         if self.preprocess_opt is not None:
             return self.preprocess(sequence)
@@ -816,20 +823,20 @@ class ServerModel(object):
             sequence = function(sequence, self)
         return sequence
 
-    def maybe_transform_feats(self, raw_src, tok_src, feats):
-        """Apply InferFeatsTransform to features"""
-
-        if self.features_opt is None:
-            return feats
-        if self.feats_transform is None:
-            return feats
-        ex = {
-            "src": tok_src.split(" "),
-            "src_original": raw_src.split(" "),
-            "src_feats": [f.split(" ") for f in feats],
-        }
-        transformed_ex = self.feats_transform.apply(ex)
-        return [" ".join(f) for f in transformed_ex["src_feats"]]
+    # def maybe_transform_feats(self, raw_src, tok_src, feats):
+    #     """Apply InferFeatsTransform to features"""
+    #
+    #     if self.features_opt is None:
+    #         return feats
+    #     if self.feats_transform is None:
+    #         return feats
+    #     ex = {
+    #         "src": tok_src.split(" "),
+    #         "src_original": raw_src.split(" "),
+    #         "src_feats": [f.split(" ") for f in feats],
+    #     }
+    #     transformed_ex = self.feats_transform.apply(ex)
+    #     return [" ".join(f) for f in transformed_ex["src_feats"]]
 
     def build_tokenizer(self, tokenizer_opt):
         """Build tokenizer described by ``tokenizer_opt``."""
