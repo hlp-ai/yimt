@@ -208,32 +208,33 @@ def tensorify(vocabs, minibatch, device, left_pad=False):
         ]
     padidx = vocabs["src"][DefaultTokens.PAD]
     tbatchsrc = pad_sequence(tbatchsrc, batch_first=True, padding_value=padidx)
-    if "feats" in minibatch[0][0]["src"]:
-        tbatchfs = [tbatchsrc]
-        for feat_id in range(len(minibatch[0][0]["src"]["feats"])):
-            if left_pad:
-                tbatchfeat = [
-                    torch.tensor(
-                        ex["src"]["feats"][feat_id], dtype=torch.long, device=device
-                    ).flip(dims=[0])
-                    for ex, indice in minibatch
-                ]
-            else:
-                tbatchfeat = [
-                    torch.tensor(
-                        ex["src"]["feats"][feat_id], dtype=torch.long, device=device
-                    )
-                    for ex, indice in minibatch
-                ]
-            padidx = vocabs["src_feats"][feat_id][DefaultTokens.PAD]
-            tbatchfeat = pad_sequence(
-                tbatchfeat, batch_first=True, padding_value=padidx
-            )
-            tbatchfs.append(tbatchfeat)
-        tbatchsrc = torch.stack(tbatchfs, dim=2)
-    else:
-        # Need to add features in last dimensions
-        tbatchsrc = tbatchsrc[:, :, None]
+    # if "feats" in minibatch[0][0]["src"]:
+    #     tbatchfs = [tbatchsrc]
+    #     for feat_id in range(len(minibatch[0][0]["src"]["feats"])):
+    #         if left_pad:
+    #             tbatchfeat = [
+    #                 torch.tensor(
+    #                     ex["src"]["feats"][feat_id], dtype=torch.long, device=device
+    #                 ).flip(dims=[0])
+    #                 for ex, indice in minibatch
+    #             ]
+    #         else:
+    #             tbatchfeat = [
+    #                 torch.tensor(
+    #                     ex["src"]["feats"][feat_id], dtype=torch.long, device=device
+    #                 )
+    #                 for ex, indice in minibatch
+    #             ]
+    #         padidx = vocabs["src_feats"][feat_id][DefaultTokens.PAD]
+    #         tbatchfeat = pad_sequence(
+    #             tbatchfeat, batch_first=True, padding_value=padidx
+    #         )
+    #         tbatchfs.append(tbatchfeat)
+    #     tbatchsrc = torch.stack(tbatchfs, dim=2)
+    # else:
+    #     # Need to add features in last dimensions
+    #     tbatchsrc = tbatchsrc[:, :, None]
+    tbatchsrc = tbatchsrc[:, :, None]
 
     if left_pad:
         tensor_batch["src"] = tbatchsrc.flip(dims=[1])
