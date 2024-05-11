@@ -16,10 +16,6 @@ class TestEmbeddings(unittest.TestCase):
             word_vocab_size=[319],
             word_padding_idx=[17],
             position_encoding=[False, True],
-            feat_merge=["first", "concat", "sum", "mlp"],
-            feat_vec_exponent=[-1, 1.1, 0.7],
-            feat_vec_size=[0, 200],
-            feat_padding_idx=[[], [29], [0, 1]],
             feat_vocab_sizes=[[], [39], [401, 39]],
             dropout=[0, 0.5],
             freeze_word_vecs=[False, True],
@@ -29,26 +25,6 @@ class TestEmbeddings(unittest.TestCase):
 
     @classmethod
     def case_is_degenerate(cls, case):
-        no_feats = len(case["feat_vocab_sizes"]) == 0
-        if case["feat_merge"] != "first" and no_feats:
-            return True
-        if case["feat_merge"] == "first" and not no_feats:
-            return True
-        if case["feat_merge"] == "concat" and case["feat_vec_exponent"] != -1:
-            return True
-        if no_feats and case["feat_vec_exponent"] != -1:
-            return True
-        if len(case["feat_vocab_sizes"]) != len(case["feat_padding_idx"]):
-            return True
-        if case["feat_vec_size"] == 0 and case["feat_vec_exponent"] <= 0:
-            return True
-        if case["feat_merge"] == "sum":
-            if case["feat_vec_exponent"] != -1:
-                return True
-            if case["feat_vec_size"] != 0:
-                return True
-        if case["feat_vec_size"] != 0 and case["feat_vec_exponent"] != -1:
-            return True
         return False
 
     @classmethod
@@ -61,9 +37,8 @@ class TestEmbeddings(unittest.TestCase):
     def dummy_inputs(cls, params, init_case):
         max_seq_len = params["max_seq_len"]
         batch_size = params["batch_size"]
-        fv_sizes = init_case["feat_vocab_sizes"]
         n_words = init_case["word_vocab_size"]
-        voc_sizes = [n_words] + fv_sizes
+        voc_sizes = [n_words]
         pad_idxs = [init_case["word_padding_idx"]] + init_case["feat_padding_idx"]
         lengths = torch.randint(0, max_seq_len, (batch_size,))
         lengths[0] = max_seq_len
@@ -77,11 +52,7 @@ class TestEmbeddings(unittest.TestCase):
     @classmethod
     def expected_shape(cls, params, init_case):
         wvs = init_case["word_vec_size"]
-        fvs = init_case["feat_vec_size"]
-        nf = len(init_case["feat_vocab_sizes"])
         size = wvs
-        if init_case["feat_merge"] not in {"sum", "mlp"}:
-            size += nf * fvs
         return params["batch_size"], params["max_seq_len"], size
 
     def test_embeddings_forward_shape(self):
