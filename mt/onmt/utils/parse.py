@@ -272,9 +272,6 @@ class ArgumentParser(cfargparse.ArgumentParser, DataOptsCheckerMixin):
         same_size = model_opt.enc_hid_size == model_opt.dec_hid_size
         assert same_size, "The encoder and decoder rnns must be the same size for now"
 
-        assert (
-            model_opt.rnn_type != "SRU" or model_opt.gpu_ranks
-        ), "Using SRU requires -gpu_ranks set."
         if model_opt.share_embeddings:
             if model_opt.model_type != "text":
                 raise AssertionError("--share_embeddings requires --model_type text.")
