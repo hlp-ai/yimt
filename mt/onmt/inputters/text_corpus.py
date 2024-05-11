@@ -90,8 +90,8 @@ class BlockwiseCorpus(object):
         return (
             f"{cls_name}({self.id}, {self.file_path}, {self.file_path}"
             f"align={None}, "
-            f"n_src_feats={0}, "
-            f'src_feats_defaults="{None}")'
+            # f"n_src_feats={0}, "
+            # f'src_feats_defaults="{None}")'
         )
 
 
@@ -119,8 +119,8 @@ class ParallelCorpus(object):
         def make_ex(sline, tline, align):
             sline, sfeats = parse_features(
                 sline,
-                n_feats=self.n_src_feats,
-                defaults=self.src_feats_defaults,
+                # n_feats=self.n_src_feats,
+                # defaults=self.src_feats_defaults,
             )
             # 'src_original' and 'tgt_original' store the
             # original line before tokenization. These
@@ -164,8 +164,8 @@ class ParallelCorpus(object):
         return (
             f"{cls_name}({self.id}, {self.src}, {self.tgt}, "
             f"align={self.align}, "
-            f"n_src_feats={self.n_src_feats}, "
-            f'src_feats_defaults="{self.src_feats_defaults}")'
+            # f"n_src_feats={self.n_src_feats}, "
+            # f'src_feats_defaults="{self.src_feats_defaults}")'
         )
 
 
@@ -207,8 +207,8 @@ def get_corpora(opts, task=CorpusTask.TRAIN, src=None, tgt=None, align=None):
             src if src else opts.src,
             tgt if tgt else opts.tgt,
             align if align else None,
-            n_src_feats=opts.n_src_feats,
-            src_feats_defaults=opts.src_feats_defaults,
+            # n_src_feats=opts.n_src_feats,
+            # src_feats_defaults=opts.src_feats_defaults,
         )
     return corpora_dict
 
