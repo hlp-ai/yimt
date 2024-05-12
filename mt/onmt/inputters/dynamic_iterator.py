@@ -66,7 +66,7 @@ class WeightedMixer(MixingStrategy):
         logger = init_logger()
         for ds_name, ds_count in self._counts.items():
             msgs.append(f"\t\t\t* {ds_name}: {ds_count}")
-        logger.info("Weighted corpora loaded so far:\n" + "\n".join(msgs))
+        logger.debug("Weighted corpora loaded so far:\n" + "\n".join(msgs))
 
     def _reset_iter(self, ds_name):
         self._iterators[ds_name] = iter(self.iterables[ds_name])
