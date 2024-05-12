@@ -106,8 +106,8 @@ class ParallelCorpus(object):
         self.src = src
         self.tgt = tgt
         self.align = align
-        self.n_src_feats = n_src_feats
-        self.src_feats_defaults = src_feats_defaults
+        # self.n_src_feats = n_src_feats
+        # self.src_feats_defaults = src_feats_defaults
 
     def load(self, offset=0, stride=1):
         """
@@ -134,8 +134,8 @@ class ParallelCorpus(object):
             }
             if align is not None:
                 example["align"] = align
-            if sfeats is not None:
-                example["src_feats"] = [f for f in sfeats]
+            # if sfeats is not None:
+            #     example["src_feats"] = [f for f in sfeats]
             return example
 
         if isinstance(self.src, list):
@@ -342,10 +342,11 @@ def save_transformed_sample(opts, transforms, n_sample=3):
                             maybe_example["tgt"]["tgt"],
                         )
 
-                        if "feats" in maybe_example["src"]:
-                            src_feats_lines = maybe_example["src"]["feats"]
-                        else:
-                            src_feats_lines = []
+                        # if "feats" in maybe_example["src"]:
+                        #     src_feats_lines = maybe_example["src"]["feats"]
+                        # else:
+                        #     src_feats_lines = []
+                        src_feats_lines = []
 
                         src_pretty_line = append_features_to_text(
                             src_line, src_feats_lines

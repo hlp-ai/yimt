@@ -152,13 +152,14 @@ class CTranslate2Translator(object):
             setdefault_if_exists_must_match(ct2_translate_batch_args, name, value)
 
     def translate(self, examples, batch_size=8, tgt=None):
-        if "feats" in examples[0]["src"]:
-            batch = [
-                append_features_to_text(ex["src"]["src"], ex["src"]["feats"]).split(" ")
-                for ex in examples
-            ]
-        else:
-            batch = [ex["src"]["src"].split(" ") for ex in examples]
+        # if "feats" in examples[0]["src"]:
+        #     batch = [
+        #         append_features_to_text(ex["src"]["src"], ex["src"]["feats"]).split(" ")
+        #         for ex in examples
+        #     ]
+        # else:
+        #     batch = [ex["src"]["src"].split(" ") for ex in examples]
+        batch = [ex["src"]["src"].split(" ") for ex in examples]
         if tgt is not None:
             tgt = [item.split(" ") for item in tgt]
         if self.report_align:
