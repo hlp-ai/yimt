@@ -240,10 +240,10 @@ class ParallelCorpusIterator(object):
         for i, example in enumerate(stream):
             example["src"] = example["src"].strip().split(" ")
             example["src_original"] = example["src_original"].strip().split(" ")
-            if "src_feats" in example:
-                example["src_feats"] = [
-                    feat.strip().split(" ") for feat in example["src_feats"]
-                ]
+            # if "src_feats" in example:
+            #     example["src_feats"] = [
+            #         feat.strip().split(" ") for feat in example["src_feats"]
+            #     ]
             line_number = i * self.stride + self.offset
             example["cid_line_number"] = line_number
             example["cid"] = self.cid
