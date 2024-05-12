@@ -50,7 +50,7 @@ def build_sub_vocab(corpora, transforms, opts, n_sample, stride, offset):
     """Build vocab on (strided) subpart of the data."""
     sub_counter_src = Counter()
     sub_counter_tgt = Counter()
-    sub_counter_src_feats = [Counter() for _ in range(opts.n_src_feats)]
+    # sub_counter_src_feats = [Counter() for _ in range(opts.n_src_feats)]
     datasets_iterables = build_corpora_iters(
         corpora,
         transforms,
@@ -75,12 +75,13 @@ def build_sub_vocab(corpora, transforms, opts, n_sample, stride, offset):
             sub_counter_src.update(src_line.split(" "))
             sub_counter_tgt.update(tgt_line.split(" "))
 
-            if "feats" in maybe_example["src"]:
-                src_feats_lines = maybe_example["src"]["feats"]
-                for k in range(opts.n_src_feats):
-                    sub_counter_src_feats[k].update(src_feats_lines[k].split(" "))
-            else:
-                src_feats_lines = []
+            # if "feats" in maybe_example["src"]:
+            #     src_feats_lines = maybe_example["src"]["feats"]
+            #     for k in range(opts.n_src_feats):
+            #         sub_counter_src_feats[k].update(src_feats_lines[k].split(" "))
+            # else:
+            #     src_feats_lines = []
+            src_feats_lines = []
 
             if opts.dump_samples:
                 src_pretty_line = append_features_to_text(src_line, src_feats_lines)
@@ -93,7 +94,7 @@ def build_sub_vocab(corpora, transforms, opts, n_sample, stride, offset):
                 break
         if opts.dump_samples:
             build_sub_vocab.queues[c_name][offset].put("break")
-    return sub_counter_src, sub_counter_tgt, sub_counter_src_feats
+    return sub_counter_src, sub_counter_tgt
 
 
 def init_pool(queues):
@@ -119,7 +120,7 @@ def build_vocab(opts, transforms, n_sample=3):
     corpora = get_corpora(opts, task=CorpusTask.TRAIN)
     counter_src = Counter()
     counter_tgt = Counter()
-    counter_src_feats = [Counter() for _ in range(opts.n_src_feats)]
+    # counter_src_feats = [Counter() for _ in range(opts.n_src_feats)]
 
     queues = {
         c_name: [
@@ -137,16 +138,16 @@ def build_vocab(opts, transforms, n_sample=3):
         func = partial(
             build_sub_vocab, corpora, transforms, opts, n_sample, opts.num_threads
         )
-        for sub_counter_src, sub_counter_tgt, sub_counter_src_feats in p.imap(
+        for sub_counter_src, sub_counter_tgt in p.imap(
             func, range(0, opts.num_threads)
         ):
             counter_src.update(sub_counter_src)
             counter_tgt.update(sub_counter_tgt)
-            for i in range(opts.n_src_feats):
-                counter_src_feats[i].update(sub_counter_src_feats[i])
+            # for i in range(opts.n_src_feats):
+            #     counter_src_feats[i].update(sub_counter_src_feats[i])
     if opts.dump_samples:
         write_process.join()
-    return counter_src, counter_tgt, counter_src_feats
+    return counter_src, counter_tgt
 
 
 def ingest_tokens(opts, transforms, n_sample, learner, stride, offset):
@@ -243,14 +244,14 @@ def build_vocab_main(opts):
     transforms = make_transforms(opts, transforms_cls, None)
 
     logger.info(f"Counter vocab from {opts.n_sample} samples.")
-    src_counter, tgt_counter, src_feats_counter = build_vocab(
+    src_counter, tgt_counter = build_vocab(
         opts, transforms, n_sample=opts.n_sample
     )
 
     logger.info(f"Counters src: {len(src_counter)}")
     logger.info(f"Counters tgt: {len(tgt_counter)}")
-    for i, feat_counter in enumerate(src_feats_counter):
-        logger.info(f"Counters src feat_{i}: {len(feat_counter)}")
+    # for i, feat_counter in enumerate(src_feats_counter):
+    #     logger.info(f"Counters src feat_{i}: {len(feat_counter)}")
 
     def save_counter(counter, save_path):
         check_path(save_path, exist_ok=opts.overwrite, log=logger.warning)
@@ -267,8 +268,8 @@ def build_vocab_main(opts):
         save_counter(src_counter, opts.src_vocab)
         save_counter(tgt_counter, opts.tgt_vocab)
 
-    for i, c in enumerate(src_feats_counter):
-        save_counter(c, f"{opts.src_vocab}_feat{i}")
+    # for i, c in enumerate(src_feats_counter):
+    #     save_counter(c, f"{opts.src_vocab}_feat{i}")
 
 
 def _get_parser():
