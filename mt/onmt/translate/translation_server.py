@@ -23,7 +23,6 @@ from onmt.utils.misc import check_model_config
 from onmt.utils.alignment import to_word_align
 from onmt.utils.parse import ArgumentParser
 from onmt.translate.translator import build_translator
-from onmt.transforms.features import InferFeatsTransform
 from onmt.inputters.text_utils import (
     textbatch_to_tensor,
     parse_features,
@@ -428,8 +427,8 @@ class ServerModel(object):
                 self.tokenizers = {"src": tokenizer, "tgt": tokenizer}
 
         self.feats_transform = None
-        if self.features_opt is not None:
-            self.feats_transform = InferFeatsTransform(Namespace(**self.features_opt))
+        # if self.features_opt is not None:
+        #     self.feats_transform = InferFeatsTransform(Namespace(**self.features_opt))
 
         if self.postprocess_opt is not None:
             self.logger.info("Loading postprocessor")
