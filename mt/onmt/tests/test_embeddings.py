@@ -16,7 +16,6 @@ class TestEmbeddings(unittest.TestCase):
             word_vocab_size=[319],
             word_padding_idx=[17],
             position_encoding=[False, True],
-            feat_vocab_sizes=[[], [39], [401, 39]],
             dropout=[0, 0.5],
             freeze_word_vecs=[False, True],
         )
@@ -39,7 +38,7 @@ class TestEmbeddings(unittest.TestCase):
         batch_size = params["batch_size"]
         n_words = init_case["word_vocab_size"]
         voc_sizes = [n_words]
-        pad_idxs = [init_case["word_padding_idx"]] + init_case["feat_padding_idx"]
+        pad_idxs = [init_case["word_padding_idx"]]
         lengths = torch.randint(0, max_seq_len, (batch_size,))
         lengths[0] = max_seq_len
         inps = torch.empty((batch_size, max_seq_len, len(voc_sizes)), dtype=torch.long)
