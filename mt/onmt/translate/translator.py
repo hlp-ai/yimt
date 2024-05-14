@@ -90,7 +90,6 @@ class Inference(object):
         data_type (str): Source data type.
         verbose (bool): Print/log every translation.
         report_time (bool): Print/log total time/frequency.
-        copy_attn (bool): Use copy attention.
         global_scorer (onmt.translate.GNMTGlobalScorer): Translation
             scoring/reranking object.
         out_file (TextIO or codecs.StreamReaderWriter): Output file.
@@ -123,7 +122,6 @@ class Inference(object):
         data_type="text",
         verbose=False,
         report_time=False,
-        copy_attn=False,
         global_scorer=None,
         out_file=None,
         report_align=False,
@@ -176,8 +174,6 @@ class Inference(object):
         self.data_type = data_type
         self.verbose = verbose
         self.report_time = report_time
-
-        self.copy_attn = copy_attn
 
         self.global_scorer = global_scorer
         if self.global_scorer.has_cov_pen and not self.model.decoder.attentional:
@@ -264,7 +260,6 @@ class Inference(object):
             data_type=opt.data_type,
             verbose=opt.verbose,
             report_time=opt.report_time,
-            copy_attn=model_opt.copy_attn,
             global_scorer=global_scorer,
             out_file=out_file,
             report_align=report_align,
@@ -282,11 +277,11 @@ class Inference(object):
             print(msg)
 
     def _gold_score(
-        self, batch, enc_out, src_len, use_src_map, enc_final_hs, batch_size, src
+        self, batch, enc_out, src_len, enc_final_hs, batch_size, src
     ):
         if "tgt" in batch.keys() and not self.tgt_file_prefix:
             gs, glp = self._score_target(
-                batch, enc_out, src_len, batch["src_map"] if use_src_map else None
+                batch, enc_out, src_len, None
             )
             self.model.decoder.init_state(src, enc_out, enc_final_hs)
         else:
@@ -667,11 +662,11 @@ class Inference(object):
         batch_offset=None,
         return_attn=False,
     ):
-        if self.copy_attn:
-            # Turn any copied words into UNKs.
-            decoder_in = decoder_in.masked_fill(
-                decoder_in.gt(self._tgt_vocab_len - 1), self._tgt_unk_idx
-            )
+        # if self.copy_attn:
+        #     # Turn any copied words into UNKs.
+        #     decoder_in = decoder_in.masked_fill(
+        #         decoder_in.gt(self._tgt_vocab_len - 1), self._tgt_unk_idx
+        #     )
 
         # Decoder forward, takes [batch, tgt_len, nfeats] as input
         # and [batch, src_len, hidden] as enc_out
@@ -912,7 +907,7 @@ class Translator(Inference):
             results (dict): The translation results.
         """
         # (0) Prep the components of the search.
-        use_src_map = self.copy_attn
+        # use_src_map = self.copy_attn
         parallel_paths = decode_strategy.parallel_paths  # beam_size
 
         batch_size = len(batch["srclen"])
@@ -926,14 +921,14 @@ class Translator(Inference):
             batch,
             enc_out,
             src_len,
-            use_src_map,
             enc_final_hs,
             batch_size,
             src,
         )
 
         # (2) prep decode_strategy. Possibly repeat src objects.
-        src_map = batch["src_map"] if use_src_map else None
+        # src_map = batch["src_map"] if use_src_map else None
+        src_map = None
         target_prefix = batch["tgt"] if self.tgt_file_prefix else None
         (fn_map_state, enc_out, src_map) = decode_strategy.initialize(
             enc_out, src_len, src_map, target_prefix=target_prefix
@@ -1102,7 +1097,7 @@ class GeneratorLM(Inference):
             results (dict): The translation results.
         """
         # (0) Prep the components of the search.
-        use_src_map = self.copy_attn
+        # use_src_map = self.copy_attn
         parallel_paths = decode_strategy.parallel_paths  # beam_size
         batch_size = len(batch["srclen"])
 

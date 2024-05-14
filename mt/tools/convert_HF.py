@@ -876,7 +876,6 @@ if __name__ == "__main__":
         alignment_layer=-3,
         alignment_heads=0,
         full_context_alignment=False,
-        copy_attn=False,
         copy_attn_type="general",
         generator_function="softmax",
         copy_attn_force=False,

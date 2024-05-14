@@ -424,7 +424,7 @@ class TransformerDecoderLayer(TransformerDecoderLayerBase):
 
 class TransformerDecoderBase(DecoderBase):
     def __init__(
-        self, d_model, copy_attn, embeddings, alignment_layer, layer_norm, norm_eps
+        self, d_model, embeddings, alignment_layer, layer_norm, norm_eps
     ):
         super(TransformerDecoderBase, self).__init__()
 
@@ -436,7 +436,6 @@ class TransformerDecoderBase(DecoderBase):
         # previously, there was a GlobalAttention module here for copy
         # attention. But it was never actually used -- the "copy" attention
         # just reuses the context attention.
-        self._copy = copy_attn
         if layer_norm == "standard":
             self.layer_norm = nn.LayerNorm(d_model, eps=norm_eps)
         elif layer_norm == "rms":
@@ -454,7 +453,6 @@ class TransformerDecoderBase(DecoderBase):
             opt.dec_hid_size,
             opt.heads,
             opt.transformer_ff,
-            opt.copy_attn,
             opt.self_attn_type,
             opt.dropout[0] if type(opt.dropout) is list else opt.dropout,
             opt.attention_dropout[0]
@@ -542,7 +540,6 @@ class TransformerDecoder(TransformerDecoderBase):
         d_model (int): size of the model
         heads (int): number of heads
         d_ff (int): size of the inner FF layer
-        copy_attn (bool): if using a separate copy attention
         self_attn_type (str): type of self-attention scaled-dot, scaled-dot-flash, average
         dropout (float): dropout in residual, self-attn(dot) and feed-forward
         attention_dropout (float): dropout in context_attn (and self-attn(avg))
@@ -585,7 +582,6 @@ class TransformerDecoder(TransformerDecoderBase):
         d_model,
         heads,
         d_ff,
-        copy_attn,
         self_attn_type,
         dropout,
         attention_dropout,
@@ -614,7 +610,7 @@ class TransformerDecoder(TransformerDecoderBase):
         num_experts_per_tok=2,
     ):
         super(TransformerDecoder, self).__init__(
-            d_model, copy_attn, embeddings, alignment_layer, layer_norm, norm_eps
+            d_model, embeddings, alignment_layer, layer_norm, norm_eps
         )
 
         self.transformer_layers = nn.ModuleList(
@@ -691,7 +687,8 @@ class TransformerDecoder(TransformerDecoderBase):
         tgt_pad_mask = tgt[:, :, 0].eq(pad_idx).unsqueeze(1)  # [B, 1, T_tgt]
 
         with_align = kwargs.pop("with_align", False)
-        return_attn = with_align or self._copy or kwargs.pop("return_attn", False)
+        # return_attn = with_align or self._copy or kwargs.pop("return_attn", False)
+        return_attn = with_align or kwargs.pop("return_attn", False)
 
         attn_aligns = []
 
@@ -711,8 +708,8 @@ class TransformerDecoder(TransformerDecoderBase):
         dec_out = self.layer_norm(dec_out)
 
         attns = {"std": attn}
-        if self._copy:
-            attns["copy"] = attn
+        # if self._copy:
+        #     attns["copy"] = attn
         if with_align:
             attns["align"] = attn_aligns[self.alignment_layer]  # `(B, Q, K)`
             # attns["align"] = torch.stack(attn_aligns, 0).mean(0)  # All avg
@@ -823,7 +820,6 @@ class TransformerLMDecoder(TransformerDecoderBase):
         d_model (int): size of the model
         heads (int): number of heads
         d_ff (int): size of the inner FF layer
-        copy_attn (bool): if using a separate copy attention
         self_attn_type (str): type of self-attention scaled-dot, scaled-dot-flash, average
         dropout (float): dropout in residual, self-attn(dot) and feed-forward
         attention_dropout (float): dropout in context_attn (and self-attn(avg))
@@ -866,7 +862,6 @@ class TransformerLMDecoder(TransformerDecoderBase):
         d_model,
         heads,
         d_ff,
-        copy_attn,
         self_attn_type,
         dropout,
         attention_dropout,
@@ -895,7 +890,7 @@ class TransformerLMDecoder(TransformerDecoderBase):
         num_experts_per_tok=2,
     ):
         super(TransformerLMDecoder, self).__init__(
-            d_model, copy_attn, embeddings, alignment_layer, layer_norm, norm_eps
+            d_model, embeddings, alignment_layer, layer_norm, norm_eps
         )
         self.transformer_layers = nn.ModuleList(
             [

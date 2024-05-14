@@ -204,7 +204,6 @@ tests_nmtmodel = [
         ("position_encoding", True),
     ],
     [("coverage_attn", True)],
-    [("copy_attn", True)],
     [("global_attention", "mlp")],
     [],
 ]

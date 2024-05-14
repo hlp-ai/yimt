@@ -211,7 +211,6 @@ def main(opt, device_id):
         transforms_cls,
         vocabs,
         task=CorpusTask.TRAIN,
-        copy=opt.copy_attn,
         stride=stride,
         offset=offset,
         device_id=device_id,
@@ -222,7 +221,6 @@ def main(opt, device_id):
         transforms_cls,
         vocabs,
         task=CorpusTask.VALID,
-        copy=opt.copy_attn,
         device_id=device_id,
     )
 

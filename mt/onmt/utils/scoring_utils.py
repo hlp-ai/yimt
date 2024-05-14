@@ -104,7 +104,6 @@ class ScoringPreparator:
             translator.vocabs,
             task=CorpusTask.VALID,
             tgt="",  # This force to clear the target side (needed when using tgt_file_prefix)
-            copy=model_opt.copy_attn,
             device_id=opt.gpu,
         )
 

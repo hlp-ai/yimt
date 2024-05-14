@@ -915,21 +915,6 @@ def model_opts(parser):
     # Generator and loss options.
     group = parser.add_argument_group("Generator")
     group.add(
-        "--copy_attn",
-        "-copy_attn",
-        action="store_true",
-        help="Train copy attention layer.",
-    )
-    group.add(
-        "--copy_attn_type",
-        "-copy_attn_type",
-        type=str,
-        default=None,
-        choices=["dot", "general", "mlp", "none"],
-        help="The copy attention type to use. Leave as None to use "
-        "the same as -global_attention.",
-    )
-    group.add(
         "--generator_function",
         "-generator_function",
         default="softmax",
@@ -937,24 +922,6 @@ def model_opts(parser):
         help="Which function to use for generating "
         "probabilities over the target vocabulary (choices: "
         "softmax, sparsemax)",
-    )
-    group.add(
-        "--copy_attn_force",
-        "-copy_attn_force",
-        action="store_true",
-        help="When available, train to copy.",
-    )
-    group.add(
-        "--reuse_copy_attn",
-        "-reuse_copy_attn",
-        action="store_true",
-        help="Reuse standard attention for copy",
-    )
-    group.add(
-        "--copy_loss_by_seqlength",
-        "-copy_loss_by_seqlength",
-        action="store_true",
-        help="Divide copy loss by length of sequence",
     )
     group.add(
         "--coverage_attn",

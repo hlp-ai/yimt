@@ -25,7 +25,6 @@ class LossCompute(nn.Module):
     Args:
         criterion (:obj:`nn. loss function`) : NLLoss or customed loss
         generator (:obj:`nn.Module`) :
-        copy_attn (bool): whether copy attention mechanism is on/off
         lambda_coverage: Hyper-param to apply coverage attention if any
         lambda_align: Hyper-param for alignment loss
         tgt_shift_index (int): 1 for NMT, 0 for LM
@@ -41,7 +40,6 @@ class LossCompute(nn.Module):
         self,
         criterion,
         generator,
-        copy_attn=False,
         lambda_coverage=0.0,
         lambda_align=0.0,
         tgt_shift_index=1,
@@ -57,7 +55,6 @@ class LossCompute(nn.Module):
         self.lambda_coverage = lambda_coverage
         self.lambda_align = lambda_align
         self.tgt_shift_index = tgt_shift_index
-        self.copy_attn = copy_attn
         self.vocab = vocab  # target vocab for copy_attn need
         self.lm_generator = lm_generator
         self.lm_prior_lambda = lm_prior_lambda
@@ -141,7 +138,6 @@ class LossCompute(nn.Module):
         compute = cls(
             criterion,
             model.generator,
-            copy_attn=opt.copy_attn,
             lambda_coverage=opt.lambda_coverage,
             lambda_align=opt.lambda_align,
             tgt_shift_index=tgt_shift_idx,

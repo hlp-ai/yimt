@@ -109,7 +109,6 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
         amount of examples;
         bucket_size_increment (int): increment the bucket
         size with this amount of examples;
-        copy (Bool): if True, will add specific items for copy_attn
         skip_empty_level (str): security level when encouter empty line;
         stride (int): iterate data files with this stride;
         offset (int): iterate data files with this offset.

@@ -254,9 +254,6 @@ class ArgumentParser(cfargparse.ArgumentParser, DataOptsCheckerMixin):
 
         model_opt.brnn = model_opt.encoder_type == "brnn"
 
-        if model_opt.copy_attn_type is None:
-            model_opt.copy_attn_type = model_opt.global_attention
-
         if model_opt.alignment_layer is None:
             model_opt.alignment_layer = -2
             model_opt.lambda_align = 0.0
