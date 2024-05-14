@@ -15,7 +15,6 @@ from onmt.translate.beam_search import BeamSearch, BeamSearchLM
 from onmt.translate.greedy_search import GreedySearch, GreedySearchLM
 from onmt.utils.misc import tile, set_random_seed, report_matrix
 from onmt.utils.alignment import extract_alignment, build_align_pharaoh
-from onmt.modules.copy_generator import collapse_copy_scores
 from onmt.constants import ModelTask
 from onmt.transforms import TransformPipe
 
@@ -492,7 +491,6 @@ class Inference(object):
         prev_idx = 0
 
         for batch, bucket_idx in infer_iter:
-
             batch_data = self.translate_batch(batch, attn_debug)
 
             translations = xlation_builder.from_batch(batch_data)
@@ -688,39 +686,48 @@ class Inference(object):
             return_attn=self.global_scorer.has_cov_pen or return_attn,
         )
         # Generator forward.
-        if not self.copy_attn:
-            if "std" in dec_attn:
-                attn = dec_attn["std"]
-            else:
-                attn = None
-            scores = self.model.generator(dec_out.squeeze(1))
-            log_probs = log_softmax(scores, dim=-1)  # we keep float16 if FP16
-            # returns [(batch_size x beam_size) , vocab ] when 1 step
-            # or [batch_size, tgt_len, vocab ] when full sentence
+        if "std" in dec_attn:
+            attn = dec_attn["std"]
         else:
-            attn = dec_attn["copy"]
-            scores = self.model.generator(
-                dec_out.view(-1, dec_out.size(2)),
-                attn.view(-1, attn.size(2)),
-                src_map,
-            )
-            # here we have scores [tgt_lenxbatch, vocab] or [beamxbatch, vocab]
-            if batch_offset is None:
-                scores = scores.view(-1, len(batch["srclen"]), scores.size(-1))
-                scores = scores.transpose(0, 1).contiguous()
-            else:
-                scores = scores.view(-1, self.beam_size, scores.size(-1))
-            # at this point scores is batch first (dim=0)
-            scores = collapse_copy_scores(
-                scores,
-                batch,
-                self._tgt_vocab,
-                batch_dim=0,
-            )
-            scores = scores.view(-1, decoder_in.size(1), scores.size(-1))
-            log_probs = scores.squeeze(1).log()
-            # returns [(batch_size x beam_size) , vocab ] when 1 step
-            # or [batch_size, tgt_len, vocab ] when full sentence
+            attn = None
+        scores = self.model.generator(dec_out.squeeze(1))
+        log_probs = log_softmax(scores, dim=-1)  # we keep float16 if FP16
+        # returns [(batch_size x beam_size) , vocab ] when 1 step
+        # or [batch_size, tgt_len, vocab ] when full sentence
+
+        # if not self.copy_attn:
+        #     if "std" in dec_attn:
+        #         attn = dec_attn["std"]
+        #     else:
+        #         attn = None
+        #     scores = self.model.generator(dec_out.squeeze(1))
+        #     log_probs = log_softmax(scores, dim=-1)  # we keep float16 if FP16
+        #     # returns [(batch_size x beam_size) , vocab ] when 1 step
+        #     # or [batch_size, tgt_len, vocab ] when full sentence
+        # else:
+        #     attn = dec_attn["copy"]
+        #     scores = self.model.generator(
+        #         dec_out.view(-1, dec_out.size(2)),
+        #         attn.view(-1, attn.size(2)),
+        #         src_map,
+        #     )
+        #     # here we have scores [tgt_lenxbatch, vocab] or [beamxbatch, vocab]
+        #     if batch_offset is None:
+        #         scores = scores.view(-1, len(batch["srclen"]), scores.size(-1))
+        #         scores = scores.transpose(0, 1).contiguous()
+        #     else:
+        #         scores = scores.view(-1, self.beam_size, scores.size(-1))
+        #     # at this point scores is batch first (dim=0)
+        #     scores = collapse_copy_scores(
+        #         scores,
+        #         batch,
+        #         self._tgt_vocab,
+        #         batch_dim=0,
+        #     )
+        #     scores = scores.view(-1, decoder_in.size(1), scores.size(-1))
+        #     log_probs = scores.squeeze(1).log()
+        #     # returns [(batch_size x beam_size) , vocab ] when 1 step
+        #     # or [batch_size, tgt_len, vocab ] when full sentence
         return log_probs, attn
 
     def translate_batch(self, batch, attn_debug):

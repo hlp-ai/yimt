@@ -10,7 +10,7 @@ from onmt.models.model import NMTModel, LanguageModel
 from onmt.encoders import str2enc
 from onmt.decoders import str2dec
 from onmt.inputters.inputter import dict_to_vocabs
-from onmt.modules import Embeddings, CopyGenerator
+from onmt.modules import Embeddings
 from onmt.utils.misc import use_gpu
 from onmt.utils.logging import logger
 from onmt.utils.parse import ArgumentParser
@@ -376,20 +376,27 @@ def build_base_model(model_opt, vocabs):
         mark_only_lora_as_trainable(model, bias="lora_only")
 
     # Build Generator.
-    if not model_opt.copy_attn:
-        generator = skip_init(
-            nn.Linear,
-            in_features=model_opt.dec_hid_size,
-            out_features=len(vocabs["tgt"]),
-        )
-        if model_opt.share_decoder_embeddings:
-            generator.weight = model.decoder.embeddings.word_lut.weight
-    else:
-        vocab_size = len(vocabs["tgt"])
-        pad_idx = vocabs["tgt"][DefaultTokens.PAD]
-        generator = CopyGenerator(model_opt.dec_hid_size, vocab_size, pad_idx)
-        if model_opt.share_decoder_embeddings:
-            generator.linear.weight = model.decoder.embeddings.word_lut.weight
+    generator = skip_init(
+        nn.Linear,
+        in_features=model_opt.dec_hid_size,
+        out_features=len(vocabs["tgt"]),
+    )
+    if model_opt.share_decoder_embeddings:
+        generator.weight = model.decoder.embeddings.word_lut.weight
+    # if not model_opt.copy_attn:
+    #     generator = skip_init(
+    #         nn.Linear,
+    #         in_features=model_opt.dec_hid_size,
+    #         out_features=len(vocabs["tgt"]),
+    #     )
+    #     if model_opt.share_decoder_embeddings:
+    #         generator.weight = model.decoder.embeddings.word_lut.weight
+    # else:
+    #     vocab_size = len(vocabs["tgt"])
+    #     pad_idx = vocabs["tgt"][DefaultTokens.PAD]
+    #     generator = CopyGenerator(model_opt.dec_hid_size, vocab_size, pad_idx)
+    #     if model_opt.share_decoder_embeddings:
+    #         generator.linear.weight = model.decoder.embeddings.word_lut.weight
 
     model.generator = generator
 
