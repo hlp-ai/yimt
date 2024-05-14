@@ -162,11 +162,11 @@ class GreedySearch(DecodeStrategy):
         self.n_best = n_best
 
     def initialize(
-        self, enc_out, src_len, src_map=None, device=None, target_prefix=None
+        self, enc_out, src_len, device=None, target_prefix=None
     ):
         """Initialize for decoding."""
-        (fn_map_state, enc_out, src_map, target_prefix) = self.initialize_tile(
-            enc_out, src_len, src_map, target_prefix
+        (fn_map_state, enc_out, target_prefix) = self.initialize_tile(
+            enc_out, src_len, target_prefix
         )
         if device is None:
             device = self.get_device_from_enc_out(enc_out)
@@ -181,7 +181,7 @@ class GreedySearch(DecodeStrategy):
         self.beams_scores = torch.zeros(
             (self.batch_size * self.beam_size, 1), dtype=torch.float, device=device
         )
-        return fn_map_state, enc_out, src_map
+        return fn_map_state, enc_out
 
     @property
     def current_predictions(self):
@@ -296,17 +296,17 @@ class GreedySearchLM(GreedySearch):
     def update_finished(self):
         super(GreedySearchLM, self).update_finished()
 
-    def initialize(self, src, src_len, src_map=None, device=None, target_prefix=None):
+    def initialize(self, src, src_len, device=None, target_prefix=None):
         """Initialize for decoding."""
 
         if device is None:
             device = src.device
 
-        (fn_map_state, _, src_map) = super(GreedySearchLM, self).initialize(
-            None, src_len, src_map, device, target_prefix
+        (fn_map_state, _) = super(GreedySearchLM, self).initialize(
+            None, src_len, device, target_prefix
         )
 
-        return fn_map_state, src, src_map
+        return fn_map_state, src
 
     def advance(self, log_probs, attn):
         super(GreedySearchLM, self).advance(log_probs, attn)

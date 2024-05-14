@@ -113,7 +113,7 @@ class BeamSearchBase(DecodeStrategy):
     def initialize(self, *args, **kwargs):
         raise NotImplementedError
 
-    def initialize_(self, enc_out, src_map, device, target_prefix):
+    def initialize_(self, enc_out, device, target_prefix):
         super(BeamSearchBase, self).initialize(device, target_prefix)
         self.best_scores = [-1e10 for _ in range(self.batch_size)]
         self._beam_offset = torch.arange(
@@ -387,21 +387,21 @@ class BeamSearch(BeamSearchBase):
     """
 
     def initialize(
-        self, enc_out, src_len, src_map=None, device=None, target_prefix=None
+        self, enc_out, src_len, device=None, target_prefix=None
     ):
         """Initialize for decoding.
         Repeat src objects `beam_size` times.
         """
 
-        (fn_map_state, enc_out, src_map, target_prefix) = self.initialize_tile(
-            enc_out, src_len, src_map, target_prefix
+        (fn_map_state, enc_out, target_prefix) = self.initialize_tile(
+            enc_out, src_len, target_prefix
         )
         if device is None:
             device = self.get_device_from_enc_out(enc_out)
 
-        super(BeamSearch, self).initialize_(enc_out, src_map, device, target_prefix)
+        super(BeamSearch, self).initialize_(enc_out, device, target_prefix)
 
-        return fn_map_state, enc_out, src_map
+        return fn_map_state, enc_out
 
 
 class BeamSearchLM(BeamSearchBase):
@@ -409,24 +409,23 @@ class BeamSearchLM(BeamSearchBase):
     Beam search for language/decoder only models
     """
 
-    def initialize(self, src, src_len, src_map=None, device=None, target_prefix=None):
+    def initialize(self, src, src_len, device=None, target_prefix=None):
         """Initialize for decoding.
         Repeat src objects `beam_size` times.
         """
-        (fn_map_state, _, src_map, target_prefix) = self.initialize_tile(
-            None, src_len, src_map, target_prefix
+        (fn_map_state, _, target_prefix) = self.initialize_tile(
+            None, src_len, target_prefix
         )
         if device is None:
             device = src.device
 
         super(BeamSearchLM, self).initialize_(
             None,
-            src_map=src_map,
             device=device,
             target_prefix=target_prefix,
         )
 
-        return fn_map_state, src, src_map
+        return fn_map_state, src
 
     def advance(self, log_probs, attn):
         super(BeamSearchLM, self).advance(log_probs, attn)

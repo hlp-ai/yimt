@@ -120,7 +120,7 @@ class DecodeStrategy(object):
             mb_device = enc_out.device
         return mb_device
 
-    def initialize_tile(self, enc_out, src_len, src_map=None, target_prefix=None):
+    def initialize_tile(self, enc_out, src_len, target_prefix=None):
         def fn_map_state(state, dim=0):
             return tile(state, self.beam_size, dim=dim)
 
@@ -129,15 +129,15 @@ class DecodeStrategy(object):
         elif enc_out is not None:
             enc_out = tile(enc_out, self.beam_size, dim=0)
 
-        if src_map is not None:
-            src_map = tile(src_map, self.beam_size, dim=0)
+        # if src_map is not None:
+        #     src_map = tile(src_map, self.beam_size, dim=0)
 
         self.src_len = tile(src_len, self.beam_size)
 
         if target_prefix is not None:
             target_prefix = tile(target_prefix, self.beam_size, dim=0)
 
-        return fn_map_state, enc_out, src_map, target_prefix
+        return fn_map_state, enc_out, target_prefix
 
     def initialize(self, device=None, target_prefix=None):
         """DecodeStrategy subclasses should override :func:`initialize()`.

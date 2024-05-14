@@ -100,7 +100,7 @@ class EnsembleGenerator(nn.Module):
         self.model_generators = nn.ModuleList(model_generators)
         self._raw_probs = raw_probs
 
-    def forward(self, hidden, attn=None, src_map=None):
+    def forward(self, hidden, attn=None):
         """
         Compute a distribution over the target dictionary
         by averaging distributions from models in the ensemble.
@@ -108,7 +108,7 @@ class EnsembleGenerator(nn.Module):
         """
         distributions = torch.stack(
             [
-                mg(h) if attn is None else mg(h, attn, src_map)
+                mg(h) if attn is None else mg(h, attn)
                 for h, mg in zip(hidden, self.model_generators)
             ]
         )

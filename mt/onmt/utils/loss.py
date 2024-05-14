@@ -187,7 +187,7 @@ class LossCompute(nn.Module):
             A tuple with the loss and raw scores.
         """
         scores = self.generator(
-            self._bottle(output), self._bottle(attns["copy"]), batch["src_map"]
+            self._bottle(output), self._bottle(attns["copy"])
         )
         loss = self.criterion(scores, align, target).sum()
 

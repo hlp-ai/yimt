@@ -657,7 +657,6 @@ class Inference(object):
         enc_out,
         batch,
         src_len,
-        src_map=None,
         step=None,
         batch_offset=None,
         return_attn=False,
@@ -729,7 +728,7 @@ class Inference(object):
         """Translate a batch of sentences."""
         raise NotImplementedError
 
-    def _score_target(self, batch, enc_out, src_len, src_map):
+    def _score_target(self, batch, enc_out, src_len):
         raise NotImplementedError
 
     def report_results(
@@ -928,10 +927,9 @@ class Translator(Inference):
 
         # (2) prep decode_strategy. Possibly repeat src objects.
         # src_map = batch["src_map"] if use_src_map else None
-        src_map = None
         target_prefix = batch["tgt"] if self.tgt_file_prefix else None
-        (fn_map_state, enc_out, src_map) = decode_strategy.initialize(
-            enc_out, src_len, src_map, target_prefix=target_prefix
+        (fn_map_state, enc_out) = decode_strategy.initialize(
+            enc_out, src_len, target_prefix=target_prefix
         )
 
         if fn_map_state is not None:
@@ -946,7 +944,6 @@ class Translator(Inference):
                 enc_out,
                 batch,
                 src_len=decode_strategy.src_len,
-                src_map=src_map,
                 step=step,
                 batch_offset=decode_strategy.batch_offset,
                 return_attn=decode_strategy.return_attention,
@@ -970,8 +967,8 @@ class Translator(Inference):
                 else:
                     enc_out = enc_out[select_indices]
 
-                if src_map is not None:
-                    src_map = src_map[select_indices]
+                # if src_map is not None:
+                #     src_map = src_map[select_indices]
 
             if parallel_paths > 1 or any_finished:
                 self.model.decoder.map_state(lambda state, dim: state[select_indices])
@@ -984,7 +981,7 @@ class Translator(Inference):
             decode_strategy,
         )
 
-    def _score_target(self, batch, enc_out, src_len, src_map):
+    def _score_target(self, batch, enc_out, src_len):
         tgt = batch["tgt"]
         tgt_in = tgt[:, :-1, :]
 
@@ -993,7 +990,6 @@ class Translator(Inference):
             enc_out,
             batch,
             src_len=src_len,
-            src_map=src_map,
         )
 
         log_probs[:, :, self._tgt_pad_idx] = 0
@@ -1115,15 +1111,15 @@ class GeneratorLM(Inference):
         # (2) init decoder
         self.model.decoder.init_state(src, None, None)
         gold_score, gold_log_probs = self._gold_score(
-            batch, None, src_len, use_src_map, None, batch_size, src
+            batch, None, src_len, None, batch_size, src
         )
 
         # (3) prep decode_strategy. Possibly repeat src objects.
-        src_map = batch["src_map"] if use_src_map else None
-        (fn_map_state, src, src_map) = decode_strategy.initialize(
+        # src_map = batch["src_map"] if use_src_map else None
+        (fn_map_state, src) = decode_strategy.initialize(
             src,
             src_len,
-            src_map,
+            None,
             target_prefix=target_prefix,
         )
 
@@ -1138,7 +1134,6 @@ class GeneratorLM(Inference):
                 None,
                 batch,
                 src_len=decode_strategy.src_len,
-                src_map=src_map,
                 step=step if step == 0 else step + max(src_len.tolist()),
                 batch_offset=decode_strategy.batch_offset,
             )
@@ -1158,10 +1153,10 @@ class GeneratorLM(Inference):
                     break
             select_indices = decode_strategy.select_indices
 
-            if any_finished:
-                # Reorder states.
-                if src_map is not None:
-                    src_map = src_map[select_indices]
+            # if any_finished:
+            #     # Reorder states.
+            #     if src_map is not None:
+            #         src_map = src_map[select_indices]
 
             if parallel_paths > 1 or any_finished:
                 # select indexes in model state/cache
@@ -1177,7 +1172,7 @@ class GeneratorLM(Inference):
             decode_strategy,
         )
 
-    def _score_target(self, batch, enc_out, src_len, src_map):
+    def _score_target(self, batch, enc_out, src_len):
         src = batch["src"]
         src_len = batch["srclen"]
         tgt = batch["tgt"]
@@ -1187,7 +1182,6 @@ class GeneratorLM(Inference):
             None,
             batch,
             src_len=src_len,
-            src_map=src_map,
         )
 
         log_probs[:, :, self._tgt_pad_idx] = 0
