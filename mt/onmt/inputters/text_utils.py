@@ -283,18 +283,18 @@ def tensorify(vocabs, minibatch, device, left_pad=False):
         tbatchalign = torch.tensor(sparse_idx, dtype=torch.long, device=device)
         tensor_batch["align"] = tbatchalign
 
-    if "src_map" in minibatch[0][0].keys():
-        src_vocab_size = max([max(ex["src_map"]) for ex, indice in minibatch]) + 1
-        src_map = torch.zeros(
-            len(tensor_batch["srclen"]),
-            tbatchsrc.size(1),
-            src_vocab_size,
-            device=device,
-        )
-        for i, (ex, indice) in enumerate(minibatch):
-            for j, t in enumerate(ex["src_map"]):
-                src_map[i, j, t] = 1
-        tensor_batch["src_map"] = src_map
+    # if "src_map" in minibatch[0][0].keys():
+    #     src_vocab_size = max([max(ex["src_map"]) for ex, indice in minibatch]) + 1
+    #     src_map = torch.zeros(
+    #         len(tensor_batch["srclen"]),
+    #         tbatchsrc.size(1),
+    #         src_vocab_size,
+    #         device=device,
+    #     )
+    #     for i, (ex, indice) in enumerate(minibatch):
+    #         for j, t in enumerate(ex["src_map"]):
+    #             src_map[i, j, t] = 1
+    #     tensor_batch["src_map"] = src_map
 
     if "alignment" in minibatch[0][0].keys():
         alignment = torch.zeros(
@@ -339,50 +339,3 @@ def textbatch_to_tensor(vocabs, batch, device, is_train=False):
         numeric.append((numericalize(vocabs, ex), i))
     infer_iter = [(tensorify(vocabs, numeric, device), 0)]  # force bucket_idx to 0
     return infer_iter
-
-
-def _addcopykeys(vocabs, example):
-    """Create copy-vocab and numericalize with it.
-    In-place adds ``"src_map"`` to ``example``. That is the copy-vocab
-    numericalization of the tokenized ``example["src"]``. If ``example``
-    has a ``"tgt"`` key, adds ``"alignment"`` to example. That is the
-    copy-vocab numericalization of the tokenized ``example["tgt"]``. The
-    alignment has an initial and final UNK token to match the BOS and EOS
-    tokens.
-    Args:
-        vocabs
-        example (dict): An example dictionary with a ``"src"`` key and
-            maybe a ``"tgt"`` key. (This argument changes in place!)
-    Returns:
-        ``example``, changed as described.
-    """
-    src = example["src"]["src"].split(" ")
-    src_ex_vocab = pyonmttok.build_vocab_from_tokens(
-        Counter(src),
-        maximum_size=0,
-        minimum_frequency=1,
-        special_tokens=[
-            DefaultTokens.UNK,
-            DefaultTokens.PAD,
-            DefaultTokens.BOS,
-            DefaultTokens.EOS,
-        ],
-    )
-    src_ex_vocab.default_id = src_ex_vocab[DefaultTokens.UNK]
-    # make a small vocab containing just the tokens in the source sequence
-
-    # Map source tokens to indices in the dynamic dict.
-    example["src_map"] = src_ex_vocab(src)
-    example["src_ex_vocab"] = src_ex_vocab
-
-    if example["tgt"] is not None:
-        if vocabs["data_task"] == ModelTask.SEQ2SEQ:
-            tgt = (
-                [DefaultTokens.UNK]
-                + example["tgt"]["tgt"].split(" ")
-                + [DefaultTokens.UNK]
-            )
-        elif vocabs["data_task"] == ModelTask.LANGUAGE_MODEL:
-            tgt = example["tgt"]["tgt"].split(" ") + [DefaultTokens.UNK]
-        example["alignment"] = src_ex_vocab(tgt)
-    return example

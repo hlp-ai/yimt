@@ -8,7 +8,6 @@ from onmt.inputters.text_utils import (
     process,
     numericalize,
     tensorify,
-    _addcopykeys,
 )
 from onmt.transforms import make_transforms
 from onmt.utils.logging import init_logger, logger
@@ -132,7 +131,6 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
         bucket_size=2048,
         bucket_size_init=-1,
         bucket_size_increment=0,
-        copy=False,
         device=torch.device("cpu"),
         skip_empty_level="warning",
         stride=1,
@@ -152,7 +150,6 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
         self.bucket_size = bucket_size
         self.bucket_size_init = bucket_size_init
         self.bucket_size_increment = bucket_size_increment
-        self.copy = copy
         self.device = device
         if stride <= 0:
             raise ValueError(f"Invalid argument for stride={stride}.")
@@ -170,7 +167,7 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
 
     @classmethod
     def from_opt(
-        cls, corpora, transforms, vocabs, opt, task, copy, device, stride=1, offset=0
+        cls, corpora, transforms, vocabs, opt, task, device, stride=1, offset=0
     ):
         """Initilize `DynamicDatasetIter` with options parsed from `opt`."""
         corpora_info = {}
@@ -209,7 +206,6 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
             bucket_size=bucket_size,
             bucket_size_init=bucket_size_init,
             bucket_size_increment=bucket_size_increment,
-            copy=copy,
             device=device,
             skip_empty_level=skip_empty_level,
             stride=stride,
@@ -246,8 +242,8 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
         tuple_bucket = process(self.task, tuple_bucket)
         for example in tuple_bucket:
             if example is not None:
-                if self.copy:
-                    example = _addcopykeys(self.vocabs, example)
+                # if self.copy:
+                #     example = _addcopykeys(self.vocabs, example)
                 bucket.append(numericalize(self.vocabs, example))
         return bucket
 
@@ -385,7 +381,6 @@ def build_dynamic_dataset_iter(
     opt,
     transforms_cls,
     vocabs,
-    copy=False,
     task=CorpusTask.TRAIN,
     stride=1,
     offset=0,
@@ -425,7 +420,6 @@ def build_dynamic_dataset_iter(
             vocabs,
             opt,
             task,
-            copy=copy,
             stride=stride,
             offset=offset,
             device=device,
@@ -441,7 +435,6 @@ def build_dynamic_dataset_iter(
             vocabs,
             opt,
             task,
-            copy=copy,
             stride=stride,
             offset=offset,
             device=torch.device("cpu"),
