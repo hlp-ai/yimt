@@ -33,7 +33,7 @@ def evaluate(opt, inference_mode, input_file, out, method):
         engine.opt.src = input_file
         scores, preds = engine.infer_file()
     elif method == "list":
-        src = open(input_file, ("r")).readlines()
+        src = open(input_file, "r", encoding="utf-8").readlines()
         scores, preds = engine.infer_list(src)
 
     engine.terminate()
@@ -102,13 +102,13 @@ def main():
     opt.models = opt.models
     opt.model_task = args.model_task
 
-    evaluate(
-        opt,
-        inference_mode=args.inference_mode,
-        input_file=args.input_file,
-        out=args.out,
-        method="file",
-    )
+    # evaluate(
+    #     opt,
+    #     inference_mode=args.inference_mode,
+    #     input_file=args.input_file,
+    #     out=args.out,
+    #     method="file",
+    # )
 
     evaluate(
         opt,
