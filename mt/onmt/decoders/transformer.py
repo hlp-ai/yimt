@@ -960,7 +960,7 @@ class TransformerLMDecoder(TransformerDecoderBase):
 
         with_align = kwargs.pop("with_align", False)
         return_attn = kwargs.pop("return_attn", False)
-        return_attn = with_align or self._copy or return_attn
+        return_attn = with_align or return_attn
         assert not with_align, "TransformerLMDecoder does not support align"
 
         for layer in self.transformer_layers:
@@ -975,8 +975,8 @@ class TransformerLMDecoder(TransformerDecoderBase):
         dec_out = self.layer_norm(dec_out)
 
         attns = {"std": attn}
-        if self._copy:
-            attns["copy"] = attn
+        # if self._copy:
+        #     attns["copy"] = attn
 
         # TODO change the way attns is returned dict => list or tuple (onnx)
         return dec_out, attns
