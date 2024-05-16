@@ -27,10 +27,7 @@ def build_trainer(opt, device_id, model, vocabs, optim, model_saver=None):
     Args:
         opt (:obj:`Namespace`): user options (usually from argument parsing)
         model (:obj:`onmt.models.NMTModel`): the model to train
-        fields (dict): dict of fields
         optim (:obj:`onmt.utils.Optimizer`): optimizer used during training
-        data_type (str): string describing the type of data
-            e.g. "text"
         model_saver(:obj:`onmt.models.ModelSaverBase`): the utility object
             used to save the model
     """

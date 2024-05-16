@@ -987,12 +987,6 @@ def model_opts(parser):
 def _add_train_general_opts(parser):
     """General options for training"""
     group = parser.add_argument_group("General")
-    group.add(
-        "--data_type",
-        "-data_type",
-        default="text",
-        help="Type of the source input. " "Options are [text].",
-    )
 
     group.add(
         "-bucket_size",
@@ -1718,12 +1712,6 @@ def translate_opts(parser):
         'layer -- currently "scaled-dot", "scaled-dot-flash" or "average" ',
     )
     group = parser.add_argument_group("Data")
-    group.add(
-        "--data_type",
-        "-data_type",
-        default="text",
-        help="Type of the source input. Options: [text].",
-    )
     group.add(
         "--src",
         "-src",

@@ -87,7 +87,6 @@ class Inference(object):
             :class:`onmt.translate.decode_strategy.DecodeStrategy`.
         replace_unk (bool): Replace unknown token.
         tgt_file_prefix (bool): Force the predictions begin with provided -tgt.
-        data_type (str): Source data type.
         verbose (bool): Print/log every translation.
         report_time (bool): Print/log total time/frequency.
         global_scorer (onmt.translate.GNMTGlobalScorer): Translation
@@ -119,7 +118,6 @@ class Inference(object):
         ban_unk_token=False,
         tgt_file_prefix=False,
         phrase_table="",
-        data_type="text",
         verbose=False,
         report_time=False,
         global_scorer=None,
@@ -171,7 +169,6 @@ class Inference(object):
             raise ValueError("replace_unk requires an attentional decoder.")
         self.tgt_file_prefix = tgt_file_prefix
         self.phrase_table = phrase_table
-        self.data_type = data_type
         self.verbose = verbose
         self.report_time = report_time
 
@@ -257,7 +254,6 @@ class Inference(object):
             ban_unk_token=opt.ban_unk_token,
             tgt_file_prefix=opt.tgt_file_prefix,
             phrase_table=opt.phrase_table,
-            data_type=opt.data_type,
             verbose=opt.verbose,
             report_time=opt.report_time,
             global_scorer=global_scorer,
@@ -449,12 +445,15 @@ class Inference(object):
                     preds = trans.pred_sents[0]
                     preds.append(DefaultTokens.EOS)
                     attns = trans.attns[0].tolist()
-                    if self.data_type == "text":
-                        srcs = [
-                            voc_src[tok] for tok in trans.src[: trans.srclen].tolist()
-                        ]
-                    else:
-                        srcs = [str(item) for item in range(len(attns[0]))]
+                    srcs = [
+                        voc_src[tok] for tok in trans.src[: trans.srclen].tolist()
+                    ]
+                    # if self.data_type == "text":
+                    #     srcs = [
+                    #         voc_src[tok] for tok in trans.src[: trans.srclen].tolist()
+                    #     ]
+                    # else:
+                    #     srcs = [str(item) for item in range(len(attns[0]))]
                     output = report_matrix(srcs, preds, attns)
                     self._log(output)
 
@@ -464,12 +463,15 @@ class Inference(object):
                     else:
                         tgts = trans.pred_sents[0]
                     align = trans.word_aligns[0].tolist()
-                    if self.data_type == "text":
-                        srcs = [
-                            voc_src[tok] for tok in trans.src[: trans.srclen].tolist()
-                        ]
-                    else:
-                        srcs = [str(item) for item in range(len(align[0]))]
+                    srcs = [
+                        voc_src[tok] for tok in trans.src[: trans.srclen].tolist()
+                    ]
+                    # if self.data_type == "text":
+                    #     srcs = [
+                    #         voc_src[tok] for tok in trans.src[: trans.srclen].tolist()
+                    #     ]
+                    # else:
+                    #     srcs = [str(item) for item in range(len(align[0]))]
                     output = report_matrix(srcs, tgts, align)
                     self._log(output)
 

@@ -102,7 +102,6 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
         batch_type (str): batching type to count on, choices=[tokens, sents];
         batch_size (int): numbers of examples in a batch;
         batch_size_multiple (int): make batch size multiply of this;
-        data_type (str): input data type, currently only text;
         bucket_size (int): accum this number of examples in a dynamic dataset;
         bucket_size_init (int): initialize the bucket with this
         amount of examples;
@@ -127,7 +126,6 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
         batch_type,
         batch_size,
         batch_size_multiple,
-        data_type="text",
         bucket_size=2048,
         bucket_size_init=-1,
         bucket_size_increment=0,
@@ -202,7 +200,6 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
             opt.batch_type,
             batch_size,
             batch_size_multiple,
-            data_type=opt.data_type,
             bucket_size=bucket_size,
             bucket_size_init=bucket_size_init,
             bucket_size_increment=bucket_size_increment,
