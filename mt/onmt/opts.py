@@ -1265,7 +1265,6 @@ def _add_train_general_opts(parser):
             "adadelta",
             "adam",
             "sparseadam",
-            "adafactor",
             "fusedadam",
             "adamw8bit",
             "pagedadamw8bit",
