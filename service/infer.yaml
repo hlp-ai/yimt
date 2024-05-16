@@ -1,0 +1,12 @@
+model: D:/kidden/github/yimt/mt/toy-enzh/run/model_step_5500.pt
+
+transforms: [sentencepiece]
+src_subword_model: D:/kidden/github/yimt/mt/toy-enzh/en.train-sp-4800.model
+tgt_subword_model: D:/kidden/github/yimt/mt/toy-enzh/zh.train-sp-4800.model
+
+gpu: 0
+
+batch_type: sents
+batch_size: 16
+
+src: None
