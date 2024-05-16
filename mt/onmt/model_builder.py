@@ -71,7 +71,7 @@ def build_encoder(opt, embeddings):
         opt: the option in current environment.
         embeddings (Embeddings): vocab embeddings for this encoder.
     """
-    enc_type = opt.encoder_type if opt.model_type == "text" else opt.model_type
+    enc_type = opt.encoder_type
     return str2enc[enc_type].from_opt(opt, embeddings)
 
 
@@ -195,10 +195,7 @@ def load_test_model(opt, device_id=0, model_path=None):
 
 def build_src_emb(model_opt, vocabs):
     # Build embeddings.
-    if model_opt.model_type == "text":
-        src_emb = build_embeddings(model_opt, vocabs)
-    else:
-        src_emb = None
+    src_emb = build_embeddings(model_opt, vocabs)
     return src_emb
 
 

@@ -732,7 +732,6 @@ if __name__ == "__main__":
         feat_vec_size=-1,
         feat_vec_exponent=0.7,
         model_task="lm",
-        model_type="text",
         model_dtype="fp16",
         encoder_type="transformer_lm",
         decoder_type="transformer_lm",

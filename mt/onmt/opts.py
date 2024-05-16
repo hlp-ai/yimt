@@ -612,15 +612,6 @@ def model_opts(parser):
     # Encoder-Decoder Options
     group = parser.add_argument_group("Model- Encoder-Decoder")
     group.add(
-        "--model_type",
-        "-model_type",
-        default="text",
-        choices=["text"],
-        help="Type of source model to use. Allows "
-        "the system to incorporate non-text inputs. "
-        "Options are [text].",
-    )
-    group.add(
         "--model_dtype",
         "-model_dtype",
         default="fp32",
