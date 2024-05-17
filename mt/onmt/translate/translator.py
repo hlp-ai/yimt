@@ -110,7 +110,7 @@ class Inference(object):
         random_sampling_topk=0,
         random_sampling_topp=0.0,
         random_sampling_temp=1.0,
-        stepwise_penalty=None,
+        # stepwise_penalty=None,
         dump_beam=False,
         block_ngram_repeat=0,
         ignore_when_blocking=frozenset(),
@@ -159,7 +159,7 @@ class Inference(object):
         self.min_length = min_length
         self.ban_unk_token = ban_unk_token
         self.ratio = ratio
-        self.stepwise_penalty = stepwise_penalty
+        # self.stepwise_penalty = stepwise_penalty
         self.dump_beam = dump_beam
         self.block_ngram_repeat = block_ngram_repeat
         self.ignore_when_blocking = ignore_when_blocking
@@ -173,8 +173,8 @@ class Inference(object):
         self.report_time = report_time
 
         self.global_scorer = global_scorer
-        if self.global_scorer.has_cov_pen and not self.model.decoder.attentional:
-            raise ValueError("Coverage penalty requires an attentional decoder.")
+        # if self.global_scorer.has_cov_pen and not self.model.decoder.attentional:
+        #     raise ValueError("Coverage penalty requires an attentional decoder.")
         self.out_file = out_file
         self.report_align = report_align
         self.gold_align = gold_align
@@ -246,7 +246,7 @@ class Inference(object):
             random_sampling_topk=opt.random_sampling_topk,
             random_sampling_topp=opt.random_sampling_topp,
             random_sampling_temp=opt.random_sampling_temp,
-            stepwise_penalty=opt.stepwise_penalty,
+            # stepwise_penalty=opt.stepwise_penalty,
             dump_beam=opt.dump_beam,
             block_ngram_repeat=opt.block_ngram_repeat,
             ignore_when_blocking=set(opt.ignore_when_blocking),
@@ -679,7 +679,7 @@ class Inference(object):
             enc_out,
             src_len=src_len,
             step=step,
-            return_attn=self.global_scorer.has_cov_pen or return_attn,
+            return_attn=return_attn,
         )
         # Generator forward.
         if "std" in dec_attn:
@@ -874,7 +874,7 @@ class Translator(Inference):
                     return_attention=attn_debug or self.replace_unk,
                     block_ngram_repeat=self.block_ngram_repeat,
                     exclusion_tokens=self._exclusion_idxs,
-                    stepwise_penalty=self.stepwise_penalty,
+                    # stepwise_penalty=self.stepwise_penalty,
                     ratio=self.ratio,
                     ban_unk_token=self.ban_unk_token,
                 )
@@ -1060,7 +1060,7 @@ class GeneratorLM(Inference):
                     return_attention=attn_debug or self.replace_unk,
                     block_ngram_repeat=self.block_ngram_repeat,
                     exclusion_tokens=self._exclusion_idxs,
-                    stepwise_penalty=self.stepwise_penalty,
+                    # stepwise_penalty=self.stepwise_penalty,
                     ratio=self.ratio,
                     ban_unk_token=self.ban_unk_token,
                 )

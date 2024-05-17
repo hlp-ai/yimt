@@ -70,7 +70,7 @@ class BeamSearchBase(DecodeStrategy):
         return_attention,
         block_ngram_repeat,
         exclusion_tokens,
-        stepwise_penalty,
+        # stepwise_penalty,
         ratio,
         ban_unk_token,
     ):
@@ -102,11 +102,11 @@ class BeamSearchBase(DecodeStrategy):
         self.done = False
         # "global state" of the old beam
         self._prev_penalty = None
-        self._coverage = None
-
-        self._stepwise_cov_pen = stepwise_penalty and self.global_scorer.has_cov_pen
-        self._vanilla_cov_pen = not stepwise_penalty and self.global_scorer.has_cov_pen
-        self._cov_pen = self.global_scorer.has_cov_pen
+        # self._coverage = None
+        #
+        # self._stepwise_cov_pen = stepwise_penalty and self.global_scorer.has_cov_pen
+        # self._vanilla_cov_pen = not stepwise_penalty and self.global_scorer.has_cov_pen
+        # self._cov_pen = self.global_scorer.has_cov_pen
 
         self.src_len = None
 
@@ -285,12 +285,12 @@ class BeamSearchBase(DecodeStrategy):
             self.alive_attn = attention[non_finished].view(
                 _B_new * self.beam_size, step - 1, inp_seq_len
             )
-            if self._cov_pen:
-                self._coverage = self._coverage.view(
-                    _B_old, self.beam_size, 1, inp_seq_len
-                )[non_finished].view(_B_new * self.beam_size, 1, inp_seq_len)
-                if self._stepwise_cov_pen:
-                    self._prev_penalty = self._prev_penalty[non_finished]
+            # if self._cov_pen:
+            #     self._coverage = self._coverage.view(
+            #         _B_old, self.beam_size, 1, inp_seq_len
+            #     )[non_finished].view(_B_new * self.beam_size, 1, inp_seq_len)
+            #     if self._stepwise_cov_pen:
+            #         self._prev_penalty = self._prev_penalty[non_finished]
 
     def advance(self, log_probs, attn):
         vocab_size = log_probs.size(-1)
@@ -298,11 +298,11 @@ class BeamSearchBase(DecodeStrategy):
         # using integer division to get an integer _B without casting
         _B = log_probs.shape[0] // self.beam_size
 
-        if self._stepwise_cov_pen and self._prev_penalty is not None:
-            self.topk_log_probs += self._prev_penalty
-            self.topk_log_probs -= self.global_scorer.cov_penalty(
-                self._coverage + attn, self.global_scorer.beta
-            ).view(_B, self.beam_size)
+        # if self._stepwise_cov_pen and self._prev_penalty is not None:
+        #     self.topk_log_probs += self._prev_penalty
+        #     self.topk_log_probs -= self.global_scorer.cov_penalty(
+        #         self._coverage + attn, self.global_scorer.beta
+        #     ).view(_B, self.beam_size)
 
         # force the output to be longer than self.min_length
         step = len(self)
@@ -350,31 +350,41 @@ class BeamSearchBase(DecodeStrategy):
 
         self.maybe_update_forbidden_tokens()
 
-        if self.return_attention or self._cov_pen:
+        if self.return_attention:
             current_attn = attn[self.select_indices]
             if step == 1:
                 self.alive_attn = current_attn
                 # update global state (step == 1)
-                if self._cov_pen:  # coverage penalty
-                    self._prev_penalty = torch.zeros_like(self.topk_log_probs)
-                    self._coverage = current_attn
             else:
                 self.alive_attn = self.alive_attn[self.select_indices]
                 self.alive_attn = torch.cat([self.alive_attn, current_attn], 1)
                 # update global state (step > 1)
-                if self._cov_pen:
-                    self._coverage = self._coverage[self.select_indices]
-                    self._coverage += current_attn
-                    self._prev_penalty = self.global_scorer.cov_penalty(
-                        self._coverage, beta=self.global_scorer.beta
-                    ).view(_B, self.beam_size)
 
-        if self._vanilla_cov_pen:
-            # shape: (batch_size x beam_size, 1)
-            cov_penalty = self.global_scorer.cov_penalty(
-                self._coverage, beta=self.global_scorer.beta
-            )
-            self.topk_scores -= cov_penalty.view(_B, self.beam_size).float()
+        # if self.return_attention or self._cov_pen:
+        #     current_attn = attn[self.select_indices]
+        #     if step == 1:
+        #         self.alive_attn = current_attn
+        #         # update global state (step == 1)
+        #         if self._cov_pen:  # coverage penalty
+        #             self._prev_penalty = torch.zeros_like(self.topk_log_probs)
+        #             self._coverage = current_attn
+        #     else:
+        #         self.alive_attn = self.alive_attn[self.select_indices]
+        #         self.alive_attn = torch.cat([self.alive_attn, current_attn], 1)
+        #         # update global state (step > 1)
+        #         if self._cov_pen:
+        #             self._coverage = self._coverage[self.select_indices]
+        #             self._coverage += current_attn
+        #             self._prev_penalty = self.global_scorer.cov_penalty(
+        #                 self._coverage, beta=self.global_scorer.beta
+        #             ).view(_B, self.beam_size)
+
+        # if self._vanilla_cov_pen:
+        #     # shape: (batch_size x beam_size, 1)
+        #     cov_penalty = self.global_scorer.cov_penalty(
+        #         self._coverage, beta=self.global_scorer.beta
+        #     )
+        #     self.topk_scores -= cov_penalty.view(_B, self.beam_size).float()
 
         self.is_finished_list = self.topk_ids.eq(self.eos).tolist()
 
@@ -455,23 +465,22 @@ class GNMTGlobalScorer(object):
 
     @classmethod
     def from_opt(cls, opt):
-        return cls(opt.alpha, opt.beta, opt.length_penalty, opt.coverage_penalty)
+        return cls(opt.alpha, opt.length_penalty)
 
-    def __init__(self, alpha, beta, length_penalty, coverage_penalty):
-        self._validate(alpha, beta, length_penalty, coverage_penalty)
+    def __init__(self, alpha, length_penalty):
+        self._validate(alpha, length_penalty)
         self.alpha = alpha
-        self.beta = beta
-        penalty_builder = penalties.PenaltyBuilder(coverage_penalty, length_penalty)
-        self.has_cov_pen = penalty_builder.has_cov_pen
-        # Term will be subtracted from probability
-        self.cov_penalty = penalty_builder.coverage_penalty
+        penalty_builder = penalties.PenaltyBuilder(length_penalty)
+        # self.has_cov_pen = penalty_builder.has_cov_pen
+        # # Term will be subtracted from probability
+        # self.cov_penalty = penalty_builder.coverage_penalty
 
         self.has_len_pen = penalty_builder.has_len_pen
         # Probability will be divided by this
         self.length_penalty = penalty_builder.length_penalty
 
     @classmethod
-    def _validate(cls, alpha, beta, length_penalty, coverage_penalty):
+    def _validate(cls, alpha, length_penalty):
         # these warnings indicate that either the alpha/beta
         # forces a penalty to be a no-op, or a penalty is a no-op but
         # the alpha/beta would suggest otherwise.
@@ -480,16 +489,16 @@ class GNMTGlobalScorer(object):
                 "Using length penalty with alpha==0 "
                 "is equivalent to using length penalty none."
             )
-        if coverage_penalty is None or coverage_penalty == "none":
-            if beta != 0:
-                warnings.warn(
-                    "Non-default `beta` with no coverage penalty. "
-                    "`beta` has no effect."
-                )
-        else:
-            # using some coverage penalty
-            if beta == 0.0:
-                warnings.warn(
-                    "Non-default coverage penalty with beta==0 "
-                    "is equivalent to using coverage penalty none."
-                )
+        # if coverage_penalty is None or coverage_penalty == "none":
+        #     if beta != 0:
+        #         warnings.warn(
+        #             "Non-default `beta` with no coverage penalty. "
+        #             "`beta` has no effect."
+        #         )
+        # else:
+        #     # using some coverage penalty
+        #     if beta == 0.0:
+        #         warnings.warn(
+        #             "Non-default coverage penalty with beta==0 "
+        #             "is equivalent to using coverage penalty none."
+        #         )

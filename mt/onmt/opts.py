@@ -1554,24 +1554,24 @@ def _add_decoding_opts(parser):
         default=1.0,
         help="Length penalty parameter" "(higher = longer generation)",
     )
-    # Coverage penalty options
-    group.add(
-        "--coverage_penalty",
-        "-coverage_penalty",
-        default="none",
-        choices=["none", "wu", "summary"],
-        help="Coverage Penalty to use. Only available in beam search.",
-    )
-    group.add(
-        "--beta", "-beta", type=float, default=-0.0, help="Coverage penalty parameter"
-    )
-    group.add(
-        "--stepwise_penalty",
-        "-stepwise_penalty",
-        action="store_true",
-        help="Apply coverage penalty at every decoding step. "
-        "Helpful for summary penalty.",
-    )
+    # # Coverage penalty options
+    # group.add(
+    #     "--coverage_penalty",
+    #     "-coverage_penalty",
+    #     default="none",
+    #     choices=["none", "wu", "summary"],
+    #     help="Coverage Penalty to use. Only available in beam search.",
+    # )
+    # group.add(
+    #     "--beta", "-beta", type=float, default=-0.0, help="Coverage penalty parameter"
+    # )
+    # group.add(
+    #     "--stepwise_penalty",
+    #     "-stepwise_penalty",
+    #     action="store_true",
+    #     help="Apply coverage penalty at every decoding step. "
+    #     "Helpful for summary penalty.",
+    # )
 
     group = parser.add_argument_group(
         "Decoding tricks",

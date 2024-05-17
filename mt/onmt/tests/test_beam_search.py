@@ -13,10 +13,6 @@ class GlobalScorerStub(object):
 
     def __init__(self):
         self.length_penalty = lambda x, alpha: 1.0
-        self.cov_penalty = lambda cov, beta: torch.zeros(
-            (1, cov.shape[-2]), device=cov.device, dtype=torch.float
-        )
-        self.has_cov_pen = False
         self.has_len_pen = False
 
     def update_global_state(self, beam):
@@ -52,7 +48,6 @@ class TestBeamSearch(unittest.TestCase):
                 False,
                 ngram_repeat,
                 set(),
-                False,
                 0.0,
                 False,
             )
@@ -114,7 +109,6 @@ class TestBeamSearch(unittest.TestCase):
                 False,
                 ngram_repeat,
                 set(),
-                False,
                 0.0,
                 False,
             )
@@ -188,7 +182,6 @@ class TestBeamSearch(unittest.TestCase):
                 False,
                 ngram_repeat,
                 {repeat_idx_ignored},
-                False,
                 0.0,
                 False,
             )
@@ -266,7 +259,6 @@ class TestBeamSearch(unittest.TestCase):
                 False,
                 0,
                 set(),
-                False,
                 0.0,
                 False,
             )
@@ -339,7 +331,6 @@ class TestBeamSearch(unittest.TestCase):
             False,
             0,
             set(),
-            False,
             0.0,
             False,
         )
@@ -409,12 +400,11 @@ class TestBeamSearch(unittest.TestCase):
             True,
             0,
             set(),
-            False,
             0.0,
             False,
         )
         device_init = torch.zeros(1, 1)
-        _, _, _ = beam.initialize(device_init, inp_lens)
+        _, _ = beam.initialize(device_init, inp_lens)
         # inp_lens is tiled in initialize, reassign to make attn match
         for i in range(min_length + 2):
             # non-interesting beams are going to get dummy values
@@ -669,7 +659,6 @@ class TestBeamSearchAgainstReferenceCase(unittest.TestCase):
             False,
             0,
             set(),
-            False,
             0.0,
             False,
         )
@@ -686,7 +675,7 @@ class TestBeamWithLengthPenalty(TestBeamSearchAgainstReferenceCase):
     # interactions between the GNMT scorer and the beam
 
     def test_beam_advance_against_known_reference(self):
-        scorer = GNMTGlobalScorer(1.0, 0.0, "avg", "none")
+        scorer = GNMTGlobalScorer(1.0, "avg")
         beam = BeamSearch(
             self.BEAM_SZ,
             self.BATCH_SZ,
@@ -702,7 +691,6 @@ class TestBeamWithLengthPenalty(TestBeamSearchAgainstReferenceCase):
             False,
             0,
             set(),
-            False,
             0.0,
             False,
         )
@@ -752,13 +740,12 @@ class TestBeamSearchLM(TestBeamSearchAgainstReferenceCase):
             False,
             0,
             set(),
-            False,
             0.0,
             False,
         )
         device_init = torch.zeros(1, 1)
         src_len = torch.randint(0, 30, (self.BATCH_SZ,))
-        fn_map_state, _, _ = beam.initialize(device_init, src_len)
+        fn_map_state, _ = beam.initialize(device_init, src_len)
         expected_beam_scores = self.init_step(beam, 1)
         expected_beam_scores = self.first_step(beam, expected_beam_scores, 1)
         expected_beam_scores = self.second_step(beam, expected_beam_scores, 1)
@@ -783,13 +770,12 @@ class TestBeamSearchLM(TestBeamSearchAgainstReferenceCase):
             False,
             0,
             set(),
-            False,
             0.0,
             False,
         )
         device_init = torch.zeros(1, 1)
         src_len = torch.randint(0, 30, (self.BATCH_SZ,))
-        fn_map_state, _, _ = beam.initialize(device_init, src_len)
+        fn_map_state, _ = beam.initialize(device_init, src_len)
         self.init_step(beam, 1)
         self.finish_first_beam_step(beam)
 
