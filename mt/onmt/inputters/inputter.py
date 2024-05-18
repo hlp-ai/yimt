@@ -119,7 +119,6 @@ def _read_vocab_file(vocab_path, min_count):
             if has_count:
                 vocab = []
                 for line in lines:
-                    print(line)
                     if int(line.split("\t")[1]) >= min_count:
                         vocab.append(line.split("\t")[0])
             else:
