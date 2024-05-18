@@ -111,16 +111,17 @@ def _read_vocab_file(vocab_path, min_count):
         raise RuntimeError("Vocabulary not found at {}".format(vocab_path))
     else:
         with codecs.open(vocab_path, "rb") as f:
-            lines = [line.decode("utf-8").strip() for line in f.read().split(b"\n")]
+            lines = [line.decode("utf-8").rstrip('\n') for line in f.read().split(b"\n")]
             lines = lines[:-1]
 
-            first_line = lines[0].split(None, 1)
+            first_line = lines[0].split("\t")
             has_count = len(first_line) == 2 and first_line[-1].isdigit()
             if has_count:
                 vocab = []
                 for line in lines:
-                    if int(line.split(None, 1)[1]) >= min_count:
-                        vocab.append(line.split(None, 1)[0])
+                    print(line)
+                    if int(line.split("\t")[1]) >= min_count:
+                        vocab.append(line.split("\t")[0])
             else:
                 vocab = lines
             return vocab
