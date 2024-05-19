@@ -1,0 +1,71 @@
+data:
+    zh-ar:
+        path_src: /root/autodl-tmp/upload/ar-zh.tsv-1000000.tag.zh.tok
+        path_tgt: /root/autodl-tmp/upload/ar-zh.tsv-1000000.tag.ar.tok
+        weight: 1
+    zh-en:
+        path_src: /root/autodl-tmp/upload/en-zh.tsv-1000000.tag.zh.tok
+        path_tgt: /root/autodl-tmp/upload/en-zh.tsv-1000000.tag.en.tok
+        weight: 1
+    zh-ja:
+        path_src: /root/autodl-tmp/upload/ja-zh.tsv-1000000.tag.zh.tok
+        path_tgt: /root/autodl-tmp/upload/ja-zh.tsv-1000000.tag.ja.tok
+        weight: 1
+    valid:
+        path_src: /root/autodl-tmp/upload/dev-zh-x.tag.tsv.zh.tok
+        path_tgt: /root/autodl-tmp/upload/dev-zh-x.tag.tsv.x.tok
+
+src_vocab: /root/autodl-tmp/upload/zh.vocab
+tgt_vocab: /root/autodl-tmp/upload/x.vocab
+
+# Prevent overwriting existing files in the folder
+overwrite: False
+
+save_model: /root/autodl-tmp/upload/run/model
+
+early_stopping: 3
+
+valid_metrics: [BLEU]
+
+bucket_size: 262144
+
+save_checkpoint_steps: 1000
+keep_checkpoint: 8
+seed: 3435
+train_steps: 500000
+valid_steps: 1000
+warmup_steps: 8000
+report_every: 100
+
+decoder_type: transformer
+encoder_type: transformer
+word_vec_size: 512
+hidden_size: 512
+layers: 6
+transformer_ff: 2048
+heads: 8
+
+accum_count: 8
+model_dtype: fp16
+optim: adam
+adam_beta1: 0.9
+adam_beta2: 0.998
+decay_method: noam
+learning_rate: 2.0
+max_grad_norm: 0.0
+
+batch_size: 4096
+valid_batch_size: 4096
+batch_type: tokens
+normalization: tokens
+dropout: 0.1
+label_smoothing: 0.1
+
+param_init: 0.0
+param_init_glorot: 'true'
+position_encoding: 'true'
+
+world_size: 1
+gpu_ranks:
+- 0
+
