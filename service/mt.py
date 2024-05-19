@@ -3,7 +3,7 @@ import threading
 from onmt.inference_engine import InferenceEnginePY
 from onmt.utils.parse import ArgumentParser
 import onmt.opts as opts
-from service.sentence_splitter import paragraph_tokenizer, paragraph_detokenizer
+from service.segments import paragraph_tokenizer, paragraph_detokenizer
 
 
 class Translator:
@@ -17,14 +17,13 @@ class Translator:
 
         self.engine = InferenceEnginePY(self.opt)
         self.lang_pair = lang_pair
-        self.from_lang, self.to_lang = self.lang_pair.split("-")
 
-    def translate_list(self, texts):
+    def translate_list(self, texts, sl=None, tl=None):
         scores, preds = self.engine.infer_list(texts)
 
         return [p[0] for p in preds]
 
-    def translate_paragraph(self, texts):
+    def translate_paragraph(self, texts, sl=None, tl=None):
         """Translate text paragraphs
 
         the text will be segmented into paragraphs, and then paragraph segmented into sentences.
@@ -38,19 +37,42 @@ class Translator:
         """
         source_sents, breaks = paragraph_tokenizer(texts, self.from_lang)
 
-        translations = self.translate_list(source_sents)
+        translations = self.translate_list(source_sents, sl, tl)
 
         translation = paragraph_detokenizer(translations, breaks)
 
         return translation
 
-    def directions(self):
-        return [self.lang_pair]
+    def support(self, lang_pair):
+        for p in self.directions():
+            if p == lang_pair:
+                return True
+
+        return False
 
     def _get_parser(self):
         parser = ArgumentParser()
         opts.translate_opts(parser)
         return parser
+
+
+class ZhEnJaArTranslator(Translator):
+
+    def __init__(self, conf_file, lang_pair = ["zh-ar", "zh-en", "zh-en"]):
+        super(ZhEnJaArTranslator, self).__init__(conf_file, lang_pair)
+
+    def translate_list(self, texts, sl=None, tl=None):
+        if tl == "ar":
+            prefix = "<toar>"
+        elif tl == "ja":
+            prefix = "<toja>"
+        else:
+            prefix = "<toen>"
+
+        texts = [prefix + t for t in texts]
+        scores, preds = self.engine.infer_list(texts)
+
+        return [p[0] for p in preds]
 
 
 class Translators(object):
@@ -67,9 +89,19 @@ translator_factory = Translators()
 
 
 if __name__ == "__main__":
-    conf_file = "D:/kidden/github/yimt/mt/toy-enzh/infer.yaml"
-    translator = Translator(conf_file, "en-zh")
+    # conf_file = "D:/kidden/github/yimt/mt/toy-enzh/infer.yaml"
+    # translator = Translator(conf_file, "en-zh")
+    #
+    # texts = ["how are you?", "i am a teacher."]
+    # preds = translator.translate_list(texts)
+    # print(preds)
 
-    texts = ["how are you?", "i am a teacher."]
-    preds = translator.translate_list(texts)
+    conf_file = "./infer.yaml"
+    translator = ZhEnJaArTranslator(conf_file)
+
+    texts = ["你在做什么？", "我是一名教师。"]
+    preds = translator.translate_list(texts, tl="en")
+    print(preds)
+
+    preds = translator.translate_list(texts, tl="ja")
     print(preds)

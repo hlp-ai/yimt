@@ -1,8 +1,8 @@
-model: D:/kidden/github/yimt/mt/toy-enzh/run/model_step_5500.pt
+model: D:\dataset\pt-mnmt\model_step_30000.pt
 
 transforms: [sentencepiece]
-src_subword_model: D:/kidden/github/yimt/mt/toy-enzh/en.train-sp-4800.model
-tgt_subword_model: D:/kidden/github/yimt/mt/toy-enzh/zh.train-sp-4800.model
+src_subword_model: D:\dataset\pt-mnmt\arenja-zh.zh-sp-32000.model
+tgt_subword_model: D:\dataset\pt-mnmt\arenja-zh.x-sp-32000.model
 
 gpu: 0
 

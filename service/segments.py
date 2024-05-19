@@ -2,8 +2,6 @@ import pysbd
 from sentence_splitter import split_text_into_sentences
 from indicnlp.tokenize.sentence_tokenize import sentence_split
 
-tokenizers = {}
-
 
 
 def split_sentences(text, lang="en"):
