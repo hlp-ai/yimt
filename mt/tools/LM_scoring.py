@@ -63,7 +63,6 @@ def main():
         criterion,
         model.generator,
         tgt_shift_index=0,
-        lambda_coverage=model_opt.lambda_coverage,
         lambda_align=model_opt.lambda_align,
     )
     valid_loss.to(device)
@@ -74,7 +73,6 @@ def main():
         transforms_cls,
         vocabs,
         task=CorpusTask.INFER,
-        copy=False,
         device_id=opt.gpu,
     )
 

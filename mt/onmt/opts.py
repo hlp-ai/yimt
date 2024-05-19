@@ -915,19 +915,6 @@ def model_opts(parser):
         "softmax, sparsemax)",
     )
     group.add(
-        "--coverage_attn",
-        "-coverage_attn",
-        action="store_true",
-        help="Train a coverage attention layer.",
-    )
-    group.add(
-        "--lambda_coverage",
-        "-lambda_coverage",
-        type=float,
-        default=0.0,
-        help="Lambda value for coverage loss of See et al (2017)",
-    )
-    group.add(
         "--lm_prior_model",
         "-lm_prior_model",
         type=str,

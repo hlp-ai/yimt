@@ -25,7 +25,6 @@ class LossCompute(nn.Module):
     Args:
         criterion (:obj:`nn. loss function`) : NLLoss or customed loss
         generator (:obj:`nn.Module`) :
-        lambda_coverage: Hyper-param to apply coverage attention if any
         lambda_align: Hyper-param for alignment loss
         tgt_shift_index (int): 1 for NMT, 0 for LM
         vocab: target vocab (for copy attention score calculation)
@@ -40,7 +39,6 @@ class LossCompute(nn.Module):
         self,
         criterion,
         generator,
-        lambda_coverage=0.0,
         lambda_align=0.0,
         tgt_shift_index=1,
         vocab=None,
@@ -52,7 +50,6 @@ class LossCompute(nn.Module):
         super(LossCompute, self).__init__()
         self.criterion = criterion
         self.generator = generator
-        self.lambda_coverage = lambda_coverage
         self.lambda_align = lambda_align
         self.tgt_shift_index = tgt_shift_index
         self.vocab = vocab  # target vocab for copy_attn need
@@ -74,12 +71,6 @@ class LossCompute(nn.Module):
 
         padding_idx = vocab[DefaultTokens.PAD]
         unk_idx = vocab[DefaultTokens.UNK]
-
-        if opt.lambda_coverage != 0:
-            assert opt.coverage_attn, (
-                "--coverage_attn needs to be set in "
-                "order to use --lambda_coverage != 0"
-            )
 
         tgt_shift_idx = 1 if opt.model_task == ModelTask.SEQ2SEQ else 0
 
@@ -138,7 +129,6 @@ class LossCompute(nn.Module):
         compute = cls(
             criterion,
             model.generator,
-            lambda_coverage=opt.lambda_coverage,
             lambda_align=opt.lambda_align,
             tgt_shift_index=tgt_shift_idx,
             vocab=vocab,
@@ -155,15 +145,6 @@ class LossCompute(nn.Module):
     def padding_idx(self):
         return self.criterion.ignore_index
 
-    def _compute_coverage_loss(self, std_attn, cov_attn, tgt):
-        """compute coverage loss"""
-        zero_attn = torch.zeros(cov_attn.size()[1:], device=cov_attn.device)
-        cov_attn = torch.cat((zero_attn.unsqueeze(0), cov_attn[:-1]), 0)
-        covloss = torch.min(std_attn, cov_attn).sum(dim=-1).view(-1)
-
-        covloss[tgt == self.padding_idx] = 0
-        return covloss.sum()
-
     def _compute_alignement_loss(self, align_head, ref_align):
         """Compute loss between 2 partial alignment matrix."""
         # align_head contains value in [0, 1) presenting attn prob,
@@ -173,25 +154,6 @@ class LossCompute(nn.Module):
         align_loss = -align_head.clamp(min=1e-18).log().mul(ref_align).sum()
         align_loss *= self.lambda_align
         return align_loss
-
-    def _compute_copy_loss(self, batch, output, target, align, attns):
-        """Compute the copy attention loss.
-        Args:
-            batch: the current batch.
-            output: the predict output from the model.
-            target: the validate target to compare output with.
-            align:
-            attns: dictionary of attention distributions
-              `(tgt_len, batch, src_len)`
-        Returns:
-            A tuple with the loss and raw scores.
-        """
-        scores = self.generator(
-            self._bottle(output), self._bottle(attns["copy"])
-        )
-        loss = self.criterion(scores, align, target).sum()
-
-        return loss, scores
 
     def _compute_lm_loss_ct2(self, output, target):
         """
@@ -391,12 +353,6 @@ class LossCompute(nn.Module):
                 align_head=align_head, ref_align=ref_align
             )
             loss += align_loss
-
-        if self.lambda_coverage != 0.0:
-            coverage_loss = self._compute_coverage_loss(
-                attns["std"], attns["coverage"], flat_tgt
-            )
-            loss += coverage_loss
 
         if self.lm_generator is not None:
             lm_loss = self._compute_lm_loss_ct2(output, batch["tgt"])
