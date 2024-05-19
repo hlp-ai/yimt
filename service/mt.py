@@ -3,7 +3,7 @@ import threading
 from onmt.inference_engine import InferenceEnginePY
 from onmt.utils.parse import ArgumentParser
 import onmt.opts as opts
-from service.segments import paragraph_tokenizer, paragraph_detokenizer
+from service.split_text import paragraph_tokenizer, paragraph_detokenizer
 
 
 class Translator:
@@ -35,7 +35,7 @@ class Translator:
         Returns:
              translated text with paragraphs
         """
-        source_sents, breaks = paragraph_tokenizer(texts, self.from_lang)
+        source_sents, breaks = paragraph_tokenizer(texts, sl)
 
         translations = self.translate_list(source_sents, sl, tl)
 

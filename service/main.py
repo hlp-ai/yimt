@@ -71,6 +71,7 @@ def create_app():
         return response
 
     @app.post("/translate")
+    @app.get("/translate")
     def translate():
         """Translate text from a language to another"""
         if request.is_json:  # json data in body of POST method
@@ -216,4 +217,4 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
-    app.run(host="127.0.0.1", port=6666)
+    app.run(host="0.0.0.0", port=5555)
