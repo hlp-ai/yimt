@@ -1,9 +1,11 @@
 import os
 import tempfile
+from html import unescape
 
 from flask import Flask, abort, jsonify, request
 
 from service.asr import AudioRecognizers
+from service.mt import ZhEnJaArTranslator
 from service.ocr import TextRecognizers
 from service.tts import AudioGenerators
 
@@ -38,6 +40,8 @@ def create_app():
     audio_recognizers = AudioRecognizers()
     audio_generators = AudioGenerators()
 
+    translator = ZhEnJaArTranslator("./infer.yaml")
+
     @app.errorhandler(400)
     def invalid_api(e):
         return jsonify({"error": str(e.description)}), 400
@@ -65,6 +69,67 @@ def create_app():
         response.headers.add("Access-Control-Allow-Credentials", "true")
         response.headers.add("Access-Control-Max-Age", 60 * 60 * 24 * 20)
         return response
+
+    @app.post("/translate")
+    def translate():
+        """Translate text from a language to another"""
+        if request.is_json:  # json data in body of POST method
+            json = get_json_dict(request)
+            q = json.get("q")
+            source_lang = json.get("source")
+            target_lang = json.get("target")
+            text_format = json.get("format")
+            api_key = json.get("api_key")
+        else:  # url data in body of POST method
+            q = request.values.get("q")
+            source_lang = request.values.get("source")
+            target_lang = request.values.get("target")
+            text_format = request.values.get("format")
+            api_key = request.values.get("api_key")
+
+        if not q:
+            abort(400, description="Invalid request: missing q parameter")
+        if not source_lang:
+            abort(400, description="Invalid request: missing source parameter")
+        if not target_lang:
+            abort(400, description="Invalid request: missing target parameter")
+
+        if not text_format:
+            text_format = "text"
+
+        if text_format not in ["text", "html"]:
+            abort(400, description="%s format is not supported" % text_format)
+
+        if not api_key:
+            api_key = ""
+
+        # if isinstance(q, list):  # 浏览器插件元素列表翻译
+        #     translations = translate_tag_list(q, source_lang, target_lang)
+        #     resp = {
+        #         'translatedText': translations
+        #     }
+        #     return jsonify(resp)
+
+        q = unescape(q)
+        q = q.strip()
+        if len(q) == 0:
+            return jsonify({'translation': ""})
+
+        # if source_lang == "auto":
+        #     source_lang = detect_lang(q)
+        #
+        # if source_lang not in from_langs:
+        #     abort(400, description="Source language %s is not supported" % source_lang)
+        #
+        # if target_lang not in to_langs:
+        #     abort(400, description="Target language %s is not supported" % target_lang)
+
+        translation = translator.translate_paragraph(q, sl=source_lang, tl=target_lang)
+
+        resp = {
+            'translation': translation
+        }
+        return jsonify(resp)
 
 
     @app.post("/ocr")
