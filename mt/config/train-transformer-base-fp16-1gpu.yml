@@ -31,6 +31,9 @@ valid_metrics: [BLEU]
 scoring_debug: true
 dump_preds: /root/autodl-tmp/upload/run/pred
 
+tensorboard: true
+tensorboard_log_dir: /root/autodl-tmp/upload/run/logs
+
 bucket_size: 262144
 
 save_checkpoint_steps: 1000
