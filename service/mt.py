@@ -1,9 +1,24 @@
 import threading
-
+from langid import langid
 from onmt.inference_engine import InferenceEnginePY
 from onmt.utils.parse import ArgumentParser
 import onmt.opts as opts
 from service.split_text import paragraph_tokenizer, paragraph_detokenizer
+
+
+def detect_lang(text):
+    """Detect language of text
+
+    Args:
+        text: text to be detected
+
+    Returns:
+        language code string
+    """
+    # text = remove_lang_independent(text)
+    if all([c.isascii() for c in text]):
+        return "en"
+    return langid.classify(text)[0]
 
 
 class Translator:
