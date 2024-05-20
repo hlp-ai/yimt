@@ -12,7 +12,6 @@ __all__ = [
     "MultiHeadedAttention",
     "Embeddings",
     "PositionalEncoding",
-    "AlibiPositionalBias",
     "AverageAttention",
     "RMSNorm",
 ]

@@ -382,8 +382,6 @@ class MultiHeadedAttention(torch.nn.Module):
                 self.cos = None
                 self.sin = None
                 self.rotary_interleave = None
-            if max_relative_positions == -2:  # alibi positional bias
-                self.alibi = AlibiPositionalBias(head_count)
 
         self.maybe_ckpt = checkpoint if "mha" in use_ckpting else lambda f, x: f(x)
 

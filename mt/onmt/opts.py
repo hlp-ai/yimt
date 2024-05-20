@@ -550,8 +550,7 @@ def model_opts(parser):
         "--position_encoding",
         "-position_encoding",
         action="store_true",
-        help="Use a sin to mark relative words positions. "
-        "Necessary for non-RNN style models.",
+        help="Use a sin to mark relative words positions. ",
     )
     group.add(
         "--position_encoding_type",
