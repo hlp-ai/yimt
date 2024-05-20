@@ -732,7 +732,7 @@ def model_opts(parser):
         "-global_attention_function",
         type=str,
         default="softmax",
-        choices=["softmax", "sparsemax"],
+        choices=["softmax"],
     )
     group.add(
         "--self_attn_type",
@@ -908,10 +908,10 @@ def model_opts(parser):
         "--generator_function",
         "-generator_function",
         default="softmax",
-        choices=["softmax", "sparsemax"],
+        choices=["softmax"],
         help="Which function to use for generating "
         "probabilities over the target vocabulary (choices: "
-        "softmax, sparsemax)",
+        "softmax)",
     )
     group.add(
         "--lm_prior_model",

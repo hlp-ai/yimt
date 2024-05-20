@@ -6,8 +6,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import onmt
-from onmt.modules.sparse_losses import SparsemaxLoss
-from onmt.modules.sparse_activations import LogSparsemax
 from onmt.constants import ModelTask, DefaultTokens
 from onmt.model_builder import load_test_model
 
@@ -90,14 +88,19 @@ class LossCompute(nn.Module):
         #             reduction="sum",
         #             label_smoothing=opt.label_smoothing,
         #         )
-        if opt.generator_function == "sparsemax":
-            criterion = SparsemaxLoss(ignore_index=padding_idx, reduction="sum")
-        else:
-            criterion = nn.CrossEntropyLoss(
-                ignore_index=padding_idx,
-                reduction="sum",
-                label_smoothing=opt.label_smoothing,
-            )
+        # if opt.generator_function == "sparsemax":
+        #     criterion = SparsemaxLoss(ignore_index=padding_idx, reduction="sum")
+        # else:
+        #     criterion = nn.CrossEntropyLoss(
+        #         ignore_index=padding_idx,
+        #         reduction="sum",
+        #         label_smoothing=opt.label_smoothing,
+        #     )
+        criterion = nn.CrossEntropyLoss(
+            ignore_index=padding_idx,
+            reduction="sum",
+            label_smoothing=opt.label_smoothing,
+        )
 
         lm_prior_lambda = opt.lm_prior_lambda
         lm_prior_tau = opt.lm_prior_tau
@@ -331,8 +334,8 @@ class LossCompute(nn.Module):
         #         )
         #         loss += align_loss
         scores = self.generator(self._bottle(output))
-        if isinstance(self.criterion, SparsemaxLoss):
-            scores = LogSparsemax(scores.to(torch.float32), dim=-1)
+        # if isinstance(self.criterion, SparsemaxLoss):
+        #     scores = LogSparsemax(scores.to(torch.float32), dim=-1)
         loss = self.criterion(scores.to(torch.float32), flat_tgt)
 
         if self.lambda_align != 0.0:
