@@ -28,6 +28,9 @@ early_stopping_criteria: ppl
 
 valid_metrics: [BLEU]
 
+scoring_debug: true
+dump_preds: /root/autodl-tmp/upload/run/pred
+
 bucket_size: 262144
 
 save_checkpoint_steps: 1000
