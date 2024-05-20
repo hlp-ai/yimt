@@ -1,7 +1,8 @@
 import argparse
 import io
 import os
-from random import random
+import random
+from math import ceil
 
 
 def count_lines(fn):
@@ -62,7 +63,7 @@ def upsample(file, n):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", required=True, help="tsv files directory")
-    parser.add_argument("--t", type=float, default=3.0, help="sampling temperature")
+    parser.add_argument("--t", type=float, default=2.0, help="sampling temperature")
     args = parser.parse_args()
 
     root = args.root
@@ -80,6 +81,7 @@ if __name__ == "__main__":
     total = sum(counts_raw)
     print("Total lines:", total)
     max_count = max(counts_raw)  # 最大语料数量
+    print("max", max_count)
 
     probs_raw = []  # 原始概率
     print("Raw counts and probabilities")
@@ -92,16 +94,21 @@ if __name__ == "__main__":
     probs_tmp = [p ** T for p in probs_raw]
     prob_total = sum(probs_tmp)
     probs_normalized = [p / prob_total for p in probs_tmp]  # 温度采样概率
+    print("采样概率")
+    for i, f in enumerate(files):
+        print("  ", f, probs_normalized[i])
     max_prob = max(probs_normalized)
+    print("max sample prob", max_prob)
 
     sample_total = int(max_count / max_prob)
     print("sample total", sample_total)
 
-    sample_counts = [int(p * sample_total) for p in probs_normalized]  # 训练集中各语料采样数量
+    sample_counts = [ceil(p * sample_total) for p in probs_normalized]  # 训练集中各语料采样数量
     print("Sample counts and probabilities")
     for i, f in enumerate(files):
         print("  ", f, sample_counts[i], probs_normalized[i])
 
     for i in range(len(files)):
+        print("采样", files[i])
         upsample(files[i], sample_counts[i])
 

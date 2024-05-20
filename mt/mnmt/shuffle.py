@@ -51,7 +51,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input", required=True, help="input directory")
     parser.add_argument("-o", "--output", required=True, help="output file")
-    parser.add_argument("-b", "--block", type=int, default=4096, help="output file")
+    parser.add_argument("-b", "--block", type=int, default=8192, help="output file")
     args = parser.parse_args()
 
     shuffle(args.input, args.output, block=args.block)
