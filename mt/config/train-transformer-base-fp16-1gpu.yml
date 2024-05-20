@@ -24,6 +24,7 @@ overwrite: False
 save_model: /root/autodl-tmp/upload/run/model
 
 early_stopping: 3
+early_stopping_criteria: ppl
 
 valid_metrics: [BLEU]
 
