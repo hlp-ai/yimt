@@ -15,6 +15,31 @@ def count_lines(fn):
     return lines
 
 
+def sample(file, n):
+    """"Sample sentences from bitext or source and target file"""
+    in_file = io.open(file, encoding="utf-8")
+    out_file = io.open("{}-{}".format(file, n), "w", encoding="utf-8")
+
+    total = count_lines(files[0])
+    print(total)
+
+    sampled = 0
+    scanned = 0
+    sample_prob = (1.1*n) / total
+    for p in in_file:
+        scanned += 1
+        prob = random.uniform(0, 1)
+        if prob < sample_prob:
+            out_file.write(p.strip() + "\n")
+
+            sampled += 1
+            if sampled % 10000 == 0:
+                print(scanned, sampled)
+            if sampled >= n:
+                break
+    print(scanned, sampled)
+
+
 def upsample(file, n):
     """"UpSample sentences from bitext or source and target file"""
     total = count_lines(file)
@@ -63,7 +88,7 @@ def upsample(file, n):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", required=True, help="tsv files directory")
-    parser.add_argument("--t", type=float, default=2.0, help="sampling temperature")
+    parser.add_argument("--t", type=float, default=3.0, help="sampling temperature")
     args = parser.parse_args()
 
     root = args.root
