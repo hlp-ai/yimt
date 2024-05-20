@@ -7,7 +7,6 @@ from typing import Optional, Tuple
 from torch.nn.functional import scaled_dot_product_attention
 from torch.utils.checkpoint import checkpoint
 from torch.nn.utils import skip_init
-from .alibi_position_bias import AlibiPositionalBias
 from torch.distributed import all_reduce
 from importlib import import_module
 
@@ -700,8 +699,6 @@ class MultiHeadedAttention(torch.nn.Module):
                     relative_positions_matrix
                 )
                 scores.add_(relative_matmul(query, relations_keys, True))
-            elif self.max_relative_positions == -2:  # Alibi
-                scores = self.alibi(scores)
 
             scores = scores.float()
             if key_pad_mask is not None and mask is None:
