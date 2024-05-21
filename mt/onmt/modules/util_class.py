@@ -16,33 +16,25 @@ class Elementwise(nn.ModuleList):
     """
 
     def __init__(self, merge=None, *args):
-        assert merge in [None, 'first', 'concat', 'sum', 'mlp']
+        assert merge in [None, "first", "concat", "sum", "mlp"]
         self.merge = merge
         super(Elementwise, self).__init__(*args)
 
     def forward(self, emb):
         emb_ = [feat.squeeze(2) for feat in emb.split(1, dim=2)]
-        assert len(self) == len(emb_)
-        emb_out = [f(x) for f, x in zip(self, emb_)]
-        if self.merge == 'first':
-            return emb_out[0]
-        elif self.merge == 'concat' or self.merge == 'mlp':
-            return torch.cat(emb_out, 2)
-        elif self.merge == 'sum':
-            return sum(emb_out)
-        else:
-            return emb_out
+        emb_out = []
 
+        # for some reason list comprehension is slower in this scenario
+        for f, x in zip(self, emb_):
+            emb_out.append(f(x))
 
-class Cast(nn.Module):
-    """
-    Basic layer that casts its emb to a specific data type. The same tensor
-    is returned if the data type is already correct.
-    """
+        # if self.merge == "first":
+        #     return emb_out[0]
+        # elif self.merge == "concat" or self.merge == "mlp":
+        #     return torch.cat(emb_out, 2)
+        # elif self.merge == "sum":
+        #     return sum(emb_out)
+        # else:
+        #     return emb_out
 
-    def __init__(self, dtype):
-        super(Cast, self).__init__()
-        self._dtype = dtype
-
-    def forward(self, x):
-        return x.to(self._dtype)
+        return emb_out[0]

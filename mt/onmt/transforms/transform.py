@@ -47,7 +47,7 @@ class Transform(object):
 
     @classmethod
     def get_specials(cls, opts):
-        return (set(), set())
+        return ([], [])
 
     def apply(self, example, is_train=False, stats=None, **kwargs):
         """Apply transform to `example`.
@@ -59,14 +59,37 @@ class Transform(object):
         """
         raise NotImplementedError
 
+    def batch_apply(self, batch, is_train=False, **kwargs):
+        """Apply transform to `batch`.
+        Args:
+            batch (list): a list of examples;
+            is_train (bool): Indicate if src/tgt is training data;bject.
+        """
+        transformed_batch = []
+        for example, _, cid in batch:
+            example = self.apply(example, is_train=is_train, **kwargs)
+            if example is not None:
+                transformed_batch.append((example, self, cid))
+        return transformed_batch
+
     def apply_reverse(self, translated):
         return translated
+
+    def batch_apply_reverse(self, translated_batch, **kwargs):
+        transformed_batch = []
+        for translated in translated_batch:
+            reversed = self.apply_reverse(translated, **kwargs)
+            if isinstance(reversed, list):
+                transformed_batch += reversed
+            elif reversed is not None:
+                transformed_batch.append(reversed)
+        return transformed_batch
 
     def __getstate__(self):
         """Pickling following for rebuild."""
         state = {"opts": self.opts}
-        if hasattr(self, 'vocabs'):
-            state['vocabs'] = self.vocabs
+        if hasattr(self, "vocabs"):
+            state["vocabs"] = self.vocabs
         return state
 
     def _parse_opts(self):
@@ -83,21 +106,21 @@ class Transform(object):
         """Reload when unpickling from save file."""
         self.opts = state["opts"]
         self._parse_opts()
-        vocabs = state.get('vocabs', None)
+        vocabs = state.get("vocabs", None)
         self.warm_up(vocabs=vocabs)
 
     def stats(self):
         """Return statistic message."""
-        return ''
+        return ""
 
     def _repr_args(self):
         """Return str represent key arguments for class."""
-        return ''
+        return ""
 
     def __repr__(self):
         cls_name = type(self).__name__
         cls_args = self._repr_args()
-        return '{}({})'.format(cls_name, cls_args)
+        return "{}({})".format(cls_name, cls_args)
 
 
 class ObservableStats:
@@ -116,14 +139,13 @@ class ObservableStats:
     def __str__(self) -> str:
         return "{}({})".format(
             self.name(),
-            ", ".join(
-                f"{name}={getattr(self, name)}" for name in self.__slots__
-            )
+            ", ".join(f"{name}={getattr(self, name)}" for name in self.__slots__),
         )
 
 
 class TransformStatistics:
     """A observer containing runing statistics."""
+
     def __init__(self):
         self.observables = {}
 
@@ -161,8 +183,9 @@ class TransformPipe(Transform):
     def build_from(cls, transform_list):
         """Return a `TransformPipe` instance build from `transform_list`."""
         for transform in transform_list:
-            assert isinstance(transform, Transform), \
-                "transform should be a instance of Transform."
+            assert isinstance(
+                transform, Transform
+            ), "transform should be a instance of Transform."
         transform_pipe = cls(None, transform_list)
         return transform_pipe
 
@@ -174,11 +197,13 @@ class TransformPipe(Transform):
     @classmethod
     def get_specials(cls, opts, transforms):
         """Return all specials introduced by `transforms`."""
-        src_specials, tgt_specials = set(), set()
+        src_specials, tgt_specials = [], []
         for transform in transforms:
             _src_special, _tgt_special = transform.get_specials(transform.opts)
-            src_specials.update(_src_special)
-            tgt_specials.update(tgt_specials)
+            for _src_spec in _src_special:
+                src_specials.append(_src_spec)
+            for _tgt_spec in _tgt_special:
+                tgt_specials.append(_tgt_spec)
         return (src_specials, tgt_specials)
 
     def apply(self, example, is_train=False, **kwargs):
@@ -190,10 +215,26 @@ class TransformPipe(Transform):
         """
         for transform in self.transforms:
             example = transform.apply(
-                example, is_train=is_train, stats=self.statistics, **kwargs)
+                example, is_train=is_train, stats=self.statistics, **kwargs
+            )
             if example is None:
                 break
         return example
+
+    def batch_apply(self, batch, is_train=False, **kwargs):
+        """Apply transform pipe to `example`.
+
+        Args:
+            example (dict): a dict of field value, ex. src, tgt.
+
+        """
+        for transform in self.transforms:
+            batch = transform.batch_apply(
+                batch, is_train=is_train, stats=self.statistics, **kwargs
+            )
+            if batch is None:
+                break
+        return batch
 
     def apply_reverse(self, translated):
         for transform in self.transforms:
@@ -217,7 +258,7 @@ class TransformPipe(Transform):
         info_args = []
         for transform in self.transforms:
             info_args.append(repr(transform))
-        return ', '.join(info_args)
+        return ", ".join(info_args)
 
 
 def make_transforms(opts, transforms_cls, vocabs):
@@ -225,9 +266,7 @@ def make_transforms(opts, transforms_cls, vocabs):
     transforms = {}
     for name, transform_cls in transforms_cls.items():
         if transform_cls.require_vocab() and vocabs is None:
-            logger.warning(
-                f"{transform_cls.__name__} require vocab to apply, skip it."
-            )
+            logger.warning(f"{transform_cls.__name__} require vocab to apply, skip it.")
             continue
         transform_obj = transform_cls(opts)
         transform_obj.warm_up(vocabs)
@@ -237,11 +276,13 @@ def make_transforms(opts, transforms_cls, vocabs):
 
 def get_specials(opts, transforms_cls_dict):
     """Get specials of transforms that should be registed in Vocab."""
-    all_specials = {'src': set(), 'tgt': set()}
+    all_specials = {"src": [], "tgt": []}
     for name, transform_cls in transforms_cls_dict.items():
         src_specials, tgt_specials = transform_cls.get_specials(opts)
-        all_specials['src'].update(src_specials)
-        all_specials['tgt'].update(tgt_specials)
+        for src_spec in src_specials:
+            all_specials["src"].append(src_spec)
+        for tgt_spec in tgt_specials:
+            all_specials["tgt"].append(tgt_spec)
     logger.info(f"Get special vocabs from Transforms: {all_specials}.")
     return all_specials
 

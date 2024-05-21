@@ -1,12 +1,13 @@
 import os
 import tempfile
-import numpy as np
+from html import unescape
 
 from flask import Flask, abort, jsonify, request
-from pydub import AudioSegment
+
 from scipy.io.wavfile import write
 
 from service.asr import AudioRecognizers, amr2wav
+from service.mt import ZhEnJaArTranslator
 from service.ocr import TextRecognizers
 from service.tts import AudioGenerators
 
@@ -41,6 +42,8 @@ def create_app():
     audio_recognizers = AudioRecognizers()
     audio_generators = AudioGenerators()
 
+    translator = ZhEnJaArTranslator("./infer.yaml")
+
     @app.errorhandler(400)
     def invalid_api(e):
         return jsonify({"error": str(e.description)}), 400
@@ -68,6 +71,80 @@ def create_app():
         response.headers.add("Access-Control-Allow-Credentials", "true")
         response.headers.add("Access-Control-Max-Age", 60 * 60 * 24 * 20)
         return response
+
+    @app.get("/languages")
+    def languages():
+        """Retrieve list of supported languages
+        No parameter
+        :return list of language dictionary
+        """
+        supported_languages = [
+            {"code": "zh", "name": "Chinese", "cname": "中文"},
+            {"code": "en", "name": "English", "cname": "英文"}
+        ]
+        return jsonify(supported_languages)
+
+    @app.post("/translate")
+    @app.get("/translate")
+    def translate():
+        """Translate text from a language to another"""
+        if request.is_json:  # json data in body of POST method
+            json = get_json_dict(request)
+            q = json.get("q")
+            source_lang = json.get("source")
+            target_lang = json.get("target")
+            text_format = json.get("format")
+            api_key = json.get("api_key")
+        else:  # url data in body of POST method
+            q = request.values.get("q")
+            source_lang = request.values.get("source")
+            target_lang = request.values.get("target")
+            text_format = request.values.get("format")
+            api_key = request.values.get("api_key")
+
+        if not q:
+            abort(400, description="Invalid request: missing q parameter")
+        if not source_lang:
+            abort(400, description="Invalid request: missing source parameter")
+        if not target_lang:
+            abort(400, description="Invalid request: missing target parameter")
+
+        if not text_format:
+            text_format = "text"
+
+        if text_format not in ["text", "html"]:
+            abort(400, description="%s format is not supported" % text_format)
+
+        if not api_key:
+            api_key = ""
+
+        # if isinstance(q, list):  # 浏览器插件元素列表翻译
+        #     translations = translate_tag_list(q, source_lang, target_lang)
+        #     resp = {
+        #         'translatedText': translations
+        #     }
+        #     return jsonify(resp)
+
+        q = unescape(q)
+        q = q.strip()
+        if len(q) == 0:
+            return jsonify({'translatedText': ""})
+
+        # if source_lang == "auto":
+        #     source_lang = detect_lang(q)
+        #
+        # if source_lang not in from_langs:
+        #     abort(400, description="Source language %s is not supported" % source_lang)
+        #
+        # if target_lang not in to_langs:
+        #     abort(400, description="Target language %s is not supported" % target_lang)
+
+        translation = translator.translate_paragraph(q, sl=source_lang, tl=target_lang)
+
+        resp = {
+            'translatedText': translation
+        }
+        return jsonify(resp)
 
     @app.post("/ocr")
     # @access_check
@@ -165,6 +242,13 @@ def create_app():
         if not lang:
             abort(400, description="Invalid request: missing language parameter")
 
+        if lang == "en":
+            lang = "eng"
+        elif lang == "zh":
+            lang = "zho"
+
+        print(lang, text)
+
         result = audio_generators.generate(text, lang)
         if result is None:
             abort(400, description="NO TTS")
@@ -181,10 +265,10 @@ def create_app():
         # audio_64_string = base64.b64encode(r["audio"].tobytes())
 
         return jsonify({
-                'base64': audio_64_string.decode('utf-8'),
-                'rate': r["sr"],
-                "type": "wav"
-            })
+            'base64': audio_64_string.decode('utf-8'),
+            'rate': r["sr"],
+            "type": "wav"
+        })
 
     return app
 
