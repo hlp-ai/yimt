@@ -134,33 +134,47 @@ def create_app():
         }
         return jsonify(resp)
 
-
     @app.post("/ocr")
     # @access_check
     def image2text():
         json_dict = get_json_dict(request)
         image_64_string = json_dict.get("base64")
+        format = json_dict.get("format")
         token = json_dict.get("token")
         lang = json_dict.get("lang")
 
         if not lang:
             abort(400, description="Invalid request: missing lang parameter")
+        else:
+            if lang == "zh":
+                lang = "ch_sim"
         if not image_64_string:
             abort(400, description="Invalid request: missing base64 parameter")
+
+        if not format:
+            format = "jpg"
 
         import base64
         image_data = base64.b64decode(image_64_string)
 
-        filepath = os.path.join(get_upload_dir(), "decoded_image.png")
+        # filepath = os.path.join(get_upload_dir(), "decoded_image.{}".format(format))
+        filepath = "decoded_image.{}".format(format)
 
         with open(filepath, "wb") as image_file:
             image_file.write(image_data)
 
         result = text_recognizers.recognize(filepath, lang)
+        print(result)
         if result is None:
             abort(400, description="NO OCR")
 
-        return jsonify(result)
+        text = ""
+        for p in result:
+            text += p[-1] + "\n"
+
+        print(text)
+
+        return jsonify({"text": text})
 
     @app.post("/asr")
     # @access_check
@@ -175,16 +189,33 @@ def create_app():
         lang = json.get("lang")
 
         if not audio_64_string:
-            abort(400, description="Invalid request: missing base64 parameter")
+            abort(400, description="Invalid request: missing audio base64 parameter")
 
         import base64
         audio_data = base64.b64decode(audio_64_string)
-        temp_audio_file = "temp_audo.wav"
+        temp_audio_file = "temp_audo.{}".format(format)
         with open(temp_audio_file, "wb") as audio_file:
             audio_file.write(audio_data)
 
-        result = audio_recognizers.recognize_file(temp_audio_file)
-        return jsonify(result)
+        if format == "amr":
+            print("转换AMR文件...")
+            temp_wav_file = "temp_audo.wav"
+            amr2wav(temp_audio_file, temp_wav_file)
+            # audio = AudioSegment.from_file(temp_audio_file)
+            # # print(len(song)) #时长，单位：毫秒
+            # # print(song.frame_rate) #采样频率，单位：赫兹
+            # # print(song.sample_width) #量化位数，单位：字节
+            # # print(song.channels) #声道数，常见的MP3多是双声道的，声道越多文件也会越大。
+            # print(audio.frame_rate, audio.channels)
+            # wav = np.array(audio.get_array_of_samples())
+            # wav = wav / 32768
+            # wav = wav.astype(np.float32)
+            result = audio_recognizers.recognize_file(temp_wav_file)
+        else:
+            result = audio_recognizers.recognize_file(temp_audio_file)
+
+        print(result)
+        return jsonify(result[0])
 
     @app.post("/tts")
     # @access_check
