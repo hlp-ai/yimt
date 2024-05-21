@@ -209,15 +209,21 @@ def create_app():
             abort(400, description="NO TTS")
 
         import base64
-        output = []
-        for r in result:
-            audio_64_string = base64.b64encode(r["audio"].tobytes())
-            output.append({
-                'base64': audio_64_string.decode('utf-8'),
-                'rate': r["sr"]
-            })
+        r = result[0]
 
-        return jsonify(output)
+        print("写临时声音文件...")
+        tmp_file = "./temp.wav"
+        write(tmp_file, r["sr"], r["audio"])
+
+        audio_64_string = base64.b64encode(open(tmp_file, "rb").read())
+
+        # audio_64_string = base64.b64encode(r["audio"].tobytes())
+
+        return jsonify({
+            'base64': audio_64_string.decode('utf-8'),
+            'rate': r["sr"],
+            "type": "wav"
+        })
 
     return app
 
