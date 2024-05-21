@@ -72,6 +72,18 @@ def create_app():
         response.headers.add("Access-Control-Max-Age", 60 * 60 * 24 * 20)
         return response
 
+    @app.get("/languages")
+    def languages():
+        """Retrieve list of supported languages
+        No parameter
+        :return list of language dictionary
+        """
+        supported_languages = [
+            {"code": "zh", "name": "Chinese", "cname": "中文"},
+            {"code": "en", "name": "English", "cname": "英文"}
+        ]
+        return jsonify(supported_languages)
+
     @app.post("/translate")
     @app.get("/translate")
     def translate():
