@@ -2,6 +2,14 @@ from zhconv import zhconv
 
 from whisper.api import ASR
 
+from pydub import AudioSegment
+
+
+def amr2wav(amr_file, wav_file):
+    amr = AudioSegment.from_file(amr_file, format="amr")
+    wav = amr.set_frame_rate(16000).set_channels(1)
+    wav.export(wav_file, format="wav")
+
 
 class AudioRecognizers:
 
