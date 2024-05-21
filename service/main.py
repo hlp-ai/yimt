@@ -114,7 +114,7 @@ def create_app():
         q = unescape(q)
         q = q.strip()
         if len(q) == 0:
-            return jsonify({'translation': ""})
+            return jsonify({'translatedText': ""})
 
         # if source_lang == "auto":
         #     source_lang = detect_lang(q)
@@ -128,7 +128,7 @@ def create_app():
         translation = translator.translate_paragraph(q, sl=source_lang, tl=target_lang)
 
         resp = {
-            'translation': translation
+            'translatedText': translation
         }
         return jsonify(resp)
 
@@ -196,6 +196,13 @@ def create_app():
             abort(400, description="Invalid request: missing text parameter")
         if not lang:
             abort(400, description="Invalid request: missing language parameter")
+
+        if lang == "en":
+            lang = "eng"
+        elif lang == "zh":
+            lang = "zho"
+
+        print(lang, text)
 
         result = audio_generators.generate(text, lang)
         if result is None:
