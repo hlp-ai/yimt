@@ -6,7 +6,7 @@ from flask import Flask, abort, jsonify, request
 
 from scipy.io.wavfile import write
 
-from service.asr import AudioRecognizers
+from service.asr import AudioRecognizers, amr2wav
 from service.mt import ZhEnJaArTranslator
 from service.ocr import TextRecognizers
 from service.tts import AudioGenerators
