@@ -4,6 +4,18 @@ import onmt.opts as opts
 from service.split_text import paragraph_tokenizer, paragraph_detokenizer
 
 
+class Progress:
+
+    def __init__(self):
+        self._tag = ""
+
+    def report(self, total, done):
+        print(self._tag, total, done)
+
+    def set_tag(self, tag):
+        self._tag = tag
+
+
 class Translator:
 
     def __init__(self, conf_file, lang_pair):
@@ -16,12 +28,19 @@ class Translator:
         self.engine = InferenceEnginePY(self.opt)
         self.lang_pair = lang_pair
 
-    def translate_list(self, texts, sl=None, tl=None):
+    def translate_list(self, texts, sl=None, tl=None, callbacker=None):
+        total = len(texts)
+        done = 0
+
         scores, preds = self.engine.infer_list(texts)
+
+        done = total
+        if callbacker:
+            callbacker.report(total, done)
 
         return [p[0] for p in preds]
 
-    def translate_paragraph(self, texts, sl=None, tl=None):
+    def translate_paragraph(self, texts, sl=None, tl=None, callbacker=None):
         """Translate text paragraphs
 
         the text will be segmented into paragraphs, and then paragraph segmented into sentences.
@@ -35,7 +54,7 @@ class Translator:
         """
         source_sents, breaks = paragraph_tokenizer(texts, sl)
 
-        translations = self.translate_list(source_sents, sl, tl)
+        translations = self.translate_list(source_sents, sl, tl, callbacker)
 
         translation = paragraph_detokenizer(translations, breaks)
 
@@ -59,7 +78,7 @@ class ZhEnJaArTranslator(Translator):
     def __init__(self, conf_file):
         super(ZhEnJaArTranslator, self).__init__(conf_file, lang_pair = ["zh-ar", "zh-en", "zh-en"])
 
-    def translate_list(self, texts, sl=None, tl=None):
+    def translate_list(self, texts, sl=None, tl=None, callbacker=None):
         if tl == "ar":
             prefix = "<toar>"
         elif tl == "ja":
