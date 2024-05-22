@@ -43,7 +43,7 @@ class Model(nn.Module):
         # else:
         #     raise Exception('Prediction is neither CTC or Attn')
 
-    def forward(self, input, text, is_train=True):
+    def forward(self, input, text=None, is_train=True):
         # """ Transformation stage """
         # if not self.stages['Trans'] == "None":
         #     input = self.Transformation(input)
@@ -70,3 +70,17 @@ class Model(nn.Module):
         #     prediction = self.Prediction(contextual_feature.contiguous(), text, is_train, batch_max_length=self.opt.batch_max_length)
 
         return prediction
+
+
+if __name__ == "__main__":
+    from easyocr.trainer.crnn.train_main import get_config
+    opt = get_config("config_files/en_filtered_config.yaml")
+    opt.num_class = 1314
+    m = Model(opt)
+    print(m)
+
+    import torch
+    img = torch.randn(1, 1, 224, 312)
+    pred = m(img)
+    print(pred.shape)
+    print(pred)
