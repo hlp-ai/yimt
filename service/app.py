@@ -6,6 +6,7 @@ from functools import wraps
 from html import unescape
 
 from flask import (Flask, abort, jsonify, render_template, request, send_file, url_for, g)
+from scipy.io.wavfile import write
 from werkzeug.utils import secure_filename
 
 from extension.files.translate_files import translate_doc, support
@@ -13,7 +14,7 @@ from extension.files.translate_html import translate_tag_list
 from extension.files.translate_tag import translate_html
 from service import remove_translated_files
 from service.api_keys import APIKeyDB
-from service.asr import AudioRecognizers
+from service.asr import AudioRecognizers, amr2wav
 from service.mt import Progress, translator_factory
 from service.ocr import TextRecognizers
 from service.tts import AudioGenerators
@@ -258,7 +259,7 @@ def create_app(args):
         """Translate text from a language to another"""
         if request.is_json:  # json data in body of POST method
             json = get_json_dict(request)
-            log_service.info(json)
+            log_service.info("/translate: {}".format(json))
             q = json.get("q")
             source_lang = json.get("source")
             target_lang = json.get("target")
@@ -343,6 +344,8 @@ def create_app(args):
     # @access_check
     def image2text():
         json_dict = get_json_dict(request)
+        log_service.info("/ocr: {}".format(json_dict))
+
         image_64_string = json_dict.get("base64")
         format = json_dict.get("format")
         token = json_dict.get("token")
@@ -385,6 +388,8 @@ def create_app(args):
     # @access_check
     def audio2text():
         json = get_json_dict(request)
+        log_service.info("/asr: {}".format(json))
+
         audio_64_string = json.get("base64")
         format = json.get("format")
         rate = json.get("rate")
@@ -426,6 +431,8 @@ def create_app(args):
     # @access_check
     def text2speech():
         json = get_json_dict(request)
+        log_service.info("/tts: {}".format(json))
+
         token = json.get("token")
         text = json.get("text")
         lang = json.get("lang")
@@ -552,6 +559,8 @@ def create_app(args):
     # @access_check
     def request_ad():
         json = get_json_dict(request)
+        log_service.info("/add: {}".format(json))
+
         platform = json.get("platform")
         support_platforms = ["app", "web", "plugin"]
 
