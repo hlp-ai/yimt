@@ -344,12 +344,13 @@ def create_app(args):
     # @access_check
     def image2text():
         json_dict = get_json_dict(request)
-        log_service.info("/ocr: {}".format(json_dict))
 
         image_64_string = json_dict.get("base64")
         format = json_dict.get("format")
         token = json_dict.get("token")
         lang = json_dict.get("lang")
+
+        log_service.info("/ocr: {}".format(lang))
 
         if not lang:
             abort(400, description="Invalid request: missing lang parameter")
@@ -388,7 +389,6 @@ def create_app(args):
     # @access_check
     def audio2text():
         json = get_json_dict(request)
-        log_service.info("/asr: {}".format(json))
 
         audio_64_string = json.get("base64")
         format = json.get("format")
@@ -397,6 +397,8 @@ def create_app(args):
         token = json.get("token")
         len = json.get("len")
         lang = json.get("lang")
+
+        log_service.info("/asr: {}".format(lang))
 
         if not audio_64_string:
             abort(400, description="Invalid request: missing audio base64 parameter")

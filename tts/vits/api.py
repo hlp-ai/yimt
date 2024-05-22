@@ -19,7 +19,7 @@ def preprocess_char(text, lang=None):
     """
     Special treatement of characters in certain languages
     """
-    print(lang)
+    # print(lang)
     if lang == 'ron':
         text = text.replace("ț", "ţ")
     return text
@@ -72,14 +72,14 @@ class TextMapper(object):
         text_norm = self.text_to_sequence(text, hps.data.text_cleaners)
         if hps.data.add_blank:
             text_norm = commons.intersperse(text_norm, 0)
-        print(text_norm)
+        # print(text_norm)
         text_norm = torch.LongTensor(text_norm)
         return text_norm
 
     def filter_oov(self, text):
         val_chars = self._symbol_to_id
         txt_filt = "".join(list(filter(lambda x: x in val_chars, text)))
-        print(f"text after filtering OOV: {txt_filt}")
+        # print(f"text after filtering OOV: {txt_filt}")
         return txt_filt
 
 
@@ -144,7 +144,7 @@ class TTS:
         return txt
 
     def synthesize(self, txt, uroman_dir="D:/kidden/github/yimt/tts/vits/uroman", perl_path=f"c:/Strawberry/perl/bin/perl.exe"):
-        print(f"text: {txt}")
+        # print(f"text: {txt}")
         txt = self.preprocess_text(txt, self.text_mapper, self.hps, lang=self.lang, uroman_dir=uroman_dir, perl_path=perl_path)
         stn_tst = self.text_mapper.get_text(txt, self.hps)
         with torch.no_grad():
@@ -155,7 +155,7 @@ class TTS:
                 noise_scale_w=0.8, length_scale=1.0
             )[0][0, 0].cpu().float().numpy()
 
-        print(f"Generated audio")
+        # print(f"Generated audio")
 
         return hyp, self.hps.data.sampling_rate
 
