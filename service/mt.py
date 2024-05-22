@@ -42,7 +42,7 @@ class Translator:
         return translation
 
     def support(self, lang_pair):
-        for p in self.directions():
+        for p in self.lang_pair:
             if p == lang_pair:
                 return True
 
@@ -56,8 +56,8 @@ class Translator:
 
 class ZhEnJaArTranslator(Translator):
 
-    def __init__(self, conf_file, lang_pair = ["zh-ar", "zh-en", "zh-en"]):
-        super(ZhEnJaArTranslator, self).__init__(conf_file, lang_pair)
+    def __init__(self, conf_file):
+        super(ZhEnJaArTranslator, self).__init__(conf_file, lang_pair = ["zh-ar", "zh-en", "zh-en"])
 
     def translate_list(self, texts, sl=None, tl=None):
         if tl == "ar":
@@ -76,11 +76,30 @@ class ZhEnJaArTranslator(Translator):
 class Translators(object):
 
     def __init__(self):
-        self.translators= {}
+        self.languages = [
+            {"code": "zh", "name": "Chinese", "cname": "中文"},
+            {"code": "en", "name": "English", "cname": "英文"},
+            {"code": "ja", "name": "Japanese", "cname": "日文"}
+        ]
+        self.lang_pairs = ["zh-en", "zh-ja"]
+        self.from_langs = ["zh"]
+        self.to_langs = ["en", "ja"]
+
+        translator = ZhEnJaArTranslator("./infer.yaml")
+
+        self.translators = {"zh-en": translator,
+                            "zh-ja": translator}
+
+    def support_languages(self):
+        return self.lang_pairs, self.from_langs, self.to_langs, self.languages
 
     def get_translator(self, source_lang, target_lang, debug=False):
         lang_pair = source_lang + "-" + target_lang
-        return self.translators[lang_pair]
+
+        if lang_pair in self.translators:
+            return self.translators[lang_pair]
+        else:
+            return None
 
 
 translator_factory = Translators()
