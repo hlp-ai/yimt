@@ -1,0 +1,238 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <link rel="shortcut icon" href="#" />
+        <link rel="stylesheet" type="text/css" href="../static/text.css">
+        <link rel="stylesheet" type="text/css" href="../static/reference.css">
+
+        <!-- jquery -->
+        <script type="text/javascript" src="../static/plugin/jquery-2.2.1.min.js"></script>
+        <script type="text/javascript" src="../static/plugin/jquery.media.js"></script>
+
+        <!-- docx --> 
+        <script crossorigin src="https://unpkg.com/jszip/dist/jszip.min.js"></script>
+        <script src="../static/plugin/docx-preview.js"></script>
+
+        <!-- pptx --> 
+        <link rel="stylesheet" href="../static/plugin/pptx/pptxjs.css">
+        <link rel="stylesheet" href="../static/plugin/pptx/nv.d3.min.css">
+
+        <script type="text/javascript" src="../static/plugin/pptx/jquery-1.11.3.min.js"></script>
+        <script type="text/javascript" src="../static/plugin/pptx/jszip.min.js"></script>
+        <script type="text/javascript" src="../static/plugin/pptx/filereader.js"></script>
+        <script type="text/javascript" src="../static/plugin/pptx/d3.min.js"></script>
+        <script type="text/javascript" src="../static/plugin/pptx/nv.d3.min.js"></script>
+        <script type="text/javascript" src="../static/plugin/pptx/pptxjs.js"></script>
+        <script type="text/javascript" src="../static/plugin/pptx/divs2slides.js"></script>
+
+        <!-- xlsx --> 
+        <script type="text/javascript" src="../static/plugin/xlsx/xlsx.core.min.js"></script>
+        <script>
+            var file_type = "";
+            var END_POINT;
+            var file_path = decodeURIComponent("{{ file_path }}");
+
+            window.onload = function()
+            {
+                END_POINT = "http://127.0.0.1:5555";
+                var server = window.localStorage.getItem("server");
+                if(!!server){
+                    END_POINT = server;
+                }
+                check_file_type(); 
+                //Show_pptx();     
+            }
+    
+            function check_file_type()
+            {
+                var file_type = "{{ file_type }}";
+                console.log("media file_type :"+ file_type);
+                if(file_type =="docx"){
+                    Show_docx();
+                    //document.getElementById("preview-media").innerText="d";
+                }else if(file_type =="pptx"){
+                    Show_pptx();
+                    //document.getElementById("preview-media").innerText="p";
+                }else if(file_type =="xlsx"){
+                    Show_xlsx();
+                }else{
+                    console.log("file_type error:"+ file_type);
+                }
+            }
+            
+        </script>
+    </head>
+    <body>
+        <div class="preview-media" id="preview-media">
+
+        </div>
+        <script>
+            var API_KEY = "";
+
+            //把二进制文件转Blob-file类型
+            function createFile(urlData,fileType){
+                var bytes=window.atob(urlData),
+                n=bytes.length,
+                u8arr=new Uint8Array(n);
+                while(n--){
+                    u8arr[n]=bytes.charCodeAt(n);
+                }
+                return new Blob([u8arr],{type:fileType});
+            }
+            
+            function Show_docx()
+            {
+                const container = document.querySelector("#preview-media");
+                get_blob_file();
+
+                async function get_blob_file(){
+                    //var translated_file_path = window.localStorage.getItem("translated_file_path");
+                    const res = await fetch(END_POINT + "/get_blob_file", {
+                        method: "POST",
+                        body: JSON.stringify({file_path:file_path}),
+                        headers: { "Content-Type": "application/json" },
+                        }
+                    );
+                    trans_json = await res.json();
+                    data = trans_json.base64;
+                    // console.log(data); // for test
+                    var str = data;   //str接收来自后端返回的base64
+                    var fileType = "application/msword";   //指定mime
+                    var myFile = createFile(str,fileType);
+                    // console.log(myFile); // for test
+                    renderDocx(myFile)
+                }
+                const docxOptions = Object.assign(docx.defaultOptions, {
+                    ignoreWidth: false,
+                    experimental: true,
+                    useBase64URL: true,
+                    debug: true
+                });
+                    
+                function renderDocx(file) {
+                    currentDocument = file; 
+                    if (!currentDocument) 
+                        return;
+                        docx.renderAsync(currentDocument, container, null, docxOptions)
+                }
+            }
+            function Show_pptx()
+            {
+                //var translated_file_path = window.localStorage.getItem("translated_file_path");
+                $("#preview-media").pptxToHtml({ 
+                    pptxFileUrl: END_POINT + "/pptx_target" + '?translated_file_path=' + encodeURIComponent(file_path), 
+                    slidesScale: "50%", 
+                    slideMode: false, 
+                    keyBoardShortCut: false 
+                });
+            }
+
+            function Show_xlsx()
+            {
+                    get_xlsx_file();
+
+                    async function get_xlsx_file(){
+                        //var translated_file_path = window.localStorage.getItem("translated_file_path");
+                        const res = await fetch(END_POINT + "/get_blob_file", {
+                            method: "POST",
+                            body: JSON.stringify({file_path:file_path}),
+                            headers: { "Content-Type": "application/json" },
+                            }
+                        );
+                        trans_json = await res.json();
+                        data = trans_json.base64;
+                        //console.log(data); // for test
+                        var str = data;   //str接收来自后端返回的base64
+                        var fileType = "application/msword";//指定mime
+                        var myFile = createFile(str,fileType);
+                        console.log(myFile); // for test
+                        readWorkbookFromLocalFile(myFile, function(workbook) {
+                            readWorkbook(workbook);
+                        });
+                    }
+
+                    function readWorkbookFromLocalFile(file, callback) {
+                        var reader = new FileReader();
+                        reader.onload = function(e) {
+                            var data = e.target.result;
+                            var workbook = XLSX.read(data, {type: 'binary'});
+                            if(callback) callback(workbook);
+                        };
+                        reader.readAsBinaryString(file);
+                    }
+
+                    // 读取 excel文件
+                    function outputWorkbook(workbook) {
+                        var sheetNames = workbook.SheetNames; // 工作表名称集合
+                        sheetNames.forEach(name => {
+                            var worksheet = workbook.Sheets[name]; // 只能通过工作表名称来获取指定工作表
+                            for(var key in worksheet) {
+                                // v是读取单元格的原始值
+                                console.log(key, key[0] === '!' ? worksheet[key] : worksheet[key].v);
+                            }
+                        });
+                    }
+
+                    function readWorkbook(workbook) {
+                        var sheetNames = workbook.SheetNames; // 工作表名称集合
+                        var worksheet = workbook.Sheets[sheetNames[0]]; // 这里我们只读取第一张sheet
+                        var csv = XLSX.utils.sheet_to_csv(worksheet);
+                        document.getElementById('preview-media').innerHTML = csv2table(csv);
+                    }
+
+                    // 将csv转换成表格
+                    function csv2table(csv)
+                    {
+                        var html = '<table>';
+                        var rows = csv.split('\n');
+                        rows.pop(); // 最后一行没用的
+                        rows.forEach(function(row, idx) {
+                            var columns = row.split(',');
+                            columns.unshift(idx+1); // 添加行索引
+                            if(idx == 0) { // 添加列索引
+                                html += '<tr>';
+                                for(var i=0; i<columns.length; i++) {
+                                    html += '<th>' + (i==0?'':String.fromCharCode(65+i-1)) + '</th>';
+                                }
+                                html += '</tr>';
+                            }
+                            html += '<tr>';
+                            columns.forEach(function(column) {
+                                html += '<td>'+column+'</td>';
+                            });
+                            html += '</tr>';
+                        });
+                        html += '</table>';
+                        return html;
+                    }
+                }
+
+        
+        </script>
+
+        <style type="text/css">
+                table {
+                    border-collapse: collapse;
+                }
+                th, td {
+                    border: solid 1px #6D6D6D;
+                    padding: 5px 10px;
+                }
+                .mt-sm {margin-top: 8px;}
+                body {
+                    background: #f4f4f4;
+                    padding: 0;
+                    margin: 0;
+                }
+                .container {
+                    width: 1024px;
+                    margin: 0 auto;
+                    background: #fff;
+                    padding: 20px;
+                    min-height: 100vh;
+                }
+            </style>           
+        
+    </body>
+</html>

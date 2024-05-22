@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>使用指南</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 50px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .step {
+            margin-bottom: 50px;
+        }
+        .step h2 {
+            margin-top: 0;
+        }
+        .step img {
+            max-width: 100%;
+            margin-bottom: 20px;
+        }
+        ol {
+            line-height: 2;
+        }
+        ul {
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <h1>使用指南</h1>
+    <div class="container">
+        <div class="step">
+            <h2>步骤一：下载插件</h2>
+            <p>首先，您需要下载我们的插件。点击下方链接即可下载插件。</p>
+            <!-- <a href="/download_extension" id="downloadLink" download>
+                下载插件
+            </a> -->
+            <a href="https://codeload.github.com/hlp-ai/mt-browser/zip/refs/heads/main" id="downloadLink" download>
+                下载插件
+            </a>
+        </div>
+        <div class="step">
+            <h2>步骤二：安装插件</h2>
+            <p>下载完成后，您需要将插件安装到您的浏览器中。具体步骤如下：</p>
+            <ol>
+                <h3>对于 Chrome 浏览器：</h3>
+                <ol>
+                    <li>打开您的 Chrome 浏览器，并进入扩展程序页面（chrome://extensions/）；</li>
+                    <li>在页面右上角开启“开发者模式”；</li>
+                    <li>点击“加载已解压的扩展程序”按钮，选择您下载的插件所在的文件夹；</li>
+                    <li>安装成功后，您可以在浏览器的扩展程序栏中看到您的插件图标。</li>
+                </ol>
+                <img src="../static/img/chrome.png" alt="安装插件">
+                <h3>对于 Edge 浏览器：</h3>
+                <ol>
+                    <li>打开您的 Edge 浏览器，并进入扩展程序页面（edge://extensions/）；</li>
+                    <li>开启“开发者模式”；</li>
+                    <li>点击“加载已解压的扩展程序”按钮，选择您下载的插件所在的文件夹；</li>
+                    <li>安装成功后，您可以在浏览器的扩展程序栏中看到您的插件图标。</li>
+                </ol>
+                <img src="../static/img/Edge.png" alt="安装插件">
+                <h3>对于 Firefox 浏览器：</h3>
+                <ol>
+                    <li>打开您的 Firefox 浏览器，并进入附加组件页面；</li>
+                    <li>点击“齿轮”图标，选择“调试附加组件”；</li>
+                    <li>点击“临时载入附加组件”按钮，选择您下载的插件所在的文件夹，选取manifest.json文件；</li>
+                    <li>安装成功后，您可以在浏览器的附加组件栏中看到您的插件图标。</li>
+                </ol>
+                <img src="../static/img/firefox2.png" alt="安装插件">
+            </ol>
+        </div>
+        <div class="step">
+            <h2>步骤三：使用插件</h2>
+            <p>安装完成后，您可以开始使用我们的插件了。具体使用方法如下：</p>
+            <h3>一、翻译设置</h3>
+            <ol>
+                <li>在网页右上角找到扩展按钮，打开插件</li>
+                <li>点击齿轮状的设置按钮进入设置界面</li>
+                <li>配置API端点以及api_key</li>
+                <li>点击“保存设置”保存</li>
+            </ol>
+            <img src="../static/img/use1.png" width="70%" alt="打开插件">
+            <img src="../static/img/set.png" width="48%" alt="设置">
+            <img src="../static/img/set2.png" width="48%" alt="设置">
+            <h3>二、翻译网页以及恢复网页的使用说明</h3>
+            <ol>
+                <li>首先，打开您需要翻译的网页页面；</li>
+                <li>在网页右上角找到扩展按钮，打开插件；</li>
+                <li>在翻译窗口中选择您需要翻译的目标语言，源语言可以自动识别，也可以手动选择；</li>
+                <li>点击“翻译网页”按钮，即可将网页翻译为所需语言；</li>
+                <li>点击“恢复网页”按钮，即可将网页还原为原网页。</li>
+            </ol>
+            <img src="../static/img/use2.png" width="50%" alt="使用插件">
+            <h3>三、划词翻译的使用说明</h3>
+            <ol>
+                <li>在网页用鼠标中选取需要翻译的文本；</li>
+                <li>右键鼠标打开菜单选项；</li>
+                <li>选择翻译的目标语言；</li>
+                <li>点击菜单项中的语言选项即可直接翻译所选文本。</li>
+            </ol>
+            <img src="../static/img/use3.png" width="50%" alt="划词翻译">
+        </div>
+        <div class="version">
+            <h2>版本说明</h2>
+            <p>本插件支持以下版本的浏览器或浏览器内核：</p>
+            <ul>
+                <li>Chromium 88 及以上版本，包括chrome浏览器及其他支持chromium内核的浏览器（如360浏览器、360极速浏览器）</li>
+                <li>Edge浏览器，内核 88 及以上版本</li>
+                <li>Firefox浏览器，内核 102 及以上版本</li>
+            </ul>
+        </div>
+    </div>
+    <script>
+        // var downloadLink = document.getElementById('downloadLink');
+        // downloadLink.addEventListener('click', function() {
+        //     var xhr = new XMLHttpRequest();
+        //     xhr.open('GET', "/download_extension", true);
+        //     xhr.responseType = 'blob';
+        //     xhr.onload = function() {
+        //         if (this.status === 200) {
+        //             var blob = this.response;
+        //             var url = URL.createObjectURL(blob);
+        //             downloadLink.href = url;
+        //             downloadLink.download = 'mt-browser.zip';
+        //         }
+        //     };
+        //     xhr.send();
+        // });
+    </script>
+</body>
+</html>
