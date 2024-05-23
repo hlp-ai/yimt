@@ -107,10 +107,7 @@ def train(opt, show_number = 2, amp=False):
     
     """ setup loss """
     criterion = torch.nn.CTCLoss(zero_infinity=True).to(device)
-    # if 'CTC' in opt.Prediction:
-    #     criterion = torch.nn.CTCLoss(zero_infinity=True).to(device)
-    # else:
-    #     criterion = torch.nn.CrossEntropyLoss(ignore_index=0).to(device)  # ignore [GO] token = ignore index 0
+
     # loss averager
     loss_avg = Averager()
 
@@ -189,17 +186,6 @@ def train(opt, show_number = 2, amp=False):
                 cost = criterion(preds, text.to(device), preds_size.to(device), length.to(device))
                 torch.backends.cudnn.enabled = True
 
-                # if 'CTC' in opt.Prediction:
-                #     preds = model(image, text).log_softmax(2)
-                #     preds_size = torch.IntTensor([preds.size(1)] * batch_size)
-                #     preds = preds.permute(1, 0, 2)
-                #     torch.backends.cudnn.enabled = False
-                #     cost = criterion(preds, text.to(device), preds_size.to(device), length.to(device))
-                #     torch.backends.cudnn.enabled = True
-                # else:
-                #     preds = model(image, text[:, :-1])  # align with Attention.forward
-                #     target = text[:, 1:]  # without [GO] Symbol
-                #     cost = criterion(preds.view(-1, preds.shape[-1]), target.contiguous().view(-1))
             scaler.scale(cost).backward()
             scaler.unscale_(optimizer)
             torch.nn.utils.clip_grad_norm_(model.parameters(), opt.grad_clip)
@@ -217,17 +203,7 @@ def train(opt, show_number = 2, amp=False):
             torch.backends.cudnn.enabled = False
             cost = criterion(preds, text.to(device), preds_size.to(device), length.to(device))
             torch.backends.cudnn.enabled = True
-            # if 'CTC' in opt.Prediction:
-            #     preds = model(image, text).log_softmax(2)
-            #     preds_size = torch.IntTensor([preds.size(1)] * batch_size)
-            #     preds = preds.permute(1, 0, 2)
-            #     torch.backends.cudnn.enabled = False
-            #     cost = criterion(preds, text.to(device), preds_size.to(device), length.to(device))
-            #     torch.backends.cudnn.enabled = True
-            # else:
-            #     preds = model(image, text[:, :-1])  # align with Attention.forward
-            #     target = text[:, 1:]  # without [GO] Symbol
-            #     cost = criterion(preds.view(-1, preds.shape[-1]), target.contiguous().view(-1))
+
             cost.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), opt.grad_clip) 
             optimizer.step()
