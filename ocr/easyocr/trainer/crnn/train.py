@@ -252,9 +252,9 @@ def train(opt, show_number = 2, amp=False):
                 
                 start = random.randint(0,len(labels) - show_number )    
                 for gt, pred, confidence in zip(labels[start:start+show_number], preds[start:start+show_number], confidence_score[start:start+show_number]):
-                    if 'Attn' in opt.Prediction:
-                        gt = gt[:gt.find('[s]')]
-                        pred = pred[:pred.find('[s]')]
+                    # if 'Attn' in opt.Prediction:
+                    #     gt = gt[:gt.find('[s]')]
+                    #     pred = pred[:pred.find('[s]')]
 
                     predicted_result_log += f'{gt:25s} | {pred:25s} | {confidence:0.4f}\t{str(pred == gt)}\n'
                 predicted_result_log += f'{dashed_line}'
