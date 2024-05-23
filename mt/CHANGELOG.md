@@ -1,12 +1,140 @@
 
 **Notes on versioning**
 
-
 ## [Unreleased]
+
+## [3.5.0](https://github.com/OpenNMT/OpenNMT-py/tree/3.5.0) (2024-02-22)
+
+* Further improvements and fixes
+* Suport for AWQ models
+* Add n_best for topp/topk generation
+* Support MoE (MIxtral) inference
+* Extend HF models converter
+* use flash_attn_with_kvcache for faster inference
+* Add wikitext2 PPL computation
+* Support for Phi-2 models
+
+## [3.4.3](https://github.com/OpenNMT/OpenNMT-py/tree/3.4.3) (2023-11-2)
+
+* Further improvements to beam search and decoding
+* New indexing "in bucket" for faster inference cf #2496
+* Code cleanup
+* Fix int8 for CPU dynamic quantization (still slow...)
+
+## [3.4.2](https://github.com/OpenNMT/OpenNMT-py/tree/3.4.2) (2023-10-20)
+
+* torch 2.1 (scaled_dot_product improvements)
+* Mistral 7B sliding window
+* Speed-up inference
+* flash attention 2 (with sliding window) >= v2.3.1
+* use FusedRMSNorm from apex if available
+* fixed attn_debug
+
+## [3.4.1](https://github.com/OpenNMT/OpenNMT-py/tree/3.4.1) (2023-09-26)
+
+* bug fixes
+* torch 2.x requirement (flash attention requires it)
+* zero-out the prompt loss in LM finetuning
+* batching sorted on src then tgt instead of max len
+* six dependancy
+
+## [3.4.0](https://github.com/OpenNMT/OpenNMT-py/tree/3.4.0) (2023-09-06)
+
+* bitsandbytes 4/8 bit quantization at inference
+* MMLU-FR results and scoring
+* flan-T5 support
+* flash attention
+* terminology transform
+* tensor parallelism (inference, training)
+
+## [3.3.0](https://github.com/OpenNMT/OpenNMT-py/tree/3.3.0) (2023-06-22)
+
+* Switch to pytorch 2.0.1
+* Eval LLM with MMLU benchmark
+* Fix Falcon 40B conversion / finetuning / inference
+* Plugin encoder/decoder thanks @kleag / @n2oblife
+* Safetensors for model storage (beta)
+* finetuning config templates for supported LLMs
+
+
+## [3.2.0](https://github.com/OpenNMT/OpenNMT-py/tree/3.2.0) (2023-06-07)
+* Skip init during model build (way faster building)
+* Enable quantization of LoRA layers
+* Enable 4bit quantization from bitsandbytes (NF4 / FP4)
+* Enable "some" bnb.optim Optimizers for benchmarking purpose
+* Refactor model state_dict loading to enable pseudo lazy loading with move on GPU as it loads
+* Enable Gradient checkpointing for FFN, MHA, LoRA modules
+* Make FFN bias optional (same as QKV): llama, mpt, redpajama, openllama converters changed accordingly.
+  Convertv2_v3 set add_qkvbias=True, add_ffnbias=True.
+  load_checkpoint: if w1_bias detected in checkpoint then add_ffnbias=True
+* Add Multi Query attention
+* Add Parallel Residual attention
+* Add Falcon 7B converter
+
+## [3.1.3](https://github.com/OpenNMT/OpenNMT-py/tree/3.1.3) (2023-05-24)
+* Step-by-step Tuto for Vicuna replication thanks Lina
+* MosaicML MPT7B converter and support (Alibi embeddings)
+* Open Llama converter
+* Switch GCLD3 to Fasttext thanks ArtanieTheOne
+* fix coverage attention in beam decoding
+* fix ct2 keys for "Llama / MPT7B based" OpenNMT-y models
+
+## [3.1.2](https://github.com/OpenNMT/OpenNMT-py/tree/3.1.2) (2023-05-10)
+* fixes: transforms (normalize, clean, inlinetags)
+* Llama support (rotary embeddings, RMSNorm, Silu activation)
+* 8bit loading for specific layers (along with LoRa for other layers)
+* subword learner added to build_vocab
+
+## [3.1.1](https://github.com/OpenNMT/OpenNMT-py/tree/3.1.1) (2023-03-30)
+* fix major bug in 3.1.0 introduced with LoRa (3.1.0 not available)
+
+## [3.1.0](https://github.com/OpenNMT/OpenNMT-py/tree/3.1.0) (2023-03-27)
+* updated docs with Sphinx 6.4
+* Restore source features to v3 (thanks @anderleich)
+* add inline tags transform (thanks @panosk)
+* add docify transform to allow doc-level training / inference
+* fix NLLB training (decoder_start_token)
+* New! LoRa adapters to finetune big models (egs: NLLB 3.3B)
+* various bug fixes
+
+## [3.0.4](https://github.com/OpenNMT/OpenNMT-py/tree/3.0.4) (2023-02-06)
+* override_opts to override checkpoints opt when training from
+* normalize transform based on (Sacre)Moses scripts
+* uppercase transform for adhoc data augmentation
+* suffix transform
+* Fuzzy match transform
+* WMT17 detailed example
+* NLLB-200 (from Meta/FB) models support (after conversion)
+* various bug fixes
+
+## [3.0.3](https://github.com/OpenNMT/OpenNMT-py/tree/3.0.3) (2022-12-16)
+* fix loss normalization when using accum or nb GPU > 1
+* use native CrossEntropyLoss with Label Smoothing. reported loss/ppl impacted by LS
+* fix long-time coverage loss bug thanks Sanghyuk-Choi
+* fix detok at scoring / fix tokenization Subword_nmt + Sentencepiece
+* various small bugs fixed
+
+## [3.0.2](https://github.com/OpenNMT/OpenNMT-py/tree/3.0.2) (2022-12-07)
+* pyonmttok.Vocab is now pickable. dataloader switched to spawn. (MacOS/Windows compatible)
+* fix scoring with specific metrics (BLEU, TER)
+* fix tensorboard logging
+* fix dedup in batch iterator (only for TRAIN, was happening at inference also)
+* New: Change: tgt_prefix renamed to tgt_file_prefix
+* New: tgt_prefix / src_prefix used for "prefix" Transform (onmt/transforms/misc.py)
+* New: process transforms of buckets in batches (vs per example) / faster
+
+## [3.0.1](https://github.com/OpenNMT/OpenNMT-py/tree/3.0.1) (2022-11-23)
+
+* fix dynamic scoring
+* reinstate apex.amp level O1/O2 for benchmarking
+* New: LM distillation for NMT training
+* New: bucket_size ramp-up to avoid slow start
+* fix special tokens order
+* remove Library and add link to Yasmin's Tuto
 
 ## [3.0.0](https://github.com/OpenNMT/OpenNMT-py/tree/3.0.0) (2022-11-3)
 
-* Removed completely torchtext. Use Vocab object of pyonmttok instead
+* Removed completely torchtext. Use [Vocab object of pyonmttok](https://github.com/OpenNMT/Tokenizer/tree/master/bindings/python#vocabulary) instead
 * Dataloading changed accordingly with the use of pytorch Dataloader (num_workers)
 * queue_size / pool_factor no longer needed. bucket_size optimal value > 64K
 * options renamed: rnn_size => hidden_size (enc/dec_rnn_size => enc/dec_hid_size)

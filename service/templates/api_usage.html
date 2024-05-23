@@ -1,0 +1,431 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>易译翻译API：使用指南</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 50px;
+        }
+        h2 {
+            font-size: 30px;
+        }
+        h3 {
+            font-size: 24px;
+        }
+        p{
+            text-indent:2em;
+        }
+        .p1{
+            text-indent:4em;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .step {
+            margin-bottom: 50px;
+        }
+        .step h2 {
+            margin-top: 0;
+        }
+        .step img {
+            max-width: 100%;
+            margin-bottom: 20px;
+        }
+        ol {
+            line-height: 2;
+        }
+        ul {
+            line-height: 1.5;
+        }
+        .ins_table{
+            position: relative;
+            left: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1>易译API：使用指南</h1>
+    <div class="container">
+        <div class="step">
+            <h2>示例Demo代码</h2>
+            <p>示例代码下载链接如下，运行yimt/service/test.py进行功能测试。</p>
+            <a style="margin-left: 30px;" href="https://codeload.github.com/hlp-ai/mt-core/zip/refs/heads/restful" id="downloadLink" download>
+                "https://github.com/hlp-ai/mt-core/tree/restful/yimt/service"
+            </a>
+        </div>
+        <div class="step">
+            <h2>语音识别翻译API</h2>
+            <h3>音频说明</h3>
+            <p>1、格式支持：pcm（不压缩）、wav（不压缩，pcm编码）、amr、m4a。</p>
+            <P>2、推荐pcm 采样率 ：16000、8000（仅支持普通话模型） 固定值。</P>
+            <P>3、单声道编码。</P>
+            <!-- <a href="/download_extension" id="downloadLink" download>
+                下载API
+            </a> -->
+            <h3>请求说明</h3>
+            <p>1、JSON 格式 POST 上传本地音频文件。请求端口路由：/translate_audio2text。</p>
+            <P>2、JSON参数：</p>
+            <!--<P class="p1">(1)  "base64": 上传音频的BASE64编码</P>
+                <P class="p1">(2)  "format": 上传音频格式类型：pcm/wav/amr/m4a</P>
+                <P class="p1">(3)  "rate":   音频采样率：8000/16000</P>
+                <P class="p1">(5)  "channel":声道数，默认为1</P>
+                <P class="p1">(6)  "len":    上传音频文件的字节数</P> -->
+            <div class="ins_table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>属性</th>
+                            <th>类型</th>
+                            <th>默认值</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>base64</td>
+                            <td>base64</td>
+                            <td>无</td>
+                            <td>是</td>
+                            <td>上传音频的BASE64编码</td>
+                        </tr>
+                        <tr>
+                            <td>format</td>
+                            <td>string</td>
+                            <td>无</td>
+                            <td>是</td>
+                            <td>上传音频格式类型：pcm/wav/amr/m4a</td>
+                        </tr>
+                        <tr>
+                            <td>source</td>
+                            <td>string</td>
+                            <td>无</td>
+                            <td>是</td>
+                            <td>源语言类二字母代码，自动识别类型:"auto"</td>
+                        </tr>
+                        <tr>
+                            <td>target</td>
+                            <td>string</td>
+                            <td>无</td>
+                            <td>是</td>
+                            <td>目标语言类二字母代码</td>
+                        </tr>
+                        <tr>
+                            <td>rate</td>
+                            <td>number</td>
+                            <td>8000</td>
+                            <td>否</td>
+                            <td>音频采样率：8000/16000</td>
+                        </tr>
+                        <tr>
+                            <td>channel</td>
+                            <td>number</td>
+                            <td>1</td>
+                            <td>否</td>
+                            <td>上传音频声道数，固定为1</td>
+                        </tr>
+                        <tr>
+                            <td>len</td>
+                            <td>number</td>
+                            <td>无</td>
+                            <td>是</td>
+                            <td>上传音频文件的字节数</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <P>3、返回结果：JSON类型数据，包含翻译结果文本字符串。</p>
+                <div class="ins_table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>属性</th>
+                                <th>类型</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>translatedText</td>
+                                <td>String</td>
+                                <td>翻译结果文本字符串</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            <h3>错误说明</h3>
+            <P>1、请求JSON缺少任意必填字段内容，报错400："Invalid request: missing {} parameter"</p>
+            <P>2、请求字段"source"的语言名不在API支持语言类范围内，报错400："Source language {} is not supported"</p>
+            <P>3、请求字段"target"的语言名不在API支持语言类范围内，报错400："Target language {} is not supported"</p>
+            <P>4、请求字段"format"的不在API支持的音频格式范围内，报错400："Audio format {} is not supported"</p>
+            <P> * {}内为异常的输入字段名或内容。</p>
+        </div>
+
+        <div class="step">
+            <h2>图像识别翻译API</h2>
+            <h3>图像说明</h3>
+            <p>1、格式支持：jpg、png。</p>
+            <h3>请求说明</h3>
+            <p>1、JSON 格式 POST 上传本地图像文件。请求端口路由：/translate_image2text。</p>
+            <P>2、JSON参数：</p>
+            <div class="ins_table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>属性</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>base64</td>
+                            <td>base64</td>
+                            <td>是</td>
+                            <td>上传图像的BASE64编码</td>
+                        </tr>
+                        <tr>
+                            <td>source</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>源语言类二字母代码，自动识别类型:"auto"</td>
+                        </tr>
+                        <tr>
+                            <td>target</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>目标语言类二字母代码</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <P>3、返回结果：JSON类型数据，包含翻译结果文本字符串。</p>
+                <div class="ins_table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>属性</th>
+                                <th>类型</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>translatedText</td>
+                                <td>String</td>
+                                <td>翻译结果文本字符串</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            <h3>错误说明</h3>
+            <P>1、请求JSON缺少任意必填字段内容，报错400："Invalid request: missing {} parameter"</p>
+            <P>2、请求字段"source"的语言名不在API支持语言类范围内，报错400："Source language {} is not supported"</p>
+            <P>3、请求字段"target"的语言名不在API支持语言类范围内，报错400："Target language {} is not supported"</p>
+            <P> * {}内为异常的输入字段名或内容。</p>
+        </div>
+        <div class="step">
+            <h2>语音合成翻译API</h2>
+            <h3>请求说明</h3>
+            <p>1、JSON 格式 POST 上传本地图像文件。请求端口路由：/translate_text2audio。</p>
+            <P>2、JSON参数：</p>
+            <div class="ins_table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>属性</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>text</td>
+                            <td>String</td>
+                            <td>是</td>
+                            <td>上传的文本字符串</td>
+                        </tr>
+                        <tr>
+                            <td>source</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>源语言类二字母代码，自动识别类型:"auto"</td>
+                        </tr>
+                        <tr>
+                            <td>target</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>目标语言类二字母代码</td>
+                        </tr>
+                    </tbody>
+                    
+                </table>
+            </div>
+            <P>3、返回结果：JSON类型数据，包含翻译结果合成音频的BASE64文件编码。</p>
+                <div class="ins_table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>属性</th>
+                                <th>类型</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>base64</td>
+                                <td>String</td>
+                                <td>合成音频的BASE64编码字符串</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            <h3>错误说明</h3>
+            <P>1、请求JSON缺少任意必填字段内容，报错400："Invalid request: missing {} parameter"</p>
+            <P>2、请求字段"source"的语言名不在API支持语言类范围内，报错400："Source language {} is not supported"</p>
+            <P>3、请求字段"target"的语言名不在API支持语言类范围内，报错400："Target language {} is not supported"</p>
+            <P> * {}内为异常的输入字段名或内容。</p>
+        </div>
+        <div class="step">
+            <h2>文本翻译API</h2>
+            <h3>请求说明</h3>
+            <p>1、JSON 格式 POST 上传待翻译的文本。请求端口路由：/translate。</p>
+            <P>2、JSON参数：</p>
+                <div class="ins_table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>属性</th>
+                                <th>类型</th>
+                                <th>默认值</th>
+                                <th>必填</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>q</td>
+                                <td>String</td>
+                                <td>无</td>
+                                <td>是</td>
+                                <td>上传的待翻译文本字符串</td>
+                            </tr>
+                            <tr>
+                                <td>source</td>
+                                <td>String</td>
+                                <td>无</td>
+                                <td>是</td>
+                                <td>源语言类二字母代码，自动识别类型:"auto"</td>
+                            </tr>
+                            <tr>
+                                <td>target</td>
+                                <td>String</td>
+                                <td>无</td>
+                                <td>是</td>
+                                <td>目标语言类二字母代码</td>
+                            </tr>
+                            <tr>
+                                <td>api_key</td>
+                                <td>String</td>
+                                <td>无</td>
+                                <td>是</td>
+                                <td>API密钥</td>
+                            </tr>
+                            <tr>
+                                <td>format</td>
+                                <td>String</td>
+                                <td>"text"</td>
+                                <td>否</td>
+                                <td>提交数据的类型</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            <P>3、返回结果：JSON类型数据，包含翻译结果文本字符串。</p>
+                <div class="ins_table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>属性</th>
+                                <th>类型</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>translatedText</td>
+                                <td>String</td>
+                                <td>翻译结果文本字符串</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <h3>错误说明</h3>
+            <P>1、请求JSON缺少任意必填字段内容，报错400："Invalid request: missing {} parameter"</p>
+            <P>2、请求字段"source"的语言名不在API支持语言类范围内，报错400："Source language {} is not supported"</p>
+            <P>3、请求字段"target"的语言名不在API支持语言类范围内，报错400："Target language {} is not supported"</p>
+            <P>4、请求字段"format"的不在API支持的文本格式范围内，报错400："format {} is not supported"</p>
+            <P> * {}内为异常的输入字段名或内容。</p>
+        <div class="step">
+            <h2>语言列表API</h2>
+            <h3>请求说明</h3>
+            <p>1、GET :请求端口路由：/language。</p>
+            <P>2、返回结果：翻译引擎支持的语言列表，类型：List。</p>
+        </div>
+                
+    </div>
+    <style type="text/css">
+        table {
+            left: 120px;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: solid 1px #6D6D6D;
+            padding: 5px 10px;
+        }
+        .mt-sm {margin-top: 8px;}
+        body {
+            background: #ffffff;
+            padding: 0;
+            margin: 0;
+        }
+        .container {
+            width: 100%;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            min-height: 100vh;
+        }
+    </style>           
+    <script>
+        // var downloadLink = document.getElementById('downloadLink');
+        // downloadLink.addEventListener('click', function() {
+        //     var xhr = new XMLHttpRequest();
+        //     xhr.open('GET', "/download_extension", true);
+        //     xhr.responseType = 'blob';
+        //     xhr.onload = function() {
+        //         if (this.status === 200) {
+        //             var blob = this.response;
+        //             var url = URL.createObjectURL(blob);
+        //             downloadLink.href = url;
+        //             downloadLink.download = 'mt-browser.zip';
+        //         }
+        //     };
+        //     xhr.send();
+        // });
+    </script>
+</body>
+</html>

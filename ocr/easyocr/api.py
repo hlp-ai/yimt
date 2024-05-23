@@ -10,8 +10,8 @@ class OCR:
             langs = [lang]
         self._reader = Reader(langs, model_storage_directory=models_dir)
 
-    def recognize(self, img_path):
-        result = self._reader.readtext(img_path)
+    def recognize(self, img_path, paragraph=True):
+        result = self._reader.readtext(img_path, paragraph=paragraph)
         return result
 
 

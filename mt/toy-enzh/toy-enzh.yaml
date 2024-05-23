@@ -6,8 +6,7 @@ save_data: ./toy-enzh/run/example
 src_vocab: ./toy-enzh/en.vocab
 tgt_vocab: ./toy-enzh/zh.vocab
 # Prevent overwriting existing files in the folder
-overwrite: False
-
+overwrite: True
 
 # Corpus opts:
 data:
@@ -21,6 +20,8 @@ data:
 # Train on a single GPU
 world_size: 1
 gpu_ranks: [0]
+
+vocab_size_multiple: 16
 
 # Where to save the checkpoints
 save_model: ./toy-enzh/run/model
@@ -41,6 +42,7 @@ heads: 8
 
 accum_count: 4
 optim: adam
+model_type: fp16
 adam_beta1: 0.9
 adam_beta2: 0.998
 decay_method: noam
@@ -49,6 +51,15 @@ max_grad_norm: 0.0
 warmup_steps: 4000
 
 early_stopping: 2
+early_stopping_criteria: ppl
+
+valid_metrics: [BLEU]
+
+scoring_debug: true
+dump_preds: ./toy-enzh/run/pred
+
+tensorboard: true
+tensorboard_log_dir: ./toy-enzh/run/logs
 
 bucket_size: 262144
 batch_size: 2048

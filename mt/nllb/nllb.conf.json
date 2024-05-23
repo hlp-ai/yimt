@@ -1,0 +1,20 @@
+{
+    "models_root": "./available_models",
+    "models": [
+        {
+            "id": 100,
+            "model": "D:/kidden/github/yimt/pretrained/mt/nllb/nllb-200-1.3B-onmt.pt",
+            "timeout": 600,
+            "on_timeout": "to_cpu",
+            "load": true,
+            "opt": {
+                "gpu": -1,
+                "beam_size": 5
+            },
+            "tokenizer": {
+                "type": "sentencepiece",
+                "model": "D:/kidden/github/yimt/pretrained/mt/nllb/flores200_sacrebleu_tokenizer_spm.model"
+            }
+        }
+    ]
+}

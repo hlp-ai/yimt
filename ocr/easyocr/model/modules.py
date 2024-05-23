@@ -20,14 +20,16 @@ def init_weights(modules):
             m.weight.data.normal_(0, 0.01)
             m.bias.data.zero_()
 
+
 class vgg16_bn(torch.nn.Module):
+
     def __init__(self, pretrained=True, freeze=True):
         super(vgg16_bn, self).__init__()
         if version.parse(torchvision.__version__) >= version.parse('0.13'):
             vgg_pretrained_features = models.vgg16_bn(
                 weights=models.VGG16_BN_Weights.DEFAULT if pretrained else None
             ).features
-        else: #torchvision.__version__ < 0.13
+        else:  # torchvision.__version__ < 0.13
             models.vgg.model_urls['vgg16_bn'] = models.vgg.model_urls['vgg16_bn'].replace('https://', 'http://')
             vgg_pretrained_features = models.vgg16_bn(pretrained=pretrained).features
 
@@ -79,6 +81,7 @@ class vgg16_bn(torch.nn.Module):
         out = vgg_outputs(h_fc7, h_relu5_3, h_relu4_3, h_relu3_2, h_relu2_2)
         return out
 
+
 class BidirectionalLSTM(nn.Module):
 
     def __init__(self, input_size, hidden_size, output_size):
@@ -98,6 +101,7 @@ class BidirectionalLSTM(nn.Module):
         recurrent, _ = self.rnn(input)  # batch_size x T x input_size -> batch_size x T x (2*hidden_size)
         output = self.linear(recurrent)  # batch_size x T x output_size
         return output
+
 
 class VGG_FeatureExtractor(nn.Module):
 
@@ -123,6 +127,7 @@ class VGG_FeatureExtractor(nn.Module):
     def forward(self, input):
         return self.ConvNet(input)
 
+
 class ResNet_FeatureExtractor(nn.Module):
     """ FeatureExtractor of FAN (http://openaccess.thecvf.com/content_ICCV_2017/papers/Cheng_Focusing_Attention_Towards_ICCV_2017_paper.pdf) """
 
@@ -132,6 +137,7 @@ class ResNet_FeatureExtractor(nn.Module):
 
     def forward(self, input):
         return self.ConvNet(input)
+
 
 class BasicBlock(nn.Module):
     expansion = 1
@@ -167,6 +173,7 @@ class BasicBlock(nn.Module):
         out = self.relu(out)
 
         return out
+
 
 class ResNet(nn.Module):
 

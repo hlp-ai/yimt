@@ -1,0 +1,12 @@
+model: D:\dataset\pt-mnmt\model_step_30000.pt
+
+transforms: [sentencepiece]
+src_subword_model: D:\dataset\pt-mnmt\arenja-zh.zh-sp-32000.model
+tgt_subword_model: D:\dataset\pt-mnmt\arenja-zh.x-sp-32000.model
+
+gpu: 0
+
+batch_type: sents
+batch_size: 16
+
+src: None

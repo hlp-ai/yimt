@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head> 
+    <link rel="stylesheet" type="text/css" href="../static/text.css">
+    <link rel="stylesheet" type="text/css" href="../static/reference.css">
+
+    <!-- jquery -->
+    <script type="text/javascript" src="../static/plugin/jquery-2.2.1.min.js"></script>
+    <script type="text/javascript" src="../static/plugin/jquery.media.js"></script>
+
+    <script src="../static/common_block.js" type="text/javascript"></script>
+    <script src="../static/func.js" type="text/javascript"></script>
+        
+    <script>
+        var file_type = "";
+        var END_POINT
+        var translated_file_path  
+        var file_type  
+        window.onload = function()
+        {
+            set_setting();
+            set_footer();
+            set_products();
+
+            END_POINT = "http://127.0.0.1:5555";
+            var server = window.localStorage.getItem("server");
+            if(!!server)
+                END_POINT = server;
+
+            var queryParams = new URLSearchParams(window.location.search);
+            file_path = queryParams.get("file_path");
+            translated_file_path = queryParams.get("translated_file_path");
+            file_type = queryParams.get("file_type");   
+               
+            console.log(file_type);
+            console.log(file_path);
+            console.log(translated_file_path);
+
+            var randomNumber = Math.floor(Math.random() * 1000000);
+            document.getElementById("document-container").setAttribute("src", END_POINT + "/request_original" + '?timestamp=' + randomNumber + '&file_path=' + encodeURIComponent(file_path)+ '&file_type=' + file_type);
+            document.getElementById("document-container2").setAttribute("src", END_POINT+"/request_target"+ '?timestamp=' + randomNumber + '&translated_file_path=' + encodeURIComponent(translated_file_path)+ '&file_type=' + file_type);
+            get_download();
+            request_ad();
+        }
+
+        async function get_download()
+        {
+            let xhr = new XMLHttpRequest();
+            var form = new FormData();
+            //var translated_file_path = '{{tgt}}';
+            form.append("translated_file_path", translated_file_path);
+            xhr.open('POST',END_POINT + "/get_download");
+            xhr.send(form);
+            xhr.onreadystatechange = function () {
+                console.log("get_download: "+ xhr.responseText);
+                document.getElementById('download_link').innerHTML = "<a href=" + xhr.responseText + ">下载翻译文件</a>";
+            }
+        }
+	</script>
+
+    <title>YiMT Doc Translation</title>
+</head>
+
+<body>
+    <div class="mask" id="mask"></div>
+    <div class="url_setting_block" id="url_setting_block"></div>
+
+    <div class="ref_fanyi__nav">
+        <div class="fanyi__nav__container">
+            <a href="/" class="fanyi__nav__logo"></a>
+            <div class="nav_left">
+                <a target="_blank" class="nav" href="/file">文档翻译</a><a target="_blank" href="/api_usage" class="nav">翻译API</a><a target="_blank" class="nav" href="/">登录</a><a target="_blank" id="url_setting_label" class="nav" >设置</a>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="restriction">
+        <div class="ref_fanyi__operations">
+            <span class="original_title">原文文档</span>
+            <span class="target_title">目标文档</span>
+            <span id="download_link" class="download_link">下载链接</span>
+        </div>
+
+        <div class="fanyi__input">
+
+            <div class="file_view_original">
+                <!-- <iframe class="document-container" id="document-container" src="http://127.0.0.1:5555/media_original"></iframe> -->
+                <iframe class="document-container" id="document-container" ></iframe>
+            </div>
+
+            <div class="file_view_target">
+                <!-- <iframe class="document-container" id="document-container2" src="http://127.0.0.1:5555/media_target"></iframe> -->
+                <iframe class="document-container" id="document-container2" ></iframe>
+            </div>
+        </div>
+
+        <div class ="download_area">
+            
+        </div>
+
+        <div class="inside__products" style="display: block;">
+            <div class="product1_area" id = "product1_area">
+                <div class="product1_content" id="product1_content"></div>
+                <a class="product1_url" id="product1_url"></a>
+            </div>
+            <div class="product2_area" id="product2_area"></div>
+        </div>
+    
+        
+    </div>
+
+    <div class="fanyi__footer" id="fanyi__footer"></div>
+</body>
+</html>

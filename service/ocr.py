@@ -10,7 +10,7 @@ class TextRecognizers:
         self.models_dir = models_dir  # 模型根目录
         self._recognizers = {}  # 语言到识别器字典
 
-    def recognize(self, img, lang):
+    def recognize(self, img, lang, paragraph=True):
         """ 对给定语言的图片进行OCR
 
         参数:
@@ -31,7 +31,10 @@ class TextRecognizers:
             recognizer = OCR(lang, self.models_dir)
             self._recognizers[lang] = recognizer
 
-        output = recognizer.recognize(img)
+        output = recognizer.recognize(img, paragraph=paragraph)
+        if paragraph:
+            return output
+
         result = []
         for pos, text, score in output:
             result.append({"pos": numpy.array(pos).tolist(),

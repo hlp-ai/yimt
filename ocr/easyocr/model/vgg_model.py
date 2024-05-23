@@ -1,5 +1,7 @@
+"""基于VGG的文本识别模型"""
 import torch.nn as nn
 from easyocr.model.modules import VGG_FeatureExtractor, BidirectionalLSTM
+
 
 class Model(nn.Module):
 
@@ -19,8 +21,7 @@ class Model(nn.Module):
         """ Prediction """
         self.Prediction = nn.Linear(self.SequenceModeling_output, num_class)
 
-
-    def forward(self, input, text):
+    def forward(self, input):
         """ Feature extraction stage """
         visual_feature = self.FeatureExtraction(input)
         visual_feature = self.AdaptiveAvgPool(visual_feature.permute(0, 3, 1, 2))

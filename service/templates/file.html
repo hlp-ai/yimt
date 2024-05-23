@@ -1,0 +1,239 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head> 
+    <link rel="stylesheet" type="text/css" href="../static/text.css">
+
+    <script src="../static/common_block.js" type="text/javascript"></script>
+    <script src="../static/func.js" type="text/javascript"></script>
+    
+    <script>
+        var API_KEY = "";
+        var END_POINT = "http://127.0.0.1:5555";
+        window.onload = function()
+        {
+            set_setting();
+            set_footer();
+            set_products();
+
+            var server = window.localStorage.getItem("server");
+            var key = window.localStorage.getItem("key");
+            API_KEY=key;
+            if(!!server)
+                END_POINT = server;
+
+            var is_finished = true;
+
+            request_ad();
+        }
+
+        var is_finished = true;
+        var xhr;
+       
+		function uploadFile() {
+		    var fileObj = document.getElementById("select_file").files[0];
+            var files = document.getElementById("select_file").files;
+            if(files.length==0)
+                return;
+
+            document.getElementById("showProgress").innerHTML = "正在上传";
+            document.getElementById("showProgress").style.display ="block";
+            document.getElementById("progress_line").style.display ="block";
+            document.getElementById("download").style.display = "none";
+
+            source_lang = document.getElementById('source').value;
+            target_lang = document.getElementById('target').value;
+
+		    var form = new FormData();
+		    form.append("file", fileObj);
+		    form.append("source", source_lang);
+		    form.append("target", target_lang);
+            form.append("api_key", API_KEY);
+
+		    var url = END_POINT + "/translate_file";
+		    xhr = new XMLHttpRequest();
+            is_finished = false;
+
+            xhr.upload.addEventListener("progress", function(evt){
+                if (evt.lengthComputable) {
+                    var percentComplete = Math.round(evt.loaded * 100 / evt.total);
+                    if (percentComplete == 100){
+                        setTimeout(function () {
+                        //document.getElementById("showProgress").innerHTML = '上传完成，正在翻译...';
+                        document.getElementById("progress_line").value=percentComplete;
+                    },10)
+                    }else{
+                        document.getElementById("showProgress").innerHTML = '已上传'+percentComplete+"%";
+                        document.getElementById("progress_line").value=percentComplete;
+                    }
+                }else {
+                    document.getElementById("showProgress").innerHTML = '无法计算';
+                }
+                }, false);
+
+		    xhr.open("post", url, true);
+		    xhr.onload = uploadComplete;
+		    xhr.send(form);
+
+            setInterval("translate_progress()",2000);  //每2秒发送查看进度
+		}
+
+        function translate_progress(){
+            //console.log(is_finished);  //测试用
+            if(is_finished == false)
+            {
+                var url = END_POINT + "/translate_file_progress";
+                var fileObj = document.getElementById("select_file").files[0];
+                var form = new FormData();
+		        form.append("file", fileObj);
+                xhr = new XMLHttpRequest();
+                xhr.onload = function(){
+                    if(is_finished == false)  //得添加这句判断，否则会在上传结束后仍短暂执行下面的语句
+                    {
+                        console.log(this.responseText);
+                        //console.log("is_finished?");
+                        document.getElementById("showProgress").innerHTML = '上传完成，正在翻译,翻译进度：'+ this.responseText;
+                    }
+                }
+                xhr.open("POST",url);
+                xhr.send(form);
+            }
+            else
+            {
+                document.getElementById("showProgress").innerHTML = "翻译完成，点击链接下载";
+            }
+        }
+
+		function uploadComplete(evt) {
+			res_json = JSON.parse(evt.target.responseText);
+			if(res_json.error){
+			    alert(res_json.error);
+			    return;
+			}
+
+			document.getElementById("download").style.display = "inline";
+            is_finished = true  //标记翻译结束
+			document.getElementById('download').innerHTML = "<a href=" + res_json.translatedFileUrl + ">下载翻译文件</a>";
+            var file_path = res_json.filepath;
+            var translated_file_path = res_json.translated_file_path;
+            var file_type = res_json.file_type;
+
+            //console.log("file_path: "+ file_path);
+            //console.log("translated_file_path: "+translated_file_path);
+            //console.log("file_type: "+file_type);
+
+            var queryParams = new URLSearchParams();
+            queryParams.append("file_path", file_path);
+            queryParams.append("translated_file_path", translated_file_path);
+            queryParams.append("file_type", file_type);
+
+            var url = "{{ url_for('reference') }}?" + queryParams.toString();
+            window.location.href = url;
+		}
+
+	</script>
+
+    <title>YiMT Doc Translation</title>
+</head>
+
+<body>
+    <div class="mask" id="mask"></div>
+    <div class="url_setting_block" id="url_setting_block"></div>
+   
+    <div class="fanyi__nav">
+        <div class="fanyi__nav__container">
+            <a href="/" class="fanyi__nav__logo"></a>
+            <div class="nav_left">
+                <a target="_blank" class="nav" href="/">文本翻译</a><a href="/api_usage" target="_blank" class="nav">翻译API</a><a target="_blank" class="nav" href="/">登录</a><a target="_blank" id="url_setting_label" class="nav" >设置</a>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="restriction">
+        <div class="fanyi__operations">
+            <div class="fanyi__operations--left">
+                <div id="toolbar">
+    
+                    <select id="source" name="source" class="source_select">
+                        <option value="auto">自动检测</option>
+                        <option value="zh">Chinese</option>
+                        <option value="en">English</option>
+                        <option value="ja">Japanese</option>
+                        <option value="ko">Korean</option>
+                        <option value="de">German</option>
+                        <option value="vi">Vietnamese</option>
+                        <option value="ru">Russian</option>
+                        <option value="ar">Arabic</option>
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="pt">Portuguese</option>
+                        <option value="ms">Malay</option>
+                        <option value="hi">Hindi</option>
+                        <option value="it">Italian</option>
+                        <option value="th">Thai</option>
+                        <option value="id">Indonesian</option>
+                        <option value="he">Hebrew</option>
+                    </select>
+                    <span class="mid">-></span>
+                    <select id="target" name="target" class="target_select">
+                        <option value="zh">Chinese</option>
+                        <option value="en">English</option>
+                        <option value="ja">Japanese</option>
+                        <option value="ko">Korean</option>
+                        <option value="de">German</option>
+                        <option value="vi">Vietnamese</option>
+                        <option value="ru">Russian</option>
+                        <option value="ar">Arabic</option>
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="pt">Portuguese</option>
+                        <option value="ms">Malay</option>
+                        <option value="hi">Hindi</option>
+                        <option value="it">Italian</option>
+                        <option value="th">Thai</option>
+                        <option value="id">Indonesian</option>
+                        <option value="he">Hebrew</option>
+                    </select>
+                    <input type="button" class="fanyi__operations--machine" id="transMachine" value="翻译" >
+                </div>
+    
+            </div>
+    
+        </div>
+    
+        <div class="fanyi__input_file">
+            <div class="input__original_file">
+                <div style=" display: inline-block;padding-top:12pt;text-align:center; font-size: 14px;color: #818181;">点 击 上 传</div>
+                <div class="input_area_file">
+                    <div class="image_container">
+                        <div class="image">
+                        </div>
+                        <input type="file" class="select_file" id="select_file" onchange="uploadFile()">
+                    </div> 
+                </div>             
+                <div style=" padding-bottom:10px;text-align:center; font-size: 14px;color: #848484;">支持以下类型文档：txt、pdf、docx、pptx、html/html/xml 等</div>
+            </div>
+       
+        </div>
+        <progress id="progress_line" class="progress_line" value="0" max="100"> </progress>
+        <a id="showProgress" style="display:none;text-align:center; font-size: 19px;color: #357aa1;z-index: 6;">11</a>
+
+        <div style="padding-top:0pt;text-align:center;">
+            <span id="download" class="download">下载链接link</span>
+        </div>
+    
+        <div class="inside__products" style="display: block;">
+            <div class="product1_area" id = "product1_area">
+                <div class="product1_content" id="product1_content"></div>
+                <a class="product1_url" id="product1_url"></a>
+            </div>
+
+            <div class="product2_area" id="product2_area"></div>
+        </div>
+
+    </div>
+
+    <div class="fanyi__footer" id="fanyi__footer"></div>
+</body>
+</html>

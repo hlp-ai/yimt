@@ -1,9 +1,7 @@
-import os
 import sys
 import time
 import random
 import torch
-import torch.backends.cudnn as cudnn
 import torch.nn as nn
 import torch.nn.init as init
 import torch.optim as optim
@@ -11,10 +9,12 @@ import torch.utils.data
 from torch.cuda.amp import autocast, GradScaler
 import numpy as np
 
-from easyocr.trainer.crnn.utils import CTCLabelConverter, Averager
+from easyocr.trainer.crnn.utils import Averager
 from easyocr.trainer.crnn.dataset import hierarchical_dataset, AlignCollate, Batch_Balanced_Dataset
 from easyocr.trainer.crnn.model import Model
 from easyocr.trainer.crnn.test import validation
+from easyocr.utils import CTCLabelConverter
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
@@ -108,10 +108,8 @@ def train(opt, show_number = 2, amp=False):
     count_parameters(model)
     
     """ setup loss """
-    if 'CTC' in opt.Prediction:
-        criterion = torch.nn.CTCLoss(zero_infinity=True).to(device)
-    else:
-        criterion = torch.nn.CrossEntropyLoss(ignore_index=0).to(device)  # ignore [GO] token = ignore index 0
+    criterion = torch.nn.CTCLoss(zero_infinity=True).to(device)
+
     # loss averager
     loss_avg = Averager()
 
@@ -183,17 +181,13 @@ def train(opt, show_number = 2, amp=False):
                 text, length = converter.encode(labels, batch_max_length=opt.batch_max_length)
                 batch_size = image.size(0)
 
-                if 'CTC' in opt.Prediction:
-                    preds = model(image, text).log_softmax(2)
-                    preds_size = torch.IntTensor([preds.size(1)] * batch_size)
-                    preds = preds.permute(1, 0, 2)
-                    torch.backends.cudnn.enabled = False
-                    cost = criterion(preds, text.to(device), preds_size.to(device), length.to(device))
-                    torch.backends.cudnn.enabled = True
-                else:
-                    preds = model(image, text[:, :-1])  # align with Attention.forward
-                    target = text[:, 1:]  # without [GO] Symbol
-                    cost = criterion(preds.view(-1, preds.shape[-1]), target.contiguous().view(-1))
+                preds = model(image, text).log_softmax(2)
+                preds_size = torch.IntTensor([preds.size(1)] * batch_size)
+                preds = preds.permute(1, 0, 2)
+                torch.backends.cudnn.enabled = False
+                cost = criterion(preds, text.to(device), preds_size.to(device), length.to(device))
+                torch.backends.cudnn.enabled = True
+
             scaler.scale(cost).backward()
             scaler.unscale_(optimizer)
             torch.nn.utils.clip_grad_norm_(model.parameters(), opt.grad_clip)
@@ -204,17 +198,14 @@ def train(opt, show_number = 2, amp=False):
             image = image_tensors.to(device)
             text, length = converter.encode(labels, batch_max_length=opt.batch_max_length)
             batch_size = image.size(0)
-            if 'CTC' in opt.Prediction:
-                preds = model(image, text).log_softmax(2)
-                preds_size = torch.IntTensor([preds.size(1)] * batch_size)
-                preds = preds.permute(1, 0, 2)
-                torch.backends.cudnn.enabled = False
-                cost = criterion(preds, text.to(device), preds_size.to(device), length.to(device))
-                torch.backends.cudnn.enabled = True
-            else:
-                preds = model(image, text[:, :-1])  # align with Attention.forward
-                target = text[:, 1:]  # without [GO] Symbol
-                cost = criterion(preds.view(-1, preds.shape[-1]), target.contiguous().view(-1))
+
+            preds = model(image, text).log_softmax(2)
+            preds_size = torch.IntTensor([preds.size(1)] * batch_size)
+            preds = preds.permute(1, 0, 2)
+            torch.backends.cudnn.enabled = False
+            cost = criterion(preds, text.to(device), preds_size.to(device), length.to(device))
+            torch.backends.cudnn.enabled = True
+
             cost.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), opt.grad_clip) 
             optimizer.step()
@@ -261,9 +252,9 @@ def train(opt, show_number = 2, amp=False):
                 
                 start = random.randint(0,len(labels) - show_number )    
                 for gt, pred, confidence in zip(labels[start:start+show_number], preds[start:start+show_number], confidence_score[start:start+show_number]):
-                    if 'Attn' in opt.Prediction:
-                        gt = gt[:gt.find('[s]')]
-                        pred = pred[:pred.find('[s]')]
+                    # if 'Attn' in opt.Prediction:
+                    #     gt = gt[:gt.find('[s]')]
+                    #     pred = pred[:pred.find('[s]')]
 
                     predicted_result_log += f'{gt:25s} | {pred:25s} | {confidence:0.4f}\t{str(pred == gt)}\n'
                 predicted_result_log += f'{dashed_line}'
