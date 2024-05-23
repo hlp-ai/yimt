@@ -1,22 +1,21 @@
 import os
-import sys
 import re
-import six
 import math
 import torch
 import pandas  as pd
 
-from natsort import natsorted
 from PIL import Image
 import numpy as np
 from torch.utils.data import Dataset, ConcatDataset, Subset
 from torch._utils import _accumulate
 import torchvision.transforms as transforms
 
+
 def contrast_grey(img):
     high = np.percentile(img, 90)
     low  = np.percentile(img, 10)
     return (high-low)/(high+low), high, low
+
 
 def adjust_contrast_grey(img, target = 0.4):
     contrast, high, low = contrast_grey(img)
@@ -139,6 +138,7 @@ def hierarchical_dataset(root, opt, select_data='/'):
 
     return concatenated_dataset, dataset_log
 
+
 class OCRDataset(Dataset):
 
     def __init__(self, root, opt):
@@ -188,6 +188,7 @@ class OCRDataset(Dataset):
         label = re.sub(out_of_char, '', label)
 
         return (img, label)
+
 
 class ResizeNormalize(object):
 
