@@ -53,12 +53,6 @@ def validation(model, criterion, evaluation_loader, converter, opt, device):
         confidence_score_list = []
         
         for gt, pred, pred_max_prob in zip(labels, preds_str, preds_max_prob):
-            if 'Attn' in opt.Prediction:
-                gt = gt[:gt.find('[s]')]
-                pred_EOS = pred.find('[s]')
-                pred = pred[:pred_EOS]  # prune after "end of sentence" token ([s])
-                pred_max_prob = pred_max_prob[:pred_EOS]
-
             if pred == gt:
                 n_correct += 1
 
