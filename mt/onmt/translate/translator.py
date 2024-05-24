@@ -173,8 +173,6 @@ class Inference(object):
         self.report_time = report_time
 
         self.global_scorer = global_scorer
-        # if self.global_scorer.has_cov_pen and not self.model.decoder.attentional:
-        #     raise ValueError("Coverage penalty requires an attentional decoder.")
         self.out_file = out_file
         self.report_align = report_align
         self.gold_align = gold_align
@@ -448,12 +446,7 @@ class Inference(object):
                     srcs = [
                         voc_src[tok] for tok in trans.src[: trans.srclen].tolist()
                     ]
-                    # if self.data_type == "text":
-                    #     srcs = [
-                    #         voc_src[tok] for tok in trans.src[: trans.srclen].tolist()
-                    #     ]
-                    # else:
-                    #     srcs = [str(item) for item in range(len(attns[0]))]
+
                     output = report_matrix(srcs, preds, attns)
                     self._log(output)
 
@@ -466,12 +459,7 @@ class Inference(object):
                     srcs = [
                         voc_src[tok] for tok in trans.src[: trans.srclen].tolist()
                     ]
-                    # if self.data_type == "text":
-                    #     srcs = [
-                    #         voc_src[tok] for tok in trans.src[: trans.srclen].tolist()
-                    #     ]
-                    # else:
-                    #     srcs = [str(item) for item in range(len(align[0]))]
+
                     output = report_matrix(srcs, tgts, align)
                     self._log(output)
 
@@ -663,12 +651,6 @@ class Inference(object):
         batch_offset=None,
         return_attn=False,
     ):
-        # if self.copy_attn:
-        #     # Turn any copied words into UNKs.
-        #     decoder_in = decoder_in.masked_fill(
-        #         decoder_in.gt(self._tgt_vocab_len - 1), self._tgt_unk_idx
-        #     )
-
         # Decoder forward, takes [batch, tgt_len, nfeats] as input
         # and [batch, src_len, hidden] as enc_out
         # in case of inference tgt_len = 1, batch = beam times batch_size
@@ -691,39 +673,6 @@ class Inference(object):
         # returns [(batch_size x beam_size) , vocab ] when 1 step
         # or [batch_size, tgt_len, vocab ] when full sentence
 
-        # if not self.copy_attn:
-        #     if "std" in dec_attn:
-        #         attn = dec_attn["std"]
-        #     else:
-        #         attn = None
-        #     scores = self.model.generator(dec_out.squeeze(1))
-        #     log_probs = log_softmax(scores, dim=-1)  # we keep float16 if FP16
-        #     # returns [(batch_size x beam_size) , vocab ] when 1 step
-        #     # or [batch_size, tgt_len, vocab ] when full sentence
-        # else:
-        #     attn = dec_attn["copy"]
-        #     scores = self.model.generator(
-        #         dec_out.view(-1, dec_out.size(2)),
-        #         attn.view(-1, attn.size(2)),
-        #         src_map,
-        #     )
-        #     # here we have scores [tgt_lenxbatch, vocab] or [beamxbatch, vocab]
-        #     if batch_offset is None:
-        #         scores = scores.view(-1, len(batch["srclen"]), scores.size(-1))
-        #         scores = scores.transpose(0, 1).contiguous()
-        #     else:
-        #         scores = scores.view(-1, self.beam_size, scores.size(-1))
-        #     # at this point scores is batch first (dim=0)
-        #     scores = collapse_copy_scores(
-        #         scores,
-        #         batch,
-        #         self._tgt_vocab,
-        #         batch_dim=0,
-        #     )
-        #     scores = scores.view(-1, decoder_in.size(1), scores.size(-1))
-        #     log_probs = scores.squeeze(1).log()
-        #     # returns [(batch_size x beam_size) , vocab ] when 1 step
-        #     # or [batch_size, tgt_len, vocab ] when full sentence
         return log_probs, attn
 
     def translate_batch(self, batch, attn_debug):
@@ -908,7 +857,6 @@ class Translator(Inference):
             results (dict): The translation results.
         """
         # (0) Prep the components of the search.
-        # use_src_map = self.copy_attn
         parallel_paths = decode_strategy.parallel_paths  # beam_size
 
         batch_size = len(batch["srclen"])
@@ -928,7 +876,6 @@ class Translator(Inference):
         )
 
         # (2) prep decode_strategy. Possibly repeat src objects.
-        # src_map = batch["src_map"] if use_src_map else None
         target_prefix = batch["tgt"] if self.tgt_file_prefix else None
         (fn_map_state, enc_out) = decode_strategy.initialize(
             enc_out, src_len, target_prefix=target_prefix
@@ -968,9 +915,6 @@ class Translator(Inference):
                     enc_out = tuple(x[select_indices] for x in enc_out)
                 else:
                     enc_out = enc_out[select_indices]
-
-                # if src_map is not None:
-                #     src_map = src_map[select_indices]
 
             if parallel_paths > 1 or any_finished:
                 self.model.decoder.map_state(lambda state, dim: state[select_indices])
@@ -1095,7 +1039,6 @@ class GeneratorLM(Inference):
             results (dict): The translation results.
         """
         # (0) Prep the components of the search.
-        # use_src_map = self.copy_attn
         parallel_paths = decode_strategy.parallel_paths  # beam_size
         batch_size = len(batch["srclen"])
 
@@ -1154,11 +1097,6 @@ class GeneratorLM(Inference):
                 if decode_strategy.done:
                     break
             select_indices = decode_strategy.select_indices
-
-            # if any_finished:
-            #     # Reorder states.
-            #     if src_map is not None:
-            #         src_map = src_map[select_indices]
 
             if parallel_paths > 1 or any_finished:
                 # select indexes in model state/cache
