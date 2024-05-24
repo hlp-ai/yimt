@@ -7,7 +7,7 @@ train_data: 'all_data'
 valid_data: 'all_data/en_val'
 manualSeed: 1111
 workers: 6
-batch_size: 32 #32
+batch_size: 4 #32
 num_iter: 300000
 valInterval: 20000
 saved_model: '' #'saved_models/en_filtered/iter_300000.pth'
@@ -21,8 +21,8 @@ eps: 0.00000001
 grad_clip: 5
 
 #Data processing
-select_data: 'en_train_filtered' # this is dataset folder in train_data
-batch_ratio: '1' 
+select_data: ['en_sample'] # this is dataset folder in train_data
+batch_ratio: ['1']
 total_data_usage_ratio: 1.0
 batch_max_length: 34 
 imgH: 64
