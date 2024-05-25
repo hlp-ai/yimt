@@ -181,7 +181,8 @@ def train(opt, show_number = 2, amp=False):
                 text, length = converter.encode(labels, batch_max_length=opt.batch_max_length)
                 batch_size = image.size(0)
 
-                preds = model(image, text).log_softmax(2)
+                # preds = model(image, text).log_softmax(2)
+                preds = model(image).log_softmax(2)
                 preds_size = torch.IntTensor([preds.size(1)] * batch_size)
                 preds = preds.permute(1, 0, 2)
                 torch.backends.cudnn.enabled = False
@@ -199,7 +200,8 @@ def train(opt, show_number = 2, amp=False):
             text, length = converter.encode(labels, batch_max_length=opt.batch_max_length)
             batch_size = image.size(0)
 
-            preds = model(image, text).log_softmax(2)
+            # preds = model(image, text).log_softmax(2)
+            preds = model(image).log_softmax(2)
             preds_size = torch.IntTensor([preds.size(1)] * batch_size)
             preds = preds.permute(1, 0, 2)
             torch.backends.cudnn.enabled = False
