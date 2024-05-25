@@ -90,8 +90,6 @@ class BlockwiseCorpus(object):
         return (
             f"{cls_name}({self.id}, {self.file_path}, {self.file_path}"
             f"align={None}, "
-            # f"n_src_feats={0}, "
-            # f'src_feats_defaults="{None}")'
         )
 
 
@@ -106,8 +104,6 @@ class ParallelCorpus(object):
         self.src = src
         self.tgt = tgt
         self.align = align
-        # self.n_src_feats = n_src_feats
-        # self.src_feats_defaults = src_feats_defaults
 
     def load(self, offset=0, stride=1):
         """
@@ -134,8 +130,7 @@ class ParallelCorpus(object):
             }
             if align is not None:
                 example["align"] = align
-            # if sfeats is not None:
-            #     example["src_feats"] = [f for f in sfeats]
+
             return example
 
         if isinstance(self.src, list):
@@ -164,8 +159,6 @@ class ParallelCorpus(object):
         return (
             f"{cls_name}({self.id}, {self.src}, {self.tgt}, "
             f"align={self.align}, "
-            # f"n_src_feats={self.n_src_feats}, "
-            # f'src_feats_defaults="{self.src_feats_defaults}")'
         )
 
 
@@ -180,8 +173,6 @@ def get_corpora(opts, task=CorpusTask.TRAIN, src=None, tgt=None, align=None):
                         corpus_dict["path_src"],
                         corpus_dict["path_tgt"],
                         corpus_dict["path_align"],
-                        # n_src_feats=opts.n_src_feats,
-                        # src_feats_defaults=opts.src_feats_defaults,
                     )
                 else:
                     corpora_dict[corpus_id] = BlockwiseCorpus(
@@ -196,8 +187,6 @@ def get_corpora(opts, task=CorpusTask.TRAIN, src=None, tgt=None, align=None):
                 opts.data[CorpusName.VALID]["path_src"],
                 opts.data[CorpusName.VALID]["path_tgt"] if tgt is None else None,
                 opts.data[CorpusName.VALID]["path_align"],
-                # n_src_feats=opts.n_src_feats,
-                # src_feats_defaults=opts.src_feats_defaults,
             )
         else:
             return None
@@ -207,8 +196,6 @@ def get_corpora(opts, task=CorpusTask.TRAIN, src=None, tgt=None, align=None):
             src if src else opts.src,
             tgt if tgt else opts.tgt,
             align if align else None,
-            # n_src_feats=opts.n_src_feats,
-            # src_feats_defaults=opts.src_feats_defaults,
         )
     return corpora_dict
 
@@ -240,10 +227,7 @@ class ParallelCorpusIterator(object):
         for i, example in enumerate(stream):
             example["src"] = example["src"].strip().split(" ")
             example["src_original"] = example["src_original"].strip().split(" ")
-            # if "src_feats" in example:
-            #     example["src_feats"] = [
-            #         feat.strip().split(" ") for feat in example["src_feats"]
-            #     ]
+
             line_number = i * self.stride + self.offset
             example["cid_line_number"] = line_number
             example["cid"] = self.cid
@@ -342,10 +326,6 @@ def save_transformed_sample(opts, transforms, n_sample=3):
                             maybe_example["tgt"]["tgt"],
                         )
 
-                        # if "feats" in maybe_example["src"]:
-                        #     src_feats_lines = maybe_example["src"]["feats"]
-                        # else:
-                        #     src_feats_lines = []
                         src_feats_lines = []
 
                         src_pretty_line = append_features_to_text(

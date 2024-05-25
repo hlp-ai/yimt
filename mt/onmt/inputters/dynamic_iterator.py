@@ -239,8 +239,6 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
         tuple_bucket = process(self.task, tuple_bucket)
         for example in tuple_bucket:
             if example is not None:
-                # if self.copy:
-                #     example = _addcopykeys(self.vocabs, example)
                 bucket.append(numericalize(self.vocabs, example))
         return bucket
 
