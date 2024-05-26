@@ -99,7 +99,8 @@ class Batch_Balanced_Dataset(object):
 
         for i, data_loader_iter in enumerate(self.dataloader_iter_list):
             try:
-                image, text = data_loader_iter.next()
+                # image, text = data_loader_iter.next()
+                image, text = next(data_loader_iter)
                 balanced_batch_images.append(image)
                 balanced_batch_texts += text
             except StopIteration:
