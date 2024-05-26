@@ -37,8 +37,8 @@ def train(opt, show_number = 2, amp=False):
         print('Filtering the images containing characters which are not in opt.character')
         print('Filtering the images whose label is longer than opt.batch_max_length')
 
-    opt.select_data = opt.select_data.split('-')
-    opt.batch_ratio = opt.batch_ratio.split('-')
+    # opt.select_data = opt.select_data.split('-')
+    # opt.batch_ratio = opt.batch_ratio.split('-')
     train_dataset = Batch_Balanced_Dataset(opt)
 
     log = open(f'./saved_models/{opt.experiment_name}/log_dataset.txt', 'a', encoding="utf8")
@@ -63,8 +63,7 @@ def train(opt, show_number = 2, amp=False):
         opt.input_channel = 3
     model = Model(opt)
     print('model input parameters', opt.imgH, opt.imgW, opt.num_fiducial, opt.input_channel, opt.output_channel,
-          opt.hidden_size, opt.num_class, opt.batch_max_length, opt.Transformation, opt.FeatureExtraction,
-          opt.SequenceModeling, opt.Prediction)
+          opt.hidden_size, opt.num_class, opt.batch_max_length)
 
     if opt.saved_model != '':
         pretrained_dict = torch.load(opt.saved_model)

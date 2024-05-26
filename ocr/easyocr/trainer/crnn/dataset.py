@@ -105,7 +105,8 @@ class Batch_Balanced_Dataset(object):
                 balanced_batch_texts += text
             except StopIteration:
                 self.dataloader_iter_list[i] = iter(self.data_loader_list[i])
-                image, text = self.dataloader_iter_list[i].next()
+                # image, text = self.dataloader_iter_list[i].next()
+                image, text = next(self.dataloader_iter_list[i])
                 balanced_batch_images.append(image)
                 balanced_batch_texts += text
             except ValueError:
@@ -262,5 +263,5 @@ if __name__ == "__main__":
     train_dataset = Batch_Balanced_Dataset(opt)
     image_tensors, labels = train_dataset.get_batch()
 
-    print(image_tensors)
+    print(image_tensors.shape)
     print(labels)

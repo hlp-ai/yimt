@@ -33,6 +33,6 @@ def get_config(file_path):
 
 if __name__ == "__main__":
     conf_file = sys.argv[1]  # "config_files/en_filtered_config.yaml"
-    opt = get_config("config_files/en_filtered_config.yaml")
+    opt = get_config(conf_file)
     train(opt, amp=False)
 

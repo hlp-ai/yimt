@@ -28,7 +28,8 @@ def validation(model, criterion, evaluation_loader, converter, opt, device):
         
         start_time = time.time()
 
-        preds = model(image, text_for_pred)
+        # preds = model(image, text_for_pred)
+        preds = model(image)
         forward_time = time.time() - start_time
 
         # Calculate evaluation loss for CTC decoder.
