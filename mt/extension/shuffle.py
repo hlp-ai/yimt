@@ -22,6 +22,12 @@ def shuffle(source, out_fn, block=2):
     files = [os.path.join(source, f) for f in files]
     files = [open(f, encoding="utf-8") for f in files]
 
+    block_size = 200  # of sents
+    if block <= 0:
+        block = block_size // len(files)
+
+    print("# of block:", block)
+
     out = open(out_fn, "w", encoding="utf-8")
     total = 0
     n_files = len(files)
@@ -41,7 +47,8 @@ def shuffle(source, out_fn, block=2):
         if i >= n_files:
             i = 0
 
-        print(total, "lines")
+        if total % (block*1000) == 0:
+            print(total, "lines")
 
     out.close()
     print(total, "lines")
@@ -51,7 +58,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input", required=True, help="input directory")
     parser.add_argument("-o", "--output", required=True, help="output file")
-    parser.add_argument("-b", "--block", type=int, default=8192, help="output file")
+    parser.add_argument("-b", "--block", type=int, default=0, help="shuffle block")
     args = parser.parse_args()
 
     shuffle(args.input, args.output, block=args.block)

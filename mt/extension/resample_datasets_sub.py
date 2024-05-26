@@ -2,7 +2,7 @@
 import argparse
 import os
 
-from mnmt.resample_datasets import count_lines, sample, upsample
+from extension.resample_datasets import count_lines, sample, upsample
 
 
 def resample_prob(root, T=3.0):
