@@ -8,24 +8,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from easyocr.craft import double_conv
 from easyocr.model.modules import vgg16_bn, init_weights
-
-
-class double_conv(nn.Module):
-    def __init__(self, in_ch, mid_ch, out_ch):
-        super(double_conv, self).__init__()
-        self.conv = nn.Sequential(
-            nn.Conv2d(in_ch + mid_ch, mid_ch, kernel_size=1),
-            nn.BatchNorm2d(mid_ch),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(mid_ch, out_ch, kernel_size=3, padding=1),
-            nn.BatchNorm2d(out_ch),
-            nn.ReLU(inplace=True)
-        )
-
-    def forward(self, x):
-        x = self.conv(x)
-        return x
 
 
 class CRAFT(nn.Module):
