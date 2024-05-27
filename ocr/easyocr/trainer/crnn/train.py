@@ -9,9 +9,9 @@ import torch.utils.data
 from torch.cuda.amp import autocast, GradScaler
 import numpy as np
 
+from easyocr.model.vgg_model import Model
 from easyocr.trainer.crnn.utils import Averager
 from easyocr.trainer.crnn.dataset import hierarchical_dataset, AlignCollate, Batch_Balanced_Dataset
-from easyocr.trainer.crnn.model import Model
 from easyocr.trainer.crnn.test import validation
 from easyocr.utils import CTCLabelConverter
 
@@ -61,7 +61,8 @@ def train(opt, show_number = 2, amp=False):
 
     if opt.rgb:
         opt.input_channel = 3
-    model = Model(opt)
+    # model = Model(opt)
+    model = Model(opt.input_channel, opt.output_channel, opt.hidden_size, opt.num_class)
     print('model input parameters', opt.imgH, opt.imgW, opt.num_fiducial, opt.input_channel, opt.output_channel,
           opt.hidden_size, opt.num_class, opt.batch_max_length)
 
