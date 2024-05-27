@@ -8,7 +8,6 @@ import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
 from tqdm import tqdm
-import wandb
 
 from easyocr.trainer.craft.config.load_config import load_yaml, DotDict
 from easyocr.trainer.craft.model.craft import CRAFT
@@ -366,10 +365,6 @@ if __name__ == "__main__":
     # load configure
     config = load_yaml(args.yaml)
     config = DotDict(config)
-
-    if config["wandb_opt"]:
-        wandb.init(project="evaluation", entity="gmuffiness", name=args.yaml)
-        wandb.config.update(config)
 
     val_result_dir_name = args.yaml
     cal_eval(

@@ -6,11 +6,9 @@ import time
 import multiprocessing as mp
 import yaml
 
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import wandb
 
 from easyocr.trainer.craft.config.load_config import load_yaml, DotDict
 from easyocr.trainer.craft.data.dataset import SynthTextDataSet, CustomDataset
@@ -127,16 +125,6 @@ class Trainer(object):
             model,
             self.mode,
         )
-        if self.gpu == 0 and self.config.wandb_opt:
-            wandb.log(
-                {
-                    "{} iou Recall".format(dataset): np.round(metrics["recall"], 3),
-                    "{} iou Precision".format(dataset): np.round(
-                        metrics["precision"], 3
-                    ),
-                    "{} iou F1-score".format(dataset): np.round(metrics["hmean"], 3),
-                }
-            )
 
     def train(self, buffer_dict):
 
@@ -358,9 +346,6 @@ class Trainer(object):
                         )
                     )
 
-                    if self.gpu == 0 and self.config.wandb_opt:
-                        wandb.log({"train_step": train_step, "mean_loss": mean_loss})
-
                 if (
                     train_step % self.config.train.eval_interval == 0
                     and train_step != 0
@@ -499,11 +484,6 @@ def main_worker(gpu, port, ngpus_per_node, config, buffer_dict, exp_name, mode):
         rank=gpu,
     )
 
-    # Apply config to wandb
-    if gpu == 0 and config["wandb_opt"]:
-        wandb.init(project="craft-stage2", entity="user_name", name=exp_name)
-        wandb.config.update(config)
-
     batch_size = int(config["train"]["batch_size"] / ngpus_per_node)
     config["train"]["batch_size"] = batch_size
     config = DotDict(config)
@@ -512,12 +492,9 @@ def main_worker(gpu, port, ngpus_per_node, config, buffer_dict, exp_name, mode):
     trainer = Trainer(config, gpu, mode)
     trainer.train(buffer_dict)
 
-    if gpu == 0:
-        if config["wandb_opt"]:
-            wandb.finish()
-
     torch.distributed.barrier()
     torch.distributed.destroy_process_group()
+
 
 if __name__ == "__main__":
     main()
