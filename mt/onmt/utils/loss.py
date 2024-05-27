@@ -72,30 +72,6 @@ class LossCompute(nn.Module):
 
         tgt_shift_idx = 1 if opt.model_task == ModelTask.SEQ2SEQ else 0
 
-        # if opt.copy_attn:
-        #     criterion = onmt.modules.CopyGeneratorLoss(
-        #         len(vocab),
-        #         opt.copy_attn_force,
-        #         unk_index=unk_idx,
-        #         ignore_index=padding_idx,
-        #     )
-        # else:
-        #     if opt.generator_function == "sparsemax":
-        #         criterion = SparsemaxLoss(ignore_index=padding_idx, reduction="sum")
-        #     else:
-        #         criterion = nn.CrossEntropyLoss(
-        #             ignore_index=padding_idx,
-        #             reduction="sum",
-        #             label_smoothing=opt.label_smoothing,
-        #         )
-        # if opt.generator_function == "sparsemax":
-        #     criterion = SparsemaxLoss(ignore_index=padding_idx, reduction="sum")
-        # else:
-        #     criterion = nn.CrossEntropyLoss(
-        #         ignore_index=padding_idx,
-        #         reduction="sum",
-        #         label_smoothing=opt.label_smoothing,
-        #     )
         criterion = nn.CrossEntropyLoss(
             ignore_index=padding_idx,
             reduction="sum",
@@ -283,56 +259,6 @@ class LossCompute(nn.Module):
 
         flat_tgt = target[:, :, 0].contiguous().view(-1)
 
-        # if self.copy_attn:
-        #     align = (
-        #         batch["alignment"][:, trunc_range[0] : trunc_range[1]]
-        #         .contiguous()
-        #         .view(-1)
-        #     )
-        #     loss, scores = self._compute_copy_loss(
-        #         batch, output, flat_tgt, align, attns
-        #     )
-        #     scores_data = collapse_copy_scores(
-        #         self._unbottle(scores.clone(), len(batch["srclen"])),
-        #         batch,
-        #         self.vocab,
-        #     )
-        #     scores_data = self._bottle(scores_data)
-        #     # Correct target copy token instead of <unk>
-        #     # tgt[i] = align[i] + len(tgt_vocab)
-        #     # for i such that tgt[i] == 0 and align[i] != 0
-        #     target_data = flat_tgt.clone()
-        #     unk = self.criterion.unk_index
-        #     correct_mask = (target_data == unk) & (align != unk)
-        #     offset_align = align[correct_mask] + len(self.vocab)
-        #     target_data[correct_mask] += offset_align
-        #     scores = scores_data
-        #     flat_tgt = target_data
-        #
-        # else:
-        #     scores = self.generator(self._bottle(output))
-        #     if isinstance(self.criterion, SparsemaxLoss):
-        #         scores = LogSparsemax(scores.to(torch.float32), dim=-1)
-        #     loss = self.criterion(scores.to(torch.float32), flat_tgt)
-        #
-        #     if self.lambda_align != 0.0:
-        #         align_head = attns["align"]
-        #         if align_head.dtype != loss.dtype:  # Fix FP16
-        #             align_head = align_head.to(loss.dtype)
-        #         align_idx = batch["align"]
-        #         batch_size, pad_tgt_size, _ = batch["tgt"].size()
-        #         _, pad_src_size, _ = batch["src"].size()
-        #         align_matrix_size = [batch_size, pad_tgt_size, pad_src_size]
-        #         ref_align = onmt.utils.make_batch_align_matrix(
-        #             align_idx, align_matrix_size, normalize=True
-        #         )
-        #         ref_align = ref_align[:, trunc_range[0] : trunc_range[1], :]
-        #         if ref_align.dtype != loss.dtype:
-        #             ref_align = ref_align.to(loss.dtype)
-        #         align_loss = self._compute_alignement_loss(
-        #             align_head=align_head, ref_align=ref_align
-        #         )
-        #         loss += align_loss
         scores = self.generator(self._bottle(output))
         # if isinstance(self.criterion, SparsemaxLoss):
         #     scores = LogSparsemax(scores.to(torch.float32), dim=-1)
