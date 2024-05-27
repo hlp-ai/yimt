@@ -30,15 +30,10 @@ def build_embeddings(opt, vocabs, for_encoder=True):
         vocab.
         for_encoder(bool): build Embeddings for encoder or decoder?
     """
-    feat_pad_indices = []
-    num_feat_embeddings = []
     if for_encoder:
         emb_dim = opt.src_word_vec_size
         word_padding_idx = vocabs["src"][DefaultTokens.PAD]
         num_word_embeddings = len(vocabs["src"])
-        # if "src_feats" in vocabs:
-        #     feat_pad_indices = [fv[DefaultTokens.PAD] for fv in vocabs["src_feats"]]
-        #     num_feat_embeddings = [len(fv) for fv in vocabs["src_feats"]]
         freeze_word_vecs = opt.freeze_word_vecs_enc
     else:
         emb_dim = opt.tgt_word_vec_size
@@ -50,14 +45,9 @@ def build_embeddings(opt, vocabs, for_encoder=True):
         word_vec_size=emb_dim,
         position_encoding=opt.position_encoding,
         position_encoding_type=opt.position_encoding_type,
-        # feat_merge=opt.feat_merge,
-        # feat_vec_exponent=opt.feat_vec_exponent,
-        # feat_vec_size=opt.feat_vec_size,
         dropout=opt.dropout[0] if type(opt.dropout) is list else opt.dropout,
         word_padding_idx=word_padding_idx,
-        # feat_padding_idx=feat_pad_indices,
         word_vocab_size=num_word_embeddings,
-        # feat_vocab_sizes=num_feat_embeddings,
         sparse=opt.optim == "sparseadam",
         freeze_word_vecs=freeze_word_vecs,
     )
@@ -380,20 +370,6 @@ def build_base_model(model_opt, vocabs):
     )
     if model_opt.share_decoder_embeddings:
         generator.weight = model.decoder.embeddings.word_lut.weight
-    # if not model_opt.copy_attn:
-    #     generator = skip_init(
-    #         nn.Linear,
-    #         in_features=model_opt.dec_hid_size,
-    #         out_features=len(vocabs["tgt"]),
-    #     )
-    #     if model_opt.share_decoder_embeddings:
-    #         generator.weight = model.decoder.embeddings.word_lut.weight
-    # else:
-    #     vocab_size = len(vocabs["tgt"])
-    #     pad_idx = vocabs["tgt"][DefaultTokens.PAD]
-    #     generator = CopyGenerator(model_opt.dec_hid_size, vocab_size, pad_idx)
-    #     if model_opt.share_decoder_embeddings:
-    #         generator.linear.weight = model.decoder.embeddings.word_lut.weight
 
     model.generator = generator
 

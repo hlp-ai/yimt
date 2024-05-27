@@ -65,13 +65,6 @@ def text_sort_key(ex):
 
 def clean_example(maybe_example):
     maybe_example["src"] = {"src": " ".join(maybe_example["src"])}
-    # Make features part of src like
-    # {'src': {'src': ..., 'feats': [...., ....]}}
-    # if "src_feats" in maybe_example:
-    #     maybe_example["src"]["feats"] = [
-    #         " ".join(x) for x in maybe_example["src_feats"]
-    #     ]
-    #     del maybe_example["src_feats"]
     if maybe_example["tgt"] is not None:
         maybe_example["tgt"] = {"tgt": " ".join(maybe_example["tgt"])}
     if "align" in maybe_example:
@@ -144,11 +137,6 @@ def numericalize(vocabs, example):
     else:
         raise ValueError(f"Something went wrong with task {vocabs['data_task']}")
 
-    # if "feats" in example["src"]:
-    #     numeric_feats = []
-    #     for fv, feat in zip(vocabs["src_feats"], example["src"]["feats"]):
-    #         numeric_feats.append(fv(feat.split(" ")))
-    #     numeric["src"]["feats"] = numeric_feats
     return numeric
 
 
@@ -208,32 +196,6 @@ def tensorify(vocabs, minibatch, device, left_pad=False):
         ]
     padidx = vocabs["src"][DefaultTokens.PAD]
     tbatchsrc = pad_sequence(tbatchsrc, batch_first=True, padding_value=padidx)
-    # if "feats" in minibatch[0][0]["src"]:
-    #     tbatchfs = [tbatchsrc]
-    #     for feat_id in range(len(minibatch[0][0]["src"]["feats"])):
-    #         if left_pad:
-    #             tbatchfeat = [
-    #                 torch.tensor(
-    #                     ex["src"]["feats"][feat_id], dtype=torch.long, device=device
-    #                 ).flip(dims=[0])
-    #                 for ex, indice in minibatch
-    #             ]
-    #         else:
-    #             tbatchfeat = [
-    #                 torch.tensor(
-    #                     ex["src"]["feats"][feat_id], dtype=torch.long, device=device
-    #                 )
-    #                 for ex, indice in minibatch
-    #             ]
-    #         padidx = vocabs["src_feats"][feat_id][DefaultTokens.PAD]
-    #         tbatchfeat = pad_sequence(
-    #             tbatchfeat, batch_first=True, padding_value=padidx
-    #         )
-    #         tbatchfs.append(tbatchfeat)
-    #     tbatchsrc = torch.stack(tbatchfs, dim=2)
-    # else:
-    #     # Need to add features in last dimensions
-    #     tbatchsrc = tbatchsrc[:, :, None]
     tbatchsrc = tbatchsrc[:, :, None]
 
     if left_pad:
@@ -282,19 +244,6 @@ def tensorify(vocabs, minibatch, device, left_pad=False):
                 sparse_idx.append([i, tgt + 1, src])
         tbatchalign = torch.tensor(sparse_idx, dtype=torch.long, device=device)
         tensor_batch["align"] = tbatchalign
-
-    # if "src_map" in minibatch[0][0].keys():
-    #     src_vocab_size = max([max(ex["src_map"]) for ex, indice in minibatch]) + 1
-    #     src_map = torch.zeros(
-    #         len(tensor_batch["srclen"]),
-    #         tbatchsrc.size(1),
-    #         src_vocab_size,
-    #         device=device,
-    #     )
-    #     for i, (ex, indice) in enumerate(minibatch):
-    #         for j, t in enumerate(ex["src_map"]):
-    #             src_map[i, j, t] = 1
-    #     tensor_batch["src_map"] = src_map
 
     if "alignment" in minibatch[0][0].keys():
         alignment = torch.zeros(
