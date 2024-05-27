@@ -5,21 +5,9 @@ import torch
 import cv2
 import math
 import numpy as np
+
+from easyocr.craft_utils import warpCoord
 from easyocr.trainer.craft.data import imgproc
-
-""" auxilary functions """
-# unwarp corodinates
-
-
-
-
-def warpCoord(Minv, pt):
-    out = np.matmul(Minv, (pt[0], pt[1], 1))
-    return np.array([out[0]/out[2], out[1]/out[2]])
-""" end of auxilary functions """
-
-def test():
-    print('pass')
     
 
 def getDetBoxes_core(textmap, linkmap, text_threshold, link_threshold, low_text):
@@ -87,6 +75,7 @@ def getDetBoxes_core(textmap, linkmap, text_threshold, link_threshold, low_text)
         mapper.append(k)
 
     return det, labels, mapper
+
 
 def getPoly_core(boxes, labels, mapper, linkmap):
     # configs
@@ -234,6 +223,7 @@ def getPoly_core(boxes, labels, mapper, linkmap):
 
     return polys
 
+
 def getDetBoxes(textmap, linkmap, text_threshold, link_threshold, low_text, poly=False):
     boxes, labels, mapper = getDetBoxes_core(textmap, linkmap, text_threshold, link_threshold, low_text)
 
@@ -244,6 +234,7 @@ def getDetBoxes(textmap, linkmap, text_threshold, link_threshold, low_text, poly
 
     return boxes, polys
 
+
 def adjustResultCoordinates(polys, ratio_w, ratio_h, ratio_net = 2):
     if len(polys) > 0:
         polys = np.array(polys)
@@ -251,6 +242,7 @@ def adjustResultCoordinates(polys, ratio_w, ratio_h, ratio_net = 2):
             if polys[k] is not None:
                 polys[k] *= (ratio_w * ratio_net, ratio_h * ratio_net)
     return polys
+
 
 def save_outputs(image, region_scores, affinity_scores, text_threshold, link_threshold,
                                            low_text, outoput_path, confidence_mask = None):
