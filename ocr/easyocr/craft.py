@@ -10,6 +10,7 @@ import torch.nn.functional as F
 
 from easyocr.model.modules import vgg16_bn, init_weights
 
+
 class double_conv(nn.Module):
     def __init__(self, in_ch, mid_ch, out_ch):
         super(double_conv, self).__init__()

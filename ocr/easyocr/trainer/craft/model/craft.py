@@ -8,7 +8,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from easyocr.trainer.craft.model.vgg16_bn import vgg16_bn, init_weights
+from easyocr.model.modules import vgg16_bn, init_weights
+
 
 class double_conv(nn.Module):
     def __init__(self, in_ch, mid_ch, out_ch):
@@ -105,6 +106,7 @@ class CRAFT(nn.Module):
             y = self.conv_cls(feature)
 
             return y.permute(0, 2, 3, 1), feature
+
 
 if __name__ == '__main__':
     model = CRAFT(pretrained=True).cuda()
