@@ -2,6 +2,7 @@ from onmt.inference_engine import InferenceEnginePY
 from onmt.utils.parse import ArgumentParser
 import onmt.opts as opts
 from service.split_text import paragraph_tokenizer, paragraph_detokenizer
+from service.tm import get_tm_saver
 
 
 class Progress:
@@ -18,7 +19,7 @@ class Progress:
 
 class Translator:
 
-    def __init__(self, conf_file, lang_pair):
+    def __init__(self, conf_file, lang_pair, batch_size=32):
         base_args = ["-config", conf_file]
         parser = self._get_parser()
         self.opt = parser.parse_args(base_args)
@@ -28,17 +29,32 @@ class Translator:
         self.engine = InferenceEnginePY(self.opt)
         self.lang_pair = lang_pair
 
+        self.batch_size = batch_size  # 句子数
+
+        self.tm_saver = get_tm_saver()
+
     def translate_list(self, texts, sl=None, tl=None, callbacker=None):
+        results = []
         total = len(texts)
         done = 0
+        for i in range(0, len(texts), self.batch_size):
+            if i + self.batch_size < len(texts):
+                to_translate = texts[i:i + self.batch_size]
+            else:
+                to_translate = texts[i:]
 
-        scores, preds = self.engine.infer_list(texts)
+            scores, preds = self.engine.infer_list(to_translate)
+            translations = [p[0] for p in preds]
 
-        done = total
-        if callbacker:
-            callbacker.report(total, done)
+            self.tm_saver.save_info(self.lang_pair, to_translate, translations)
 
-        return [p[0] for p in preds]
+            results.extend(translations)
+            done += len(to_translate)
+
+            if callbacker:
+                callbacker.report(total, done)
+
+        return results
 
     def translate_paragraph(self, texts, sl=None, tl=None, callbacker=None):
         """Translate text paragraphs
