@@ -18,7 +18,7 @@ def get_config(file_path):
     opt = AttrDict(opt)
     if opt.lang_char == 'None':
         characters = ''
-        for data in opt['select_data'].split('-'):
+        for data in opt['select_data']:
             csv_path = os.path.join(opt['train_data'], data, 'labels.csv')
             df = pd.read_csv(csv_path, sep='^([^,]+),', engine='python', usecols=['filename', 'words'], keep_default_na=False)
             all_char = ''.join(df['words'])
@@ -27,6 +27,8 @@ def get_config(file_path):
         opt.character= ''.join(characters)
     else:
         opt.character = opt.number + opt.symbol + opt.lang_char
+    for i, c in enumerate(opt.character):
+        print(c, i)
     os.makedirs(f'./saved_models/{opt.experiment_name}', exist_ok=True)
     return opt
 
