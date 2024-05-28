@@ -1,0 +1,59 @@
+
+share_vocab: true
+src_vocab: ./toy-lm/sh.vocab
+
+# Prevent overwriting existing files in the folder
+overwrite: True
+
+# Corpus opts:
+data:
+    corpus_1:
+        path_src: ./toy-lm/shakespeare.txt.tok
+    valid:
+        path_src: ./toy-lm/val.txt.tok
+
+# Train on a single GPU
+world_size: 1
+gpu_ranks: [0]
+
+# Where to save the checkpoints
+save_model: ./toy-lm/run/model
+save_checkpoint_steps: 500
+train_steps: 10000
+valid_steps: 500
+report_every: 100
+
+early_stopping: 3
+early_stopping_criteria: ppl
+
+# Model
+model_task: lm
+encoder_type: transformer_lm
+decoder_type: transformer_lm
+position_encoding: true
+
+dec_layers: 2
+
+word_vec_size: 128
+hidden_size: 128
+transformer_ff: 256
+heads: 8
+
+dropout_steps: [0]
+dropout: [0.1]
+attention_dropout: [0.1]
+batch_size: 2048
+batch_type: tokens
+
+accum_count: 4
+optim: adam
+model_type: fp16
+learning_rate: 2
+warmup_steps: 4000
+decay_method: "noam"
+adam_beta2: 0.998
+max_grad_norm: 0
+label_smoothing: 0.1
+param_init: 0
+param_init_glorot: true
+normalization: "tokens"
