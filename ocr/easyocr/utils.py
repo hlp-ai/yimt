@@ -340,6 +340,7 @@ class CTCLabelConverter(object):
 
     def decode_greedy(self, text_index, length):
         """ convert text-index into text-label. """
+        text_index = text_index.cpu()
         texts = []
         index = 0
         for l in length:
