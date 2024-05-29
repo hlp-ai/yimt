@@ -1,69 +1,4 @@
-# EasyOCR
-
-[![PyPI Status](https://badge.fury.io/py/easyocr.svg)](https://badge.fury.io/py/easyocr)
-[![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/JaidedAI/EasyOCR/blob/master/LICENSE)
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.to/easyocr)
-[![Tweet](https://img.shields.io/twitter/url/https/github.com/JaidedAI/EasyOCR.svg?style=social)](https://twitter.com/intent/tweet?text=Check%20out%20this%20awesome%20library:%20EasyOCR%20https://github.com/JaidedAI/EasyOCR)
-[![Twitter](https://img.shields.io/badge/twitter-@JaidedAI-blue.svg?style=flat)](https://twitter.com/JaidedAI)
-
-Ready-to-use OCR with 80+ [supported languages](https://www.jaided.ai/easyocr) and all popular writing scripts including: Latin, Chinese, Arabic, Devanagari, Cyrillic, etc.
-
-[Try Demo on our website](https://www.jaided.ai/easyocr)
-
-Integrated into [Huggingface Spaces 🤗](https://huggingface.co/spaces) using [Gradio](https://github.com/gradio-app/gradio). Try out the Web Demo: [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/tomofi/EasyOCR)
-
-
-## What's new
-- 4 September 2023 - Version 1.7.1
-    - Fix several compatibilities
-- 25 May 2023 - Version 1.7.0
-    - Add Apple Silicon support (thanks[@rayeesoft](https://github.com/rayeesoft) and [@ArtemBernatskyy](https://github.com/ArtemBernatskyy), see [PR](https://github.com/JaidedAI/EasyOCR/pull/1004))
-    - Fix several compatibilities
-- 15 September 2022 - Version 1.6.2
-    - Add CPU support for DBnet
-    - DBnet will only be compiled when users initialize DBnet detector.  
-- 1 September 2022 - Version 1.6.1
-    - Fix DBnet path bug for Windows
-    - Add new built-in model `cyrillic_g2`. This model is a new default for Cyrillic script.
-- 24 August 2022 - Version 1.6.0
-    - Restructure code to support alternative text detectors.
-    - Add detector `DBnet`, see [paper](https://arxiv.org/abs/2202.10304v1). It can be used by initializing like this `reader = easyocr.Reader(['en'], detect_network = 'dbnet18')`.
-- 2 June 2022 - Version 1.5.0
-    - Add trainer for CRAFT detection model (thanks[@gmuffiness](https://github.com/gmuffiness), see [PR](https://github.com/JaidedAI/EasyOCR/pull/739))
-
-- [Read all release notes](https://github.com/JaidedAI/EasyOCR/blob/master/releasenotes.md)
-
-## What's coming next
-- Handwritten text support
-
-## Examples
-
-![example](examples/example.png)
-
-![example2](examples/example2.png)
-
-![example3](examples/example3.png)
-
-
-## Installation
-
-Install using `pip`
-
-For the latest stable release:
-
-``` bash
-pip install easyocr
-```
-
-For the latest development release:
-
-``` bash
-pip install git+https://github.com/JaidedAI/EasyOCR.git
-```
-
-Note 1: For Windows, please install torch and torchvision first by following the official instructions here https://pytorch.org. On the pytorch website, be sure to select the right CUDA version you have. If you intend to run on CPU mode only, select `CUDA = None`.
-
-Note 2: We also provide a Dockerfile [here](https://github.com/JaidedAI/EasyOCR/blob/master/Dockerfile).
+# OCR
 
 ## Usage
 
@@ -138,33 +73,6 @@ The idea is to be able to plug in any state-of-the-art model into EasyOCR. There
 
 ![plan](examples/easyocr_framework.jpeg)
 
-## Acknowledgement and References
-
-This project is based on research and code from several papers and open-source repositories.
-
-All deep learning execution is based on [Pytorch](https://pytorch.org). :heart:
-
-Detection execution uses the CRAFT algorithm from this [official repository](https://github.com/clovaai/CRAFT-pytorch) and their [paper](https://arxiv.org/abs/1904.01941) (Thanks @YoungminBaek from [@clovaai](https://github.com/clovaai)). We also use their pretrained model. Training script is provided by [@gmuffiness](https://github.com/gmuffiness).
-
-The recognition model is a CRNN ([paper](https://arxiv.org/abs/1507.05717)). It is composed of 3 main components: feature extraction (we are currently using [Resnet](https://arxiv.org/abs/1512.03385)) and VGG, sequence labeling ([LSTM](https://www.bioinf.jku.at/publications/older/2604.pdf)) and decoding ([CTC](https://www.cs.toronto.edu/~graves/icml_2006.pdf)). The training pipeline for recognition execution is a modified version of the [deep-text-recognition-benchmark](https://github.com/clovaai/deep-text-recognition-benchmark) framework. (Thanks [@ku21fan](https://github.com/ku21fan) from [@clovaai](https://github.com/clovaai)) This repository is a gem that deserves more recognition.
-
-Beam search code is based on this [repository](https://github.com/githubharald/CTCDecoder) and his [blog](https://towardsdatascience.com/beam-search-decoding-in-ctc-trained-neural-networks-5a889a3d85a7). (Thanks [@githubharald](https://github.com/githubharald))
-
-Data synthesis is based on [TextRecognitionDataGenerator](https://github.com/Belval/TextRecognitionDataGenerator). (Thanks [@Belval](https://github.com/Belval))
-
-And a good read about CTC from distill.pub [here](https://distill.pub/2017/ctc/).
-
-## Want To Contribute?
-
-Let's advance humanity together by making AI available to everyone!
-
-3 ways to contribute:
-
-**Coder:** Please send a PR for small bugs/improvements. For bigger ones, discuss with us by opening an issue first. There is a list of possible bug/improvement issues tagged with ['PR WELCOME'](https://github.com/JaidedAI/EasyOCR/issues?q=is%3Aissue+is%3Aopen+label%3A%22PR+WELCOME%22).
-
-**User:** Tell us how EasyOCR benefits you/your organization to encourage further development. Also post failure cases in [Issue  Section](https://github.com/JaidedAI/EasyOCR/issues) to help improve future models.
-
-**Tech leader/Guru:** If you found this library useful, please spread the word! (See [Yann Lecun's post](https://www.facebook.com/yann.lecun/posts/10157018122787143) about EasyOCR)
 
 ## Guideline for new language request
 
@@ -182,11 +90,3 @@ If your language has unique elements (such as 1. Arabic: characters change form 
 Lastly, please understand that our priority will have to go to popular languages or sets of languages that share large portions of their characters with each other (also tell us if this is the case for your language). It takes us at least a week to develop a new model, so you may have to wait a while for the new model to be released.
 
 See [List of languages in development](https://github.com/JaidedAI/EasyOCR/issues/91)
-
-## Github Issues
-
-Due to limited resources, an issue older than 6 months will be automatically closed. Please open an issue again if it is critical.
-
-## Business Inquiries
-
-For Enterprise Support, [Jaided AI](https://www.jaided.ai/) offers full service for custom OCR/AI systems from implementation, training/finetuning and deployment. Click [here](https://www.jaided.ai/contactus?ref=github) to contact us.
