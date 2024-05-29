@@ -30,6 +30,8 @@ def get_config(file_path):
     for i, c in enumerate(opt.character):
         print(c, i)
     os.makedirs(f'./saved_models/{opt.experiment_name}', exist_ok=True)
+    with open(os.path.join(f'./saved_models/{opt.experiment_name}', "vocab.txt"), "w", encoding="utf-8") as vf:
+        vf.write(opt.character)
     return opt
 
 
