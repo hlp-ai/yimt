@@ -1,0 +1,72 @@
+
+share_vocab: true
+src_vocab: /root/autodl-tmp/lm/wiki103.vocab
+
+src_seq_length: 512
+tgt_seq_length: 512
+
+src_subword_model: /root/autodl-tmp/lm/train.csv-sp-32000.model
+tgt_subword_model: /root/autodl-tmp/lm/train.csv-sp-32000.model
+
+# Prevent overwriting existing files in the folder
+overwrite: True
+
+skip_empty_level: silent
+
+# Corpus opts:
+data:
+    alpaca:
+        path_src: /root/autodl-tmp/lm/alpaca_clean.txt
+        transforms: [sentencepiece, filtertoolong]
+        weight: 10
+    sharegpt:
+        path_src: /root/autodl-tmp/lm/sharegpt.txt
+        transforms: [sentencepiece, filtertoolong]
+        weight: 10
+
+# Train on a single GPU
+world_size: 1
+gpu_ranks: [0]
+
+# Where to save the checkpoints
+train_from: /root/autodl-tmp/lm/run/model_step_46000.pt
+save_model: /root/autodl-tmp/lm/run/chat-model
+save_checkpoint_steps: 500
+keep_checkpoint: 6
+train_steps: 40000
+report_every: 100
+tensorboard: true
+tensorboard_log_dir: /root/autodl-tmp/lm/run/tensorboard
+
+early_stopping: 3
+early_stopping_criteria: ppl
+
+# Model
+model_task: lm
+encoder_type: transformer_lm
+decoder_type: transformer_lm
+position_encoding: true
+dec_layers: 6
+heads: 8
+hidden_size: 512
+word_vec_size: 512
+transformer_ff: 2048
+dropout_steps: [0]
+dropout: [0.1]
+attention_dropout: [0.1]
+
+bucket_size: 262144
+batch_size: 4096
+valid_batch_size: 2048
+batch_type: tokens
+
+model_type: fp16
+optim: adam
+accum_count: 4
+learning_rate : 2e-05
+adam_beta2: 0.998
+max_grad_norm: 0
+label_smoothing: 0.1
+param_init: 0
+param_init_glorot: true
+normalization: "tokens"
