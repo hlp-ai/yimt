@@ -46,7 +46,7 @@ def wikitext_detokenizer(line):
 def tokenize_dataset(opt, context_length):
     print("Tokenization...")
     # Clean and Concat the dataset
-    xx = open(opt.src, "r").readlines()
+    xx = open(opt.src, "r", encoding="utf-8").readlines()
     if "sentencepiece" in opt.transforms:
         from onmt.transforms.tokenize import SentencePieceTransform
 
@@ -84,7 +84,7 @@ def evaluate(opt):
     set_random_seed(opt.seed, use_gpu(opt))
 
     # Tokenize the dataset.
-    opt.src = "eval_llm/WIKITEXT2/wikitext-2-raw-v1/wikitext-2-raw/wiki.test.raw"
+    # opt.src = "eval_llm/WIKITEXT2/wikitext-2-raw-v1/wikitext-2-raw/wiki.test.raw"
     tokens = tokenize_dataset(opt, context_length=512)
 
     # Build the translator (along with the model.

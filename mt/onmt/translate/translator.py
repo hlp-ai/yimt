@@ -275,7 +275,7 @@ class Inference(object):
     ):
         if "tgt" in batch.keys() and not self.tgt_file_prefix:
             gs, glp = self._score_target(
-                batch, enc_out, src_len, None
+                batch, enc_out, src_len
             )
             self.model.decoder.init_state(src, enc_out, enc_final_hs)
         else:
