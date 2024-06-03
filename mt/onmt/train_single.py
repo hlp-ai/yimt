@@ -1,21 +1,17 @@
 #!/usr/bin/env python
 """Training on a single process."""
 import torch
-import sys
 
 from onmt.utils.logging import init_logger, logger
 from onmt.utils.parse import ArgumentParser
 from onmt.constants import CorpusTask
 from onmt.transforms import (
-    make_transforms,
-    save_transforms,
     get_specials,
     get_transforms_cls,
 )
 from onmt.inputters import build_vocab
 from onmt.inputters.inputter import dict_to_vocabs, vocabs_to_dict
 from onmt.inputters.dynamic_iterator import build_dynamic_dataset_iter
-from onmt.inputters.text_corpus import save_transformed_sample
 from onmt.model_builder import build_model
 from onmt.models.model_saver import load_checkpoint
 from onmt.utils.optimizers import Optimizer
@@ -48,18 +44,6 @@ def prepare_transforms_vocabs(opt, transforms_cls):
     # maybe prepare pretrained embeddings, if any
     prepare_pretrained_embeddings(opt, vocabs)
 
-    if opt.dump_transforms or opt.n_sample != 0:
-        transforms = make_transforms(opt, transforms_cls, vocabs)
-    if opt.dump_transforms:
-        save_transforms(transforms, opt.save_data, overwrite=opt.overwrite)
-    if opt.n_sample != 0:
-        logger.warning(
-            "`-n_sample` != 0: Training will not be started. "
-            f"Stop after saving {opt.n_sample} samples/corpus."
-        )
-        save_transformed_sample(opt, transforms, n_sample=opt.n_sample)
-        logger.info("Sample saved, please check it before restart training.")
-        sys.exit()
     logger.info(
         "The first 10 tokens of the vocabs are:"
         f"{vocabs_to_dict(vocabs)['src'][0:10]}"
