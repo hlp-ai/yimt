@@ -81,20 +81,7 @@ def _add_logging_opts(parser, is_train=True):
             default=50,
             help="Print stats at this interval.",
         )
-        group.add(
-            "--exp_host",
-            "-exp_host",
-            type=str,
-            default="",
-            help="Send logs to this crayon server.",
-        )
-        group.add(
-            "--exp",
-            "-exp",
-            type=str,
-            default="",
-            help="Name of the experiment for logging.",
-        )
+
         # Use Tensorboard for visualization during training
         group.add(
             "--tensorboard",
