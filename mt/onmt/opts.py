@@ -247,8 +247,6 @@ def _add_vocab_opts(parser, build_vocab_only=False):
         " typically <unk> <blank> <s> </s> ",
     )
 
-    # _add_features_opts(parser)
-
     if not build_vocab_only:
         group.add(
             "-src_vocab_size",
@@ -801,27 +799,6 @@ def model_opts(parser):
         help="Which function to use for generating "
         "probabilities over the target vocabulary (choices: "
         "softmax)",
-    )
-    group.add(
-        "--lm_prior_model",
-        "-lm_prior_model",
-        type=str,
-        default=None,
-        help="LM model to used to train the TM",
-    )
-    group.add(
-        "--lm_prior_lambda",
-        "-lambda_prior_lambda",
-        type=float,
-        default=0.0,
-        help="LM Prior Lambda",
-    )
-    group.add(
-        "--lm_prior_tau",
-        "-lambda_prior_tau",
-        type=float,
-        default=1.0,
-        help="LM Prior Tau",
     )
     group.add(
         "--loss_scale",
