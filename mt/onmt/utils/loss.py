@@ -28,9 +28,6 @@ class LossCompute(nn.Module):
         vocab: target vocab (for copy attention score calculation)
              module that maps the output of the decoder to a
              distribution over the target vocabulary.
-        lm_generator (:obj:`ctranslate2.Generator`): LM Generator
-        lm_prior_lambda (float): weight of LM model in loss
-        lm_prior_tau (float): scaler for LM loss
     """
 
     def __init__(
@@ -40,10 +37,6 @@ class LossCompute(nn.Module):
         lambda_align=0.0,
         tgt_shift_index=1,
         vocab=None,
-        lm_generator=None,
-        lm_prior_lambda=None,
-        lm_prior_tau=None,
-        lm_prior_model=None,
     ):
         super(LossCompute, self).__init__()
         self.criterion = criterion
@@ -51,10 +44,6 @@ class LossCompute(nn.Module):
         self.lambda_align = lambda_align
         self.tgt_shift_index = tgt_shift_index
         self.vocab = vocab  # target vocab for copy_attn need
-        # self.lm_generator = lm_generator
-        # self.lm_prior_lambda = lm_prior_lambda
-        # self.lm_prior_tau = lm_prior_tau
-        # self.lm_prior_model = lm_prior_model
 
     @classmethod
     def from_opts(cls, opt, model, vocab, train=True):
@@ -78,43 +67,12 @@ class LossCompute(nn.Module):
             label_smoothing=opt.label_smoothing,
         )
 
-        # lm_prior_lambda = opt.lm_prior_lambda
-        # lm_prior_tau = opt.lm_prior_tau
-        # if opt.lm_prior_model:
-        #     if opt.lm_prior_model[-3:] == ".pt":
-        #         opt.gpu = 0
-        #         opt.fp32 = False
-        #         opt.int8 = False
-        #         _, lm_prior_model, lm_model_opt = load_test_model(
-        #             opt, model_path=opt.lm_prior_model
-        #         )
-        #         lm_prior_model.to(torch.device("cuda", opt.gpu))
-        #         lm_prior_model.eval()
-        #         lm_generator = None
-        #     else:
-        #         lm_prior_model = None
-        #         try:
-        #             import ctranslate2
-        #
-        #             lm_generator = ctranslate2.Generator(
-        #                 opt.lm_prior_model, device="cuda", compute_type="float16"
-        #             )
-        #         except ImportError:
-        #             raise ImportError("Could not import ctranslate2")
-        # else:
-        #     lm_generator = None
-        #     lm_prior_model = None
-
         compute = cls(
             criterion,
             model.generator,
             lambda_align=opt.lambda_align,
             tgt_shift_index=tgt_shift_idx,
             vocab=vocab,
-            # lm_generator=lm_generator,
-            # lm_prior_lambda=lm_prior_lambda,
-            # lm_prior_tau=lm_prior_tau,
-            # lm_prior_model=lm_prior_model,
         )
         compute.to(device)
 
@@ -134,70 +92,6 @@ class LossCompute(nn.Module):
         align_loss *= self.lambda_align
         return align_loss
 
-    # def _compute_lm_loss_ct2(self, output, target):
-    #     """
-    #     Compute the loss between MT output and LM output
-    #     https://github.com/cbaziotis/lm-prior-for-nmt/blob/master
-    #     /fairseq_extension/user/lm_prior/lm_prior.py#L131-L133
-    #     """
-    #
-    #     # rescale with tau (temperature) and apply the log_softmax.
-    #     scores = self.generator(self._bottle(output)) / self.lm_prior_tau
-    #     scores = F.log_softmax(scores.to(torch.float32), dim=-1)
-    #
-    #     src = target.detach().clone()
-    #     src[src == self.vocab[DefaultTokens.EOS]] = self.padding_idx
-    #     src = src[:, :-1, :]
-    #     src_len = src[:, :, 0].ne(self.padding_idx).sum(1)
-    #     # ct2 expects src with lengths without padding
-    #     lm_scores = self.lm_generator.forward_batch(
-    #         ctranslate2.StorageView.from_array(src[:, :, 0].to(torch.int32)),
-    #         ctranslate2.StorageView.from_array(src_len.to(torch.int32)),
-    #         return_log_probs=False,
-    #     )
-    #     lm_scores = torch.as_tensor(lm_scores, device=scores.device)
-    #     # again we use raw probs to rescale with tau and apply log_softmax
-    #     lm_scores = self._bottle(lm_scores) / self.lm_prior_tau
-    #     lm_scores = F.log_softmax(lm_scores.to(torch.float32), dim=-1)
-    #     lm_scores[:, self.vocab[DefaultTokens.UNK]] = -50
-    #     lm_scores[:, self.vocab[DefaultTokens.EOS]] -= 20
-    #     # lm_scores are in log space so log_target=True
-    #     lm_loss = F.kl_div(scores, lm_scores, reduction="none", log_target=True).sum(-1)
-    #     non_padding = self._bottle(output).ne(self.padding_idx)[:, 0]
-    #     lm_loss = lm_loss.masked_select(non_padding).sum()
-    #     lm_loss = lm_loss * (self.lm_prior_tau**2)
-    #     return lm_loss
-
-    # def _compute_lm_loss(self, output, target):
-    #     """
-    #     Compute the loss between MT output and LM output
-    #     https://github.com/cbaziotis/lm-prior-for-nmt/blob/master
-    #     /fairseq_extension/user/lm_prior/lm_prior.py#L131-L133
-    #     """
-    #     # rescale with tau (temperature) and apply the log_softmax.
-    #     scores = self.generator(self._bottle(output)) / self.lm_prior_tau
-    #     scores = F.log_softmax(scores.to(torch.float32), dim=-1)
-    #
-    #     src = target.detach().clone()
-    #     src[src == self.vocab[DefaultTokens.EOS]] = self.padding_idx
-    #     src = src[:, :-1, :]
-    #     src_len = src[:, :, 0].ne(self.padding_idx).sum(1)
-    #     # ct2 expects src with lengths without padding
-    #     lm_outs, _ = self.lm_prior_model(src, None, src_len, with_align=False)
-    #     lm_scores = (
-    #         self.lm_prior_model.generator(self._bottle(lm_outs)).detach().clone()
-    #         / self.lm_prior_tau
-    #     )
-    #     # again we use raw probs to rescale with tau and apply log_softmax
-    #     lm_scores = F.log_softmax(lm_scores.to(torch.float32), dim=-1)
-    #     lm_scores[:, self.vocab[DefaultTokens.UNK]] = -50
-    #     lm_scores[:, self.vocab[DefaultTokens.EOS]] -= 20
-    #     # lm_scores are in log space so log_target=True
-    #     lm_loss = F.kl_div(scores, lm_scores, reduction="none", log_target=True).sum(-1)
-    #     non_padding = self._bottle(output).ne(self.padding_idx)[:, 0]
-    #     lm_loss = lm_loss.masked_select(non_padding).sum()
-    #     lm_loss = lm_loss * (self.lm_prior_tau**2)
-    #     return lm_loss
 
     def _bottle(self, _v):
         return _v.view(-1, _v.size(2))
@@ -260,8 +154,6 @@ class LossCompute(nn.Module):
         flat_tgt = target[:, :, 0].contiguous().view(-1)
 
         scores = self.generator(self._bottle(output))
-        # if isinstance(self.criterion, SparsemaxLoss):
-        #     scores = LogSparsemax(scores.to(torch.float32), dim=-1)
         loss = self.criterion(scores.to(torch.float32), flat_tgt)
 
         if self.lambda_align != 0.0:
@@ -282,14 +174,6 @@ class LossCompute(nn.Module):
                 align_head=align_head, ref_align=ref_align
             )
             loss += align_loss
-
-        # if self.lm_generator is not None:
-        #     lm_loss = self._compute_lm_loss_ct2(output, batch["tgt"])
-        #     loss = loss + lm_loss * self.lm_prior_lambda
-
-        # if self.lm_prior_model is not None:
-        #     lm_loss = self._compute_lm_loss(output, batch["tgt"])
-        #     loss = loss + lm_loss * self.lm_prior_lambda
 
         n_sents = len(batch["srclen"]) if trunc_start == 0 else 0
         stats = self._stats(n_sents, loss.sum().item(), scores, flat_tgt)
