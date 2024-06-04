@@ -135,12 +135,3 @@ result = whisper.decode(model, mel, options)
 # print the recognized text
 print(result.text)
 ```
-
-## More examples
-
-Please use the [🙌 Show and tell](https://github.com/openai/whisper/discussions/categories/show-and-tell) category in Discussions for sharing more example usages of Whisper and third-party extensions such as web demos, integrations with other tools, ports for different platforms, etc.
-
-
-## License
-
-Whisper's code and model weights are released under the MIT License. See [LICENSE](https://github.com/openai/whisper/blob/main/LICENSE) for further details.
