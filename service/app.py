@@ -561,7 +561,7 @@ def create_app(args):
     # @access_check
     def request_ad():
         json = get_json_dict(request)
-        log_service.info("/add: {}".format(json))
+        log_service.info("/ad: {}".format(json))
 
         platform = json.get("platform")
         support_platforms = ["app", "web", "plugin"]
