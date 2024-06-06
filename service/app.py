@@ -13,6 +13,7 @@ from extension.files.translate_files import translate_doc, support
 from extension.files.translate_html import translate_tag_list
 from extension.files.translate_tag import translate_html
 from service import remove_translated_files
+from service.ad_db import get_addb
 from service.api_keys import APIKeyDB
 from service.asr import AudioRecognizers, amr2wav
 from service.mt import Progress, translator_factory
@@ -122,6 +123,8 @@ def create_app(args):
     lang_pairs, from_langs, to_langs, langs_api = translators.support_languages()
 
     api_keys_db = None
+
+    addb = get_addb()
 
     if args.req_limit > 0 or args.api_keys or args.daily_req_limit > 0:
         print("Applying request limit...")
@@ -472,7 +475,6 @@ def create_app(args):
             "type": "wav"
         })
 
-
     @app.post("/translate_file")
     @access_check
     def translate_file():
@@ -529,7 +531,6 @@ def create_app(args):
         except Exception as e:
             abort(500, description=e)
 
-
     @app.get("/download_file/<string:filename>")
     def download_file(filename: str):
         """Download a translated file"""
@@ -571,23 +572,26 @@ def create_app(args):
         if platform not in support_platforms:
             abort(400, description="platform %s is not supported" % platform)
 
-        ad_id = "AD-20221020"
         if platform == "web" or platform == "app":
             type = "image"
         else:
             type = "text"
 
-        ad_text = "Welcome!\n This is a just test."
+        ad = addb.get_ad(type)
+        ad_id = ad[0]
+
+        # ad_text = "Welcome!\n This is a just test."
         if type == "text":
-            content = ad_text
+            content = ad[2]
         else:
+            img_file = ad[2]
             import base64
-            with open("./static/img/ad11.png", "rb") as image_file:  # 设置本地图片路径
+            with open(img_file, "rb") as image_file:  # 设置本地图片路径
                 encoded_image = base64.b64encode(image_file.read())
             image_file.close()
             content = encoded_image.decode('utf-8')
 
-        ad_url = "http://www.hust.edu.cn/"  # for test
+        ad_url = ad[3]
 
         log_service.info("/request_ad: " + "platform=" + platform + "&ad_id=" + ad_id)
 
@@ -611,7 +615,6 @@ def create_app(args):
         if args.disable_web_ui:
             abort(404)
         return render_template('reference.html')
-
 
     @app.route("/translate_file_progress", methods=['GET', 'POST'])
     def get_translate_progress():
