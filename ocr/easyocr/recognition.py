@@ -136,9 +136,6 @@ def recognizer_predict(model, converter, test_loader, batch_max_length, \
             elif decoder == 'beamsearch':
                 k = preds_prob.cpu().detach().numpy()
                 preds_str = converter.decode_beamsearch(k, beamWidth=beamWidth)
-            elif decoder == 'wordbeamsearch':
-                k = preds_prob.cpu().detach().numpy()
-                preds_str = converter.decode_wordbeamsearch(k, beamWidth=beamWidth)
 
             preds_prob = preds_prob.cpu().detach().numpy()
             values = preds_prob.max(axis=2)

@@ -28,40 +28,6 @@ def consecutive(data, mode='first', stepsize=1):
     return result
 
 
-def word_segmentation(mat, separator_idx={'th': [1, 2], 'en': [3, 4]}, separator_idx_list=[1, 2, 3, 4]):
-    result = []
-    sep_list = []
-    start_idx = 0
-    sep_lang = ''
-    for sep_idx in separator_idx_list:
-        if sep_idx % 2 == 0:
-            mode = 'first'
-        else:
-            mode = 'last'
-        a = consecutive(np.argwhere(mat == sep_idx).flatten(), mode)
-        new_sep = [[item, sep_idx] for item in a]
-        sep_list += new_sep
-    sep_list = sorted(sep_list, key=lambda x: x[0])
-
-    for sep in sep_list:
-        for lang in separator_idx.keys():
-            if sep[1] == separator_idx[lang][0]:  # start lang
-                sep_lang = lang
-                sep_start_idx = sep[0]
-            elif sep[1] == separator_idx[lang][1]:  # end lang
-                if sep_lang == lang:  # check if last entry if the same start lang
-                    new_sep_pair = [lang, [sep_start_idx + 1, sep[0] - 1]]
-                    if sep_start_idx > start_idx:
-                        result.append(['', [start_idx, sep_start_idx - 1]])
-                    start_idx = sep[0] + 1
-                    result.append(new_sep_pair)
-                sep_lang = ''  # reset
-
-    if start_idx <= len(mat) - 1:
-        result.append(['', [start_idx, len(mat) - 1]])
-    return result
-
-
 # code is based from https://github.com/githubharald/CTCDecoder/blob/master/src/BeamSearch.py
 class BeamEntry:
     "information about one single beam at specific time-step"
@@ -362,45 +328,6 @@ class CTCLabelConverter(object):
         for i in range(mat.shape[0]):
             t = ctcBeamSearch(mat[i], self.character, self.ignore_idx, None, beamWidth=beamWidth)
             texts.append(t)
-        return texts
-
-    def decode_wordbeamsearch(self, mat, beamWidth=5):
-        texts = []
-        argmax = np.argmax(mat, axis=2)
-
-        for i in range(mat.shape[0]):
-            string = ''
-            # without separators - use space as separator
-            if len(self.separator_list) == 0:
-                space_idx = self.dict[' ']
-
-                data = np.argwhere(argmax[i] != space_idx).flatten()
-                group = np.split(data, np.where(np.diff(data) != 1)[0] + 1)
-                group = [list(item) for item in group if len(item) > 0]
-
-                for j, list_idx in enumerate(group):
-                    matrix = mat[i, list_idx, :]
-                    t = ctcBeamSearch(matrix, self.character, self.ignore_idx, None, \
-                                      beamWidth=beamWidth, dict_list=self.dict_list)
-                    if j == 0:
-                        string += t
-                    else:
-                        string += ' ' + t
-
-            # with separators
-            else:
-                words = word_segmentation(argmax[i])
-
-                for word in words:
-                    matrix = mat[i, word[1][0]:word[1][1] + 1, :]
-                    if word[0] == '':
-                        dict_list = []
-                    else:
-                        dict_list = self.dict_list[word[0]]
-                    t = ctcBeamSearch(matrix, self.character, self.ignore_idx, None, beamWidth=beamWidth,
-                                      dict_list=dict_list)
-                    string += t
-            texts.append(string)
         return texts
 
 

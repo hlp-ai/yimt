@@ -82,7 +82,7 @@ def parse_args():
     parser.add_argument(
         "--decoder",
         type=str,
-        choices=["greedy", 'beamsearch', 'wordbeamsearch'],
+        choices=["greedy", 'beamsearch'],
         default='greedy',
         help="decoder algorithm",
     )
