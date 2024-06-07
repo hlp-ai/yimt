@@ -572,7 +572,7 @@ def create_app(args):
         if platform not in support_platforms:
             abort(400, description="platform %s is not supported" % platform)
 
-        if platform == "web" or platform == "app":
+        if platform == "web":
             type = "image"
         else:
             type = "text"
