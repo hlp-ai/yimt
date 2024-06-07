@@ -316,8 +316,8 @@ body {
     display: block;
     font-family: ArialMT,"Microsoft YaHei",Arial,sans-serif,Helvetica,STHeiti;
     width: 100%;
-    height: 200px;
-    min-height: 156px;
+    height: 300px;
+    min-height: 256px;
     padding: 20;
     border: none;
     resize: none;
@@ -358,8 +358,8 @@ body {
     display: block;
     font-family: ArialMT,"Microsoft YaHei",Arial,sans-serif,Helvetica,STHeiti;
     width: 100%;
-    height: 200px;
-    min-height: 156px;
+    height: 300px;
+    min-height: 256px;
     padding: 20;
     border: none;
     resize: none;
