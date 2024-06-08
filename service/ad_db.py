@@ -9,10 +9,10 @@ class ADDB:
 
 class ADList(ADDB):
     def __init__(self):
-        self.all_ad = {"image": [("AD-20221020", "image", "./static/img/ad11.png", "url-a"),
-                                 ("AD-20221021", "image", "./static/img/ad1.png", "url-b")],
-                       "text": [("AD-20221022", "type", "广告内容1广告内容", "url-c"),
-                                ("AD-20221023", "type", "广告内容2广告内容", "url-d")]
+        self.all_ad = {"image": [("AD-20221020", "image", "./static/img/ad11.png", "https://www.hust.edu.cn"),
+                                 ("AD-20221021", "image", "./static/img/ad1.png", "https://www.hust.edu.cn")],
+                       "text": [("AD-20221022", "type", "广告内容1广告内容", "https://www.hust.edu.cn"),
+                                ("AD-20221023", "type", "广告内容2广告内容", "https://www.hust.edu.cn")]
                        }
 
     def get_ad(self, type):
