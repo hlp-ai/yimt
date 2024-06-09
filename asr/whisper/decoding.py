@@ -9,7 +9,7 @@ from torch.distributions import Categorical
 
 from .audio import CHUNK_LENGTH
 from .tokenizer import Tokenizer, get_tokenizer
-from .utils import compression_ratio
+# from .utils import compression_ratio
 
 if TYPE_CHECKING:
     from .model import Whisper
@@ -781,7 +781,7 @@ class DecodingTask:
                 avg_logprob=avg_logprob,
                 no_speech_prob=no_speech_prob,
                 temperature=self.options.temperature,
-                compression_ratio=compression_ratio(text),
+                # compression_ratio=compression_ratio(text),
             )
             for text, language, tokens, features, avg_logprob, no_speech_prob in zip(
                 *fields

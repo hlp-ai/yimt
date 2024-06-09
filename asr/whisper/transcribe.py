@@ -21,10 +21,10 @@ from .decoding import DecodingOptions, DecodingResult
 from .tokenizer import LANGUAGES, TO_LANGUAGE_CODE, get_tokenizer
 from .utils import (
     exact_div,
-    format_timestamp,
-    get_end,
+    # format_timestamp,
+    # get_end,
     get_writer,
-    make_safe,
+    # make_safe,
     optional_float,
     optional_int,
     str2bool,
@@ -377,11 +377,11 @@ def transcribe(
                 )
                 seek += segment_size
 
-            if verbose:
-                for segment in current_segments:
-                    start, end, text = segment["start"], segment["end"], segment["text"]
-                    line = f"[{format_timestamp(start)} --> {format_timestamp(end)}] {text}"
-                    print(make_safe(line))
+            # if verbose:
+            #     for segment in current_segments:
+            #         start, end, text = segment["start"], segment["end"], segment["text"]
+            #         line = f"[{format_timestamp(start)} --> {format_timestamp(end)}] {text}"
+            #         print(make_safe(line))
 
             # if a segment is instantaneous or does not contain text, clear it
             for i, segment in enumerate(current_segments):
