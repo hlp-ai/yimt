@@ -40,3 +40,15 @@ async function request_ad(){
         document.getElementById("product1_content").innerText = "出错啦";
     }
 }
+
+async function request_languages(){
+    const res = await fetch(END_POINT + "/languages", {method: "GET");
+    ret_json = await res.json();
+
+    console.log("languages: "+ret_json);
+
+    //var sel_langs_source = document.getElementById("source");
+    //var sel_langs_target = document.getElementById("target");
+	//var opt = new Option("123456", 01);  //第一个代表标签内的内容，第二个代表value
+	//sel_langs_source.options.add(opt);
+}
