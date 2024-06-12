@@ -42,13 +42,23 @@ async function request_ad(){
 }
 
 async function request_languages(){
-    const res = await fetch(END_POINT + "/languages", {method: "GET");
+    const res = await fetch(END_POINT + "/languages", {method: "GET"});
     ret_json = await res.json();
 
     console.log("languages: "+ret_json);
 
-    //var sel_langs_source = document.getElementById("source");
-    //var sel_langs_target = document.getElementById("target");
-	//var opt = new Option("123456", 01);  //第一个代表标签内的内容，第二个代表value
-	//sel_langs_source.options.add(opt);
+    var sel_langs_source = document.getElementById("source");
+    var sel_langs_target = document.getElementById("target");
+
+    var opt_src = new Option("自动检测", "auto");  //第一个代表标签内的内容，第二个代表value
+	sel_langs_source.options.add(opt_src);
+
+    for(var idx in ret_json){
+        console.log(ret_json[idx].code)
+
+        var opt_src = new Option(ret_json[idx].cname, ret_json[idx].code);  //第一个代表标签内的内容，第二个代表value
+	    sel_langs_source.options.add(opt_src);
+	    var opt_tgt = new Option(ret_json[idx].cname, ret_json[idx].code);  //第一个代表标签内的内容，第二个代表value
+	    sel_langs_target.options.add(opt_tgt);
+    }
 }
