@@ -1,0 +1,16 @@
+translators:
+  zh-x-test:
+    model_or_config_dir: D:\dataset\mnmt\zh-x\avg.yml
+    sp_src_path: D:\dataset\mnmt\sp\en-zh.tsv.zh-sp-32000.model
+    pretok_src: false
+    pretok_tgt: false
+    directions:
+      - zh-en
+      - zh-ja
+      - zh-ar
+
+languages:
+  - {code: en, name: English, cname: 英语}
+  - {code: zh, name: Chinese, cname: 汉语}
+  - {code: ja, name: Japanese, cname: 日日语}
+  - {code: ar, name: Arabic, cname: 阿拉伯语}
