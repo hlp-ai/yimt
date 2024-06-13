@@ -1,3 +1,7 @@
+import os
+
+import yaml
+
 from onmt.inference_engine import InferenceEnginePY
 from onmt.utils.parse import ArgumentParser
 import onmt.opts as opts
@@ -110,7 +114,9 @@ class ZhEnJaArTranslator(Translator):
 
 class Translators(object):
 
-    def __init__(self):
+    def __init__(self, config_path=os.path.join(os.path.dirname(__file__), "translators.yml")):
+        self.config_file = config_path
+
         self.languages = [
             {"code": "zh", "name": "Chinese", "cname": "中文"},
             {"code": "en", "name": "English", "cname": "英文"},
@@ -124,6 +130,28 @@ class Translators(object):
 
         self.translators = {"zh-en": translator,
                             "zh-ja": translator}
+
+    def load_config(self):
+        """Get translators from config file
+
+        Returns:
+             dictionary from language pair to translator parameter, list of language pairs
+        """
+        translators = {}
+        with open(self.config_file, encoding="utf-8") as config_f:
+            config = yaml.safe_load(config_f.read())
+
+        lang_pairs = set()
+        for name, params in config.get("translators").items():
+            translators[name] = params
+            for p in params["directions"]:
+                lang_pairs.add(p)
+
+        lang_infos = []
+        for lang in config.get("languages"):
+            lang_infos.append(lang)
+
+        return translators, lang_pairs, lang_infos
 
     def support_languages(self):
         return self.lang_pairs, self.from_langs, self.to_langs, self.languages
