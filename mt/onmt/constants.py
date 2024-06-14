@@ -18,7 +18,6 @@ class DefaultTokens(object):
 class CorpusName(object):
     VALID = "valid"
     TRAIN = "train"
-    SAMPLE = "sample"
     INFER = "infer"
 
 
