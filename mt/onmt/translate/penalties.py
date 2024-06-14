@@ -1,7 +1,6 @@
 
-
 class PenaltyBuilder(object):
-    """Returns the Length and Coverage Penalty function for Beam Search.
+    """Returns the Length Penalty function for Beam Search.
 
     Args:
         length_pen (str): option name of length pen
