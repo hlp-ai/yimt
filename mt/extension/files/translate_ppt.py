@@ -53,7 +53,7 @@ def translate_ppt_auto(in_fn, source_lang="auto", target_lang="zh", translation_
         callbacker.set_tag(docx_fn)
 
     txt_list = [r.text for r in runs]
-    result_list = translator.translate_list(txt_list, callbacker=callbacker)  # translate
+    result_list = translator.translate_list(txt_list, sl=source_lang, tl=target_lang, callbacker=callbacker)  # translate
     for i in range(len(runs)):
         runs[i].text = result_list[i]
 

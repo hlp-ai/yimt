@@ -60,7 +60,7 @@ def translate_tag_list(markup_strs, source_lang="auto", target_lang="zh", callba
     from service.mt import translator_factory
     translator = translator_factory.get_translator(source_lang, target_lang)
 
-    translations = translator.translate_list(to_translated_list, callbacker=callbacker)
+    translations = translator.translate_list(to_translated_list, sl=source_lang, tl=target_lang, callbacker=callbacker)
 
     idx  = 0
     for i in range(len(markups)):

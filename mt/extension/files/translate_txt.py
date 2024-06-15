@@ -23,7 +23,7 @@ def translate_txt_auto(txt_fn, source_lang="auto", target_lang="zh", translation
     if callbacker:
         callbacker.set_tag(txt_fn)
 
-    translation = translator.translate_paragraph(txt, callbacker)
+    translation = translator.translate_paragraph(txt, source_lang, target_lang, callbacker)
 
     out_f = open(translated_txt_fn, "w", encoding="utf-8")
     out_f.write(translation)

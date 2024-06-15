@@ -317,23 +317,23 @@ def create_app(args):
         if source_lang == "auto":
             source_lang = detect_lang(q)
 
-        if source_lang not in from_langs:
-            abort(400, description="Source language %s is not supported" % source_lang)
-
-        if target_lang not in to_langs:
-            abort(400, description="Target language %s is not supported" % target_lang)
+        # if source_lang not in from_langs:
+        #     abort(400, description="Source language %s is not supported" % source_lang)
+        #
+        # if target_lang not in to_langs:
+        #     abort(400, description="Target language %s is not supported" % target_lang)
 
         src = q
-        lang = source_lang + "-" + target_lang
+        lang_pair = source_lang + "-" + target_lang
 
         translator = translators.get_translator(source_lang, target_lang)
         if translator is None:
-            abort(400, description="Language pair %s is not supported" % lang)
+            abort(400, description="Language pair %s is not supported" % lang_pair)
 
         if text_format == "html":
             translation = str(translate_html(translator, src))
         else:
-            translation = translator.translate_paragraph(src)
+            translation = translator.translate_paragraph(src, source_lang, target_lang)
 
         log_service.info("/translate: " + "&source=" + source_lang + "&target=" + target_lang
                          + "&format=" + text_format + "&api_key=" + api_key)
