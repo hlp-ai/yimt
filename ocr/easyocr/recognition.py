@@ -102,19 +102,15 @@ class AlignCollate(object):
         return image_tensors
 
 
-def recognizer_predict(model, converter, test_loader, batch_max_length, \
-                       ignore_idx, char_group_idx, decoder='greedy', beamWidth=5, device='cpu'):
+def recognizer_predict(model, converter, test_loader,
+                       ignore_idx, decoder='greedy', beamWidth=5, device='cpu'):
     model.eval()
     result = []
     with torch.no_grad():
         for image_tensors in test_loader:
             batch_size = image_tensors.size(0)
             image = image_tensors.to(device)
-            # For max length prediction
-            length_for_pred = torch.IntTensor([batch_max_length] * batch_size).to(device)
-            text_for_pred = torch.LongTensor(batch_size, batch_max_length + 1).fill_(0).to(device)
 
-            # preds = model(image, text_for_pred)
             preds = model(image)
 
             # Select max probabilty (greedy decoding) then decode index to character
@@ -191,9 +187,6 @@ def get_recognizer(recog_network, network_params, character, \
 def get_text(character, imgH, imgW, recognizer, converter, image_list, \
              ignore_char='', decoder='greedy', beamWidth=5, batch_size=1, contrast_ths=0.1, \
              adjust_contrast=0.5, filter_ths=0.003, workers=1, device='cpu'):
-    batch_max_length = int(imgW / 10)
-
-    char_group_idx = {}
     ignore_idx = []
     for char in ignore_char:
         try:
@@ -210,8 +203,8 @@ def get_text(character, imgH, imgW, recognizer, converter, image_list, \
         num_workers=int(workers), collate_fn=AlignCollate_normal, pin_memory=True)
 
     # predict first round
-    result1 = recognizer_predict(recognizer, converter, test_loader, batch_max_length, \
-                                 ignore_idx, char_group_idx, decoder, beamWidth, device=device)
+    result1 = recognizer_predict(recognizer, converter, test_loader,
+                                 ignore_idx, decoder, beamWidth, device=device)
 
     # predict second round
     low_confident_idx = [i for i, item in enumerate(result1) if (item[1] < contrast_ths)]
@@ -223,8 +216,8 @@ def get_text(character, imgH, imgW, recognizer, converter, image_list, \
         test_loader = torch.utils.data.DataLoader(
             test_data, batch_size=batch_size, shuffle=False,
             num_workers=int(workers), collate_fn=AlignCollate_contrast, pin_memory=True)
-        result2 = recognizer_predict(recognizer, converter, test_loader, batch_max_length, \
-                                     ignore_idx, char_group_idx, decoder, beamWidth, device=device)
+        result2 = recognizer_predict(recognizer, converter, test_loader,
+                                     ignore_idx, decoder, beamWidth, device=device)
 
     result = []
     for i, zipped in enumerate(zip(coord, result1)):
