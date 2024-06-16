@@ -68,16 +68,6 @@ def load_checkpoint(ckpt_path):
         if not hasattr(checkpoint["opt"], "norm_eps"):
             checkpoint["opt"].norm_eps = 1e-6
 
-        # fix v2 compatibility
-        if "generator" in checkpoint.keys() and checkpoint["generator"]:
-            if "0.weight" in checkpoint["generator"]:
-                checkpoint["generator"]["weight"] = checkpoint["generator"].pop(
-                    "0.weight"
-                )
-            if "0.bias" in checkpoint["generator"]:
-                checkpoint["generator"]["bias"] = checkpoint["generator"].pop("0.bias")
-        # end of patch for backward compatibility
-
     return checkpoint
 
 
