@@ -6,7 +6,7 @@ subsequent transformer based architectures
 import torch
 import torch.nn as nn
 from onmt.decoders.decoder import DecoderBase
-from onmt.modules import MultiHeadedAttention, AverageAttention
+from onmt.modules import MultiHeadedAttention
 from onmt.modules.position_ffn import PositionwiseFeedForward
 from onmt.modules.position_ffn import ActivationFunction
 from onmt.modules.moe import MoE
@@ -110,10 +110,6 @@ class TransformerDecoderLayerBase(nn.Module):
                 num_kv=num_kv,
                 use_ckpting=use_ckpting,
                 parallel_gpu=parallel_gpu,
-            )
-        elif self_attn_type == "average":
-            self.self_attn = AverageAttention(
-                d_model, dropout=attention_dropout, aan_useffn=aan_useffn
             )
 
         if num_experts > 0:
@@ -244,8 +240,6 @@ class TransformerDecoderLayerBase(nn.Module):
                 step=step,
                 return_attn=return_attn,
             )
-        elif self.self_attn_type == "average":
-            return self.self_attn(norm_layer_in, mask=dec_mask, step=step)
         else:
             raise ValueError(f"self attention {type(self.self_attn)} not supported")
 
@@ -498,26 +492,22 @@ class TransformerDecoderBase(DecoderBase):
                     x = fn(layer.context_attn.layer_cache[1]["keys"], 0)
                     y = fn(layer.context_attn.layer_cache[1]["values"], 0)
                     layer.context_attn.layer_cache = True, {"keys": x, "values": y}
-            if isinstance(layer.self_attn, AverageAttention):
-                if layer.self_attn.layer_cache[1]["prev_g"].numel() != 0:
-                    x = fn(layer.self_attn.layer_cache[1]["prev_g"], 0)
-                    layer.self_attn.layer_cache = True, {"prev_g": x}
-            else:
-                if layer.self_attn.layer_cache[1]["keys"].numel() != 0:
-                    x = fn(layer.self_attn.layer_cache[1]["keys"], 0)
-                    y = fn(layer.self_attn.layer_cache[1]["values"], 0)
-                    if (
+
+            if layer.self_attn.layer_cache[1]["keys"].numel() != 0:
+                x = fn(layer.self_attn.layer_cache[1]["keys"], 0)
+                y = fn(layer.self_attn.layer_cache[1]["values"], 0)
+                if (
                         layer.self_attn.layer_cache[1].get("key_pad_mask", None)
                         is not None
-                    ):
-                        z = fn(layer.self_attn.layer_cache[1]["key_pad_mask"], 0)
-                    else:
-                        z = None
-                    layer.self_attn.layer_cache = True, {
-                        "keys": x,
-                        "values": y,
-                        "key_pad_mask": z,
-                    }
+                ):
+                    z = fn(layer.self_attn.layer_cache[1]["key_pad_mask"], 0)
+                else:
+                    z = None
+                layer.self_attn.layer_cache = True, {
+                    "keys": x,
+                    "values": y,
+                    "key_pad_mask": z,
+                }
 
     def detach_state(self):
         raise NotImplementedError
@@ -664,13 +654,11 @@ class TransformerDecoder(TransformerDecoderBase):
             self._init_cache(enc_out)
         elif step is None:
             for layer in self.transformer_layers:
-                if isinstance(layer.self_attn, AverageAttention):
-                    layer.self_attn.layer_cache = False, {"prev_g": torch.tensor([])}
-                else:
-                    layer.self_attn.layer_cache = (
-                        False,
-                        {"keys": torch.tensor([]), "values": torch.tensor([])},
-                    )
+                layer.self_attn.layer_cache = (
+                    False,
+                    {"keys": torch.tensor([]), "values": torch.tensor([])},
+                )
+
                 layer.context_attn.layer_cache = (
                     False,
                     {"keys": torch.tensor([]), "values": torch.tensor([])},
@@ -731,24 +719,18 @@ class TransformerDecoder(TransformerDecoderBase):
                     "values": torch.tensor([], device=enc_out.device),
                 },
             )
-            if isinstance(layer.self_attn, AverageAttention):
-                layer.self_attn.layer_cache = True, {
-                    "prev_g": torch.zeros(
-                        (batch_size, 1, depth), device=enc_out.device
-                    ).to(enc_out.dtype)
-                }
-            else:
-                layer.self_attn.layer_cache = (
-                    True,
-                    {
-                        "keys": torch.tensor([], device=enc_out.device),
-                        "values": torch.tensor([], device=enc_out.device),
-                    },
-                )
-                if hasattr(layer.self_attn, "rope"):
-                    layer.self_attn.rope = layer.self_attn.rope.to(enc_out.device)
-                    layer.self_attn.cos = layer.self_attn.cos.to(enc_out.device)
-                    layer.self_attn.sin = layer.self_attn.sin.to(enc_out.device)
+
+            layer.self_attn.layer_cache = (
+                True,
+                {
+                    "keys": torch.tensor([], device=enc_out.device),
+                    "values": torch.tensor([], device=enc_out.device),
+                },
+            )
+            if hasattr(layer.self_attn, "rope"):
+                layer.self_attn.rope = layer.self_attn.rope.to(enc_out.device)
+                layer.self_attn.cos = layer.self_attn.cos.to(enc_out.device)
+                layer.self_attn.sin = layer.self_attn.sin.to(enc_out.device)
 
 
 class TransformerLMDecoderLayer(TransformerDecoderLayerBase):
@@ -984,20 +966,17 @@ class TransformerLMDecoder(TransformerDecoderBase):
     def _init_cache(self, tgt=None):
         for layer in self.transformer_layers:
             if hasattr(layer, "self_attn"):
-                if isinstance(layer.self_attn, AverageAttention):
-                    raise NotImplementedError
-                else:
-                    layer.self_attn.layer_cache = (
-                        True,
-                        {
-                            "keys": torch.tensor([], device=tgt.device),
-                            "values": torch.tensor([], device=tgt.device),
-                            "key_pad_mask": tgt[:, :, 0]
+                layer.self_attn.layer_cache = (
+                    True,
+                    {
+                        "keys": torch.tensor([], device=tgt.device),
+                        "values": torch.tensor([], device=tgt.device),
+                        "key_pad_mask": tgt[:, :, 0]
                             .eq(self.embeddings.word_padding_idx)
                             .unsqueeze(1),
-                        },
-                    )
-                    if hasattr(layer.self_attn, "rope"):
-                        layer.self_attn.rope = layer.self_attn.rope.to(tgt.device)
-                        layer.self_attn.cos = layer.self_attn.cos.to(tgt.device)
-                        layer.self_attn.sin = layer.self_attn.sin.to(tgt.device)
+                    },
+                )
+                if hasattr(layer.self_attn, "rope"):
+                    layer.self_attn.rope = layer.self_attn.rope.to(tgt.device)
+                    layer.self_attn.cos = layer.self_attn.cos.to(tgt.device)
+                    layer.self_attn.sin = layer.self_attn.sin.to(tgt.device)
