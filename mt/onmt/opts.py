@@ -1372,7 +1372,7 @@ def _add_decoding_opts(parser):
     group.add(
         "--length_penalty",
         "-length_penalty",
-        default="none",
+        default="avg",
         choices=["none", "wu", "avg"],
         help="Length Penalty to use.",
     )
