@@ -17,13 +17,6 @@ def config_opts(parser):
         is_config_file_arg=True,
         help="Path of the main YAML config file.",
     )
-    group.add(
-        "-save_config",
-        "--save_config",
-        required=False,
-        is_write_out_config_file_arg=True,
-        help="Path where to save the config.",
-    )
 
 
 def _add_logging_opts(parser, is_train=True):
