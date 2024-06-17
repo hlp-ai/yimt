@@ -599,22 +599,6 @@ def model_opts(parser):
     # Attention options
     group = parser.add_argument_group("Model- Attention")
     group.add(
-        "--global_attention",
-        "-global_attention",
-        type=str,
-        default="general",
-        choices=["dot", "general", "mlp", "none"],
-        help="The attention type to use: "
-        "dotprod or general (Luong) or MLP (Bahdanau)",
-    )
-    group.add(
-        "--global_attention_function",
-        "-global_attention_function",
-        type=str,
-        default="softmax",
-        choices=["softmax"],
-    )
-    group.add(
         "--self_attn_type",
         "-self_attn_type",
         type=str,
