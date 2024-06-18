@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import argparse
+import os
+
 import torch
 
 
@@ -44,7 +46,7 @@ def average_models(model_files, fp32=False):
 def main():
     parser = argparse.ArgumentParser(description="")
     parser.add_argument(
-        "-models", "-m", nargs="+", required=True, help="List of models"
+        "-model_dir", "-d", required=True, help="model directory"
     )
     parser.add_argument("-output", "-o", required=True, help="Output file")
     parser.add_argument(
@@ -52,8 +54,17 @@ def main():
     )
     opt = parser.parse_args()
 
-    final = average_models(opt.models, opt.fp32)
-    torch.save(final, opt.output)
+    files = os.listdir(opt.model_dir)
+    models = []
+    for f in files:
+        if f.endswith(".pt"):
+            models.append(os.path.join(opt.model_dir, f))
+
+    if len(models) > 2:
+        final = average_models(models, opt.fp32)
+        torch.save(final, opt.output)
+    else:
+        print("待平均模型文件小于2，退出")
 
 
 if __name__ == "__main__":
