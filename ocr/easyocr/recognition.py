@@ -1,13 +1,15 @@
-from PIL import Image
-import torch
-import torch.utils.data
-import torch.nn.functional as F
-import torchvision.transforms as transforms
-import numpy as np
-from collections import OrderedDict
 import importlib
-from easyocr.utils import CTCLabelConverter
 import math
+from collections import OrderedDict
+
+import numpy as np
+import torch
+import torch.nn.functional as F
+import torch.utils.data
+import torchvision.transforms as transforms
+from PIL import Image
+
+from easyocr.utils import CTCLabelConverter
 
 
 def custom_mean(x):
@@ -151,10 +153,10 @@ def recognizer_predict(model, converter, test_loader,
     return result
 
 
-def get_recognizer(recog_network, network_params, character, \
-                   separator_list, dict_list, model_path, \
+def get_recognizer(recog_network, network_params, character,
+                   separator_list, model_path,
                    device='cpu', quantize=True):
-    converter = CTCLabelConverter(character, separator_list, dict_list)
+    converter = CTCLabelConverter(character, separator_list)
     num_class = len(converter.character)
 
     if recog_network == 'generation1':
@@ -184,8 +186,8 @@ def get_recognizer(recog_network, network_params, character, \
     return model, converter
 
 
-def get_text(character, imgH, imgW, recognizer, converter, image_list, \
-             ignore_char='', decoder='greedy', beamWidth=5, batch_size=1, contrast_ths=0.1, \
+def get_text(character, imgH, imgW, recognizer, converter, image_list,
+             ignore_char='', decoder='greedy', beamWidth=5, batch_size=1, contrast_ths=0.1,
              adjust_contrast=0.5, filter_ths=0.003, workers=1, device='cpu'):
     ignore_idx = []
     for char in ignore_char:

@@ -146,7 +146,7 @@ def addBeam(beamState, labeling):
         beamState.entries[labeling] = BeamEntry()
 
 
-def ctcBeamSearch(mat, classes, ignore_idx, lm, beamWidth=25, dict_list=[]):
+def ctcBeamSearch(mat, classes, ignore_idx, beamWidth=25):
     blankIdx = 0
     maxT, maxC = mat.shape
 
@@ -226,22 +226,29 @@ def ctcBeamSearch(mat, classes, ignore_idx, lm, beamWidth=25, dict_list=[]):
     # normalise LM scores according to beam-labeling-length
     last.norm()
 
-    if dict_list == []:
-        bestLabeling = last.sort()[0]  # get most probable labeling
-        res = ''
-        for i, l in enumerate(bestLabeling):
-            # removing repeated characters and blank.
-            if l not in ignore_idx and (not (i > 0 and bestLabeling[i - 1] == bestLabeling[i])):
-                res += classes[l]
-    else:
-        res = last.wordsearch(classes, ignore_idx, 20, dict_list)
+    bestLabeling = last.sort()[0]  # get most probable labeling
+    res = ''
+    for i, l in enumerate(bestLabeling):
+        # removing repeated characters and blank.
+        if l not in ignore_idx and (not (i > 0 and bestLabeling[i - 1] == bestLabeling[i])):
+            res += classes[l]
+
+    # if dict_list == []:
+    #     bestLabeling = last.sort()[0]  # get most probable labeling
+    #     res = ''
+    #     for i, l in enumerate(bestLabeling):
+    #         # removing repeated characters and blank.
+    #         if l not in ignore_idx and (not (i > 0 and bestLabeling[i - 1] == bestLabeling[i])):
+    #             res += classes[l]
+    # else:
+    #     res = last.wordsearch(classes, ignore_idx, 20, dict_list)
     return res
 
 
 class CTCLabelConverter(object):
     """ Convert between text-label and text-index """
 
-    def __init__(self, character, separator_list={}, dict_pathlist={}):
+    def __init__(self, character, separator_list={}):
         # character (str): set of the possible characters.
         dict_character = list(character)
 
@@ -257,24 +264,24 @@ class CTCLabelConverter(object):
             separator_char += sep
         self.ignore_idx = [0] + [i + 1 for i, item in enumerate(separator_char)]
 
-        ####### latin dict
-        if len(separator_list) == 0:
-            dict_list = []
-            for lang, dict_path in dict_pathlist.items():
-                try:
-                    with open(dict_path, "r", encoding="utf-8-sig") as input_file:
-                        word_count = input_file.read().splitlines()
-                    dict_list += word_count
-                except:
-                    pass
-        else:
-            dict_list = {}
-            for lang, dict_path in dict_pathlist.items():
-                with open(dict_path, "r", encoding="utf-8-sig") as input_file:
-                    word_count = input_file.read().splitlines()
-                dict_list[lang] = word_count
-
-        self.dict_list = dict_list
+        # ####### latin dict
+        # if len(separator_list) == 0:
+        #     dict_list = []
+        #     for lang, dict_path in dict_pathlist.items():
+        #         try:
+        #             with open(dict_path, "r", encoding="utf-8-sig") as input_file:
+        #                 word_count = input_file.read().splitlines()
+        #             dict_list += word_count
+        #         except:
+        #             pass
+        # else:
+        #     dict_list = {}
+        #     for lang, dict_path in dict_pathlist.items():
+        #         with open(dict_path, "r", encoding="utf-8-sig") as input_file:
+        #             word_count = input_file.read().splitlines()
+        #         dict_list[lang] = word_count
+        #
+        # self.dict_list = dict_list
 
     def encode(self, text, batch_max_length=25):
         """convert text-label into text-index.
@@ -314,7 +321,7 @@ class CTCLabelConverter(object):
     def decode_beamsearch(self, mat, beamWidth=5):
         texts = []
         for i in range(mat.shape[0]):
-            t = ctcBeamSearch(mat[i], self.character, self.ignore_idx, None, beamWidth=beamWidth)
+            t = ctcBeamSearch(mat[i], self.character, self.ignore_idx, beamWidth=beamWidth)
             texts.append(t)
         return texts
 
