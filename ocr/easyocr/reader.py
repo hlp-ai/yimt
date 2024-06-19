@@ -272,10 +272,6 @@ class Reader(object):
                                  cudnn_benchmark=self.cudnn_benchmark
                                  )
 
-    def setDetector(self, detect_network):
-        detector_path = self.getDetectorPath(detect_network)
-        self.detector = self.initDetector(detector_path)
-
     def setModelLanguage(self, language, lang_list, list_lang, list_lang_string):
         self.model_lang = language
         if set(lang_list) - set(list_lang) != set():
@@ -283,13 +279,6 @@ class Reader(object):
                 language = 'chinese'
             raise ValueError(
                 language.capitalize() + ' is only compatible with English, try lang_list=' + list_lang_string)
-
-    def getChar(self, fileName):
-        char_file = os.path.join(BASE_PATH, 'character', fileName)
-        with open(char_file, "r", encoding="utf-8-sig") as input_file:
-            list = input_file.read().splitlines()
-            char = ''.join(list)
-        return char
 
     def setLanguageList(self, lang_list, model):
         self.lang_char = []
