@@ -9,6 +9,14 @@ translators:
       - zh-ja
       - zh-ar
 
+  enzh:
+    model_or_config_dir: D:\dataset\en-zh\040607\train\infer.yaml
+    sp_src_path: D:\dataset\en-zh\040607\train\en-zh-all-new-0.66.sf.tsv.en-20000000-sp-36000.model
+    pretok_src: false
+    pretok_tgt: false
+    directions:
+      - en-zh
+
 languages:
   - {code: en, name: English, cname: 英语}
   - {code: zh, name: Chinese, cname: 汉语}

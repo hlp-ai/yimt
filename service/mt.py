@@ -28,18 +28,6 @@ class Translator:
         self.lang_pairs = conf_params["directions"]
 
         self._init(self.conf_file, batch_size);
-        # base_args = ["-config", conf_file]
-        # parser = self._get_parser()
-        # self.opt = parser.parse_args(base_args)
-        # ArgumentParser._get_all_transform_translate(self.opt)
-        # self.opt.share_vocab = False
-        #
-        # self.engine = InferenceEnginePY(self.opt)
-        # self.lang_pairs = lang_pairs
-        #
-        # self.batch_size = batch_size  # 句子数
-        #
-        # self.tm_saver = get_tm_saver()
 
     def _init(self, conf_file, batch_size=32):
         base_args = ["-config", conf_file]
@@ -48,7 +36,7 @@ class Translator:
         ArgumentParser._get_all_transform_translate(self.opt)
         self.opt.share_vocab = False
 
-        print("加载翻译引擎: {}".format(self.conf_file))
+        print("从配置文件中加载翻译引擎: {}".format(self.conf_file))
 
         self.engine = InferenceEnginePY(self.opt)
         self.batch_size = batch_size  # 句子数
@@ -122,22 +110,6 @@ class Translator:
 
 class ZhEnJaArTranslator(Translator):
 
-    # def __init__(self, conf_file):
-    #     super(ZhEnJaArTranslator, self).__init__(conf_file, lang_pairs = ["zh-ar", "zh-en", "zh-en"])
-
-    # def translate_list(self, texts, sl=None, tl=None, callbacker=None):
-    #     if tl == "ar":
-    #         prefix = "<toar>"
-    #     elif tl == "ja":
-    #         prefix = "<toja>"
-    #     else:
-    #         prefix = "<toen>"
-    #
-    #     texts = [prefix + t for t in texts]
-    #     scores, preds = self.engine.infer_list(texts)
-    #
-    #     return [p[0] for p in preds]
-
     def _preprocess(self, texts, sl, tl):
         if tl == "ar":
             prefix = "<toar>"
@@ -158,19 +130,8 @@ class Translators(object):
 
         self.translators, self.lang_pairs, self.languages = self.load_config()
 
-        # self.languages = [
-        #     {"code": "zh", "name": "Chinese", "cname": "中文"},
-        #     {"code": "en", "name": "English", "cname": "英文"},
-        #     {"code": "ja", "name": "Japanese", "cname": "日文"}
-        # ]
-        # self.lang_pairs = ["zh-en", "zh-ja"]
         self.from_langs = ["zh"]
         self.to_langs = ["en", "ja"]
-
-        # translator = ZhEnJaArTranslator("./infer.yaml")
-        #
-        # self.translators = {"zh-en": translator,
-        #                     "zh-ja": translator}
 
     def load_config(self):
         translators = {}
@@ -179,7 +140,10 @@ class Translators(object):
 
         lang_pairs = set()
         for name, params in config.get("translators").items():
-            translators[name] = ZhEnJaArTranslator(params)
+            if len(params["directions"]) > 1:
+                translators[name] = ZhEnJaArTranslator(params)
+            else:
+                translators[name] = Translator(params)
             for p in params["directions"]:
                 lang_pairs.add(p)
 
@@ -207,16 +171,6 @@ translator_factory = Translators()
 
 
 if __name__ == "__main__":
-    # conf_file = "D:/kidden/github/yimt/mt/toy-enzh/infer.yaml"
-    # translator = Translator(conf_file, "en-zh")
-    #
-    # texts = ["how are you?", "i am a teacher."]
-    # preds = translator.translate_list(texts)
-    # print(preds)
-
-    # conf_file = "./infer.yaml"
-    # translator = ZhEnJaArTranslator(conf_file)
-
     translator = translator_factory.get_translator("zh", "en")
 
     texts = ["你在做什么？", "我是一名教师。"]
@@ -224,4 +178,10 @@ if __name__ == "__main__":
     print(preds)
 
     preds = translator.translate_list(texts, sl="zh", tl="ja")
+    print(preds)
+
+    translator2 = translator_factory.get_translator("en", "zh")
+
+    texts = ["How are you?", "I am a teacher."]
+    preds = translator2.translate_list(texts, sl="en", tl="zh")
     print(preds)
