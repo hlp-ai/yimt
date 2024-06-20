@@ -1,42 +1,7 @@
 import torch
-import pyonmttok
 from onmt.constants import DefaultTokens, CorpusTask, ModelTask
 from torch.nn.utils.rnn import pad_sequence
 from onmt.utils.logging import logger
-from collections import Counter
-
-
-def parse_features(line, n_feats=0, defaults=None):
-    """
-    Parses text lines with features appended to each token.
-    Ex.: This￨A￨B is￨A￨A a￨C￨A test￨A￨B
-    """
-    text, feats = [], [[] for _ in range(n_feats)]
-    check, count = 0, 0
-    for token in line.split(" "):
-        tok, *fts = token.strip("\n").split("￨")
-        check += len(fts)
-        count += 1
-        if not fts and defaults is not None:
-            if isinstance(defaults, str):
-                defaults = defaults.split("￨")
-            if n_feats > 0:
-                assert len(defaults) == n_feats  # Security check
-                fts = defaults
-        assert len(fts) == n_feats, (
-            f"The number of fetures does not match the "
-            f"expected number of features. Found {len(fts)} "
-            f"features in the data but {n_feats} were expected."
-        )
-        text.append(tok)
-        for i in range(n_feats):
-            feats[i].append(fts[i])
-    # Check if all tokens have features or none at all
-    assert (
-        check == 0 or check == count * n_feats
-    ), "Some tokens are missing features. Please check your data."
-    feats = [" ".join(x) for x in feats] if n_feats > 0 else None
-    return " ".join(text), feats
 
 
 def append_features_to_text(text, features):

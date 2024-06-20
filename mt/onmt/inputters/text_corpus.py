@@ -1,9 +1,7 @@
 """Module that contain shard utils for dynamic data."""
-import os
 from onmt.utils.logging import logger
 from onmt.constants import CorpusName, CorpusTask
 from onmt.transforms import TransformPipe
-from onmt.inputters.text_utils import process, parse_features, append_features_to_text
 from contextlib import contextmanager
 import itertools
 
@@ -113,11 +111,9 @@ class ParallelCorpus(object):
         """
 
         def make_ex(sline, tline, align):
-            sline, sfeats = parse_features(
-                sline,
-                # n_feats=self.n_src_feats,
-                # defaults=self.src_feats_defaults,
-            )
+            # sline = parse_features(
+            #     sline,
+            # )
             # 'src_original' and 'tgt_original' store the
             # original line before tokenization. These
             # fields are used later on in the feature
