@@ -580,7 +580,7 @@ def create_app(args):
         ad = addb.get_ad(type)
         ad_id = ad[0]
 
-        addb.log_ad(ad, get_remote_address());
+        addb.log_ad(platform, ad, get_remote_address());
 
         # ad_text = "Welcome!\n This is a just test."
         if type == "text":

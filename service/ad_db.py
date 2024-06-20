@@ -29,9 +29,9 @@ class ADList(ADDB):
 
         return ads[idx]
 
-    def log_ad(self, ad, where=None):
+    def log_ad(self, platform, ad, where=None):
         where = where+": " if where else "";
-        self.logger_ad.info(where + str(ad))
+        self.logger_ad.info(platform + " " + where + str(ad))
 
 
 ad_db = None
