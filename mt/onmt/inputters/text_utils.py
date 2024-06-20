@@ -4,23 +4,6 @@ from torch.nn.utils.rnn import pad_sequence
 from onmt.utils.logging import logger
 
 
-def append_features_to_text(text, features):
-    """
-    It appends features to subwords when dumping to file
-    """
-    text_tok = text.split(" ")
-    feats_tok = [x.split(" ") for x in features]
-
-    pretty_toks = []
-    for tok, *feats in zip(text_tok, *feats_tok):
-        feats = "￨".join(feats)
-        if feats:
-            pretty_toks.append(f"{tok}￨{feats}")
-        else:
-            pretty_toks.append(tok)
-    return " ".join(pretty_toks)
-
-
 def text_sort_key(ex):
     """Sort using the number of tokens in the sequence."""
     if ex["tgt"]:
