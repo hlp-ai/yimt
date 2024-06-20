@@ -1,3 +1,5 @@
+import sys
+
 from easyocr.reader import Reader
 
 
@@ -16,10 +18,8 @@ class OCR:
 
 
 if __name__ == "__main__":
-    ocr_fr = OCR("fr")
-    r = ocr_fr.recognize('../examples/french.jpg')
-    print(r)
-
-    ocr_ja = OCR("ja")
-    r = ocr_ja.recognize('../examples/japanese.jpg')
+    lang = sys.argv[1]
+    img_file = sys.argv[2]
+    ocr = OCR(lang)
+    r = ocr.recognize(img_file)
     print(r)
