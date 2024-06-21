@@ -153,10 +153,9 @@ def recognizer_predict(model, converter, test_loader,
     return result
 
 
-def get_recognizer(recog_network, network_params, character,
-                   separator_list, model_path,
+def get_recognizer(recog_network, network_params, character, model_path,
                    device='cpu', quantize=True):
-    converter = CTCLabelConverter(character, separator_list)
+    converter = CTCLabelConverter(character)
     num_class = len(converter.character)
 
     if recog_network == 'generation1':

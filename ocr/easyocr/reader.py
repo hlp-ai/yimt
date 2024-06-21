@@ -80,9 +80,6 @@ class Reader(object):
         if detector:
             detector_path = self.getDetectorPath(detect_network)
 
-        # recognition model
-        separator_list = {}
-
         if recog_network in ['standard'] + [model for model in recognition_models['gen1']] + [model for model in
                                                                                               recognition_models[
                                                                                                   'gen2']]:
@@ -223,7 +220,7 @@ class Reader(object):
             else:
                 network_params = recog_config['network_params']
             self.recognizer, self.converter = get_recognizer(recog_network, network_params,
-                                                             self.character, separator_list,
+                                                             self.character,
                                                              model_path, device=self.device, quantize=quantize)
 
     def getDetectorPath(self, detect_network):

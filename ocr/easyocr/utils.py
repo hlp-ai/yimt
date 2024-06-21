@@ -248,7 +248,7 @@ def ctcBeamSearch(mat, classes, ignore_idx, beamWidth=25):
 class CTCLabelConverter(object):
     """ Convert between text-label and text-index """
 
-    def __init__(self, character, separator_list={}):
+    def __init__(self, character):
         # character (str): set of the possible characters.
         dict_character = list(character)
 
@@ -258,30 +258,11 @@ class CTCLabelConverter(object):
 
         self.character = ['[blank]'] + dict_character  # dummy '[blank]' token for CTCLoss (index 0)
 
-        self.separator_list = separator_list
+        # self.separator_list = separator_list
         separator_char = []
-        for lang, sep in separator_list.items():
-            separator_char += sep
+        # for lang, sep in separator_list.items():
+        #     separator_char += sep
         self.ignore_idx = [0] + [i + 1 for i, item in enumerate(separator_char)]
-
-        # ####### latin dict
-        # if len(separator_list) == 0:
-        #     dict_list = []
-        #     for lang, dict_path in dict_pathlist.items():
-        #         try:
-        #             with open(dict_path, "r", encoding="utf-8-sig") as input_file:
-        #                 word_count = input_file.read().splitlines()
-        #             dict_list += word_count
-        #         except:
-        #             pass
-        # else:
-        #     dict_list = {}
-        #     for lang, dict_path in dict_pathlist.items():
-        #         with open(dict_path, "r", encoding="utf-8-sig") as input_file:
-        #             word_count = input_file.read().splitlines()
-        #         dict_list[lang] = word_count
-        #
-        # self.dict_list = dict_list
 
     def encode(self, text, batch_max_length=25):
         """convert text-label into text-index.
