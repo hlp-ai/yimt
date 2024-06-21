@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from easyocr.recognition import get_recognizer, get_text
 from easyocr.utils import group_text_box, get_image_list, calculate_md5, get_paragraph, \
     download_and_unzip, diff, reformat_input, \
@@ -74,7 +72,6 @@ class Reader(object):
         self.recognition_models = recognition_models
 
         # check and download detection model
-        self.support_detection_network = ['craft']
         self.quantize = quantize,
         self.cudnn_benchmark = cudnn_benchmark
         if detector:
@@ -197,10 +194,6 @@ class Reader(object):
             model_path = os.path.join(self.model_storage_directory, model_file)
             self.setLanguageList(lang_list, recog_config)
 
-        # dict_list = {}
-        # for lang in lang_list:
-        #     dict_list[lang] = os.path.join(BASE_PATH, 'dict', lang + ".txt")
-
         if detector:
             self.detector = self.initDetector(detector_path)
 
@@ -224,41 +217,37 @@ class Reader(object):
                                                              model_path, device=self.device, quantize=quantize)
 
     def getDetectorPath(self, detect_network):
-        if detect_network in self.support_detection_network:
-            self.detect_network = detect_network
-            if self.detect_network == 'craft':
-                from .detection import get_detector, get_textbox
-            else:
-                raise RuntimeError("Unsupport detector network.")
-            self.get_textbox = get_textbox
-            self.get_detector = get_detector
-            corrupt_msg = 'MD5 hash mismatch, possible file corruption'
-            detector_path = os.path.join(self.model_storage_directory,
-                                         self.detection_models[self.detect_network]['filename'])
-            if os.path.isfile(detector_path) == False:
-                if not self.download_enabled:
-                    raise FileNotFoundError("Missing %s and downloads disabled" % detector_path)
-                LOGGER.warning('Downloading detection model, please wait. '
-                               'This may take several minutes depending upon your network connection.')
-                download_and_unzip(self.detection_models[self.detect_network]['url'],
-                                   self.detection_models[self.detect_network]['filename'], self.model_storage_directory,
-                                   self.verbose)
-                assert calculate_md5(detector_path) == self.detection_models[self.detect_network]['md5sum'], corrupt_msg
-                LOGGER.info('Download complete')
-            elif calculate_md5(detector_path) != self.detection_models[self.detect_network]['md5sum']:
-                if not self.download_enabled:
-                    raise FileNotFoundError("MD5 mismatch for %s and downloads disabled" % detector_path)
-                LOGGER.warning(corrupt_msg)
-                os.remove(detector_path)
-                LOGGER.warning('Re-downloading the detection model, please wait. '
-                               'This may take several minutes depending upon your network connection.')
-                download_and_unzip(self.detection_models[self.detect_network]['url'],
-                                   self.detection_models[self.detect_network]['filename'], self.model_storage_directory,
-                                   self.verbose)
-                assert calculate_md5(detector_path) == self.detection_models[self.detect_network]['md5sum'], corrupt_msg
+        self.detect_network = detect_network
+        if self.detect_network == 'craft':
+            from .detection import get_detector, get_textbox
         else:
-            raise RuntimeError("Unsupport detector network. Support networks are {}.".format(
-                ', '.join(self.support_detection_network)))
+            raise RuntimeError("Unsupport detector network.")
+        self.get_textbox = get_textbox
+        self.get_detector = get_detector
+        corrupt_msg = 'MD5 hash mismatch, possible file corruption'
+        detector_path = os.path.join(self.model_storage_directory,
+                                     self.detection_models[self.detect_network]['filename'])
+        if os.path.isfile(detector_path) == False:
+            if not self.download_enabled:
+                raise FileNotFoundError("Missing %s and downloads disabled" % detector_path)
+            LOGGER.warning('Downloading detection model, please wait. '
+                           'This may take several minutes depending upon your network connection.')
+            download_and_unzip(self.detection_models[self.detect_network]['url'],
+                               self.detection_models[self.detect_network]['filename'], self.model_storage_directory,
+                               self.verbose)
+            assert calculate_md5(detector_path) == self.detection_models[self.detect_network]['md5sum'], corrupt_msg
+            LOGGER.info('Download complete')
+        elif calculate_md5(detector_path) != self.detection_models[self.detect_network]['md5sum']:
+            if not self.download_enabled:
+                raise FileNotFoundError("MD5 mismatch for %s and downloads disabled" % detector_path)
+            LOGGER.warning(corrupt_msg)
+            os.remove(detector_path)
+            LOGGER.warning('Re-downloading the detection model, please wait. '
+                           'This may take several minutes depending upon your network connection.')
+            download_and_unzip(self.detection_models[self.detect_network]['url'],
+                               self.detection_models[self.detect_network]['filename'], self.model_storage_directory,
+                               self.verbose)
+            assert calculate_md5(detector_path) == self.detection_models[self.detect_network]['md5sum'], corrupt_msg
 
         return detector_path
 
