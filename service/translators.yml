@@ -5,7 +5,6 @@ translators:
     pretok_src: false
     pretok_tgt: false
     directions:
-      - zh-en
       - zh-ja
       - zh-ar
 
@@ -16,6 +15,14 @@ translators:
     pretok_tgt: false
     directions:
       - en-zh
+
+  zhen:
+    model_or_config_dir: D:\dataset\en-zh\040618\zhen\infer.yaml
+    sp_src_path: D:\dataset\en-zh\040607\train\en-zh-all-new-0.66.sf.tsv.zh-10000000-sp-36000.model
+    pretok_src: false
+    pretok_tgt: false
+    directions:
+      - zh-en
 
 languages:
   - {code: en, name: English, cname: 英语}
