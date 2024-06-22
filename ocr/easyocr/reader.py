@@ -18,8 +18,9 @@ LOGGER = getLogger(__name__)
 
 class Reader(object):
 
-    def __init__(self, lang_list, gpu=True, model_storage_directory=None,
-                 user_network_directory=None, detect_network="craft",
+    def __init__(self, lang_list, gpu=True,
+                 model_storage_directory=None,
+                 user_network_directory=None,
                  recog_network='standard', download_enabled=True,
                  detector=True, recognizer=True, verbose=True,
                  quantize=True, cudnn_benchmark=False):
@@ -74,8 +75,9 @@ class Reader(object):
         # check and download detection model
         self.quantize = quantize,
         self.cudnn_benchmark = cudnn_benchmark
+
         if detector:
-            detector_path = self.getDetectorPath(detect_network)
+            detector_path = self.getDetectorPath()
 
         if recog_network in ['standard'] + [model for model in recognition_models['gen1']] + [model for model in
                                                                                               recognition_models[
@@ -216,12 +218,9 @@ class Reader(object):
                                                              self.character,
                                                              model_path, device=self.device, quantize=quantize)
 
-    def getDetectorPath(self, detect_network):
-        self.detect_network = detect_network
-        if self.detect_network == 'craft':
-            from .detection import get_detector, get_textbox
-        else:
-            raise RuntimeError("Unsupport detector network.")
+    def getDetectorPath(self):
+        self.detect_network = 'craft'
+        from .detection import get_detector, get_textbox
         self.get_textbox = get_textbox
         self.get_detector = get_detector
         corrupt_msg = 'MD5 hash mismatch, possible file corruption'
