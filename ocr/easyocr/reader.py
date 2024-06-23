@@ -178,7 +178,7 @@ class Reader(object):
                     download_and_unzip(model['url'], model['filename'], self.model_storage_directory, verbose)
                     assert calculate_md5(model_path) == model['md5sum'], corrupt_msg
                     LOGGER.info('Download complete')
-            self.setLanguageList(lang_list, model)
+            # self.setLanguageList(lang_list, model)
 
         else:  # user-defined model
             with open(os.path.join(self.user_network_directory, recog_network + '.yaml'), encoding='utf8') as file:
@@ -194,7 +194,7 @@ class Reader(object):
             self.character = recog_config['character_list']
             model_file = recog_network + '.pth'
             model_path = os.path.join(self.model_storage_directory, model_file)
-            self.setLanguageList(lang_list, recog_config)
+            # self.setLanguageList(lang_list, recog_config)
 
         if detector:
             self.detector = self.initDetector(detector_path)
@@ -265,21 +265,21 @@ class Reader(object):
             raise ValueError(
                 language.capitalize() + ' is only compatible with English, try lang_list=' + list_lang_string)
 
-    def setLanguageList(self, lang_list, model):
-        self.lang_char = []
-        for lang in lang_list:
-            char_file = os.path.join(BASE_PATH, 'character', lang + "_char.txt")
-            with open(char_file, "r", encoding="utf-8-sig") as input_file:
-                char_list = input_file.read().splitlines()
-            self.lang_char += char_list
-        if model.get('symbols'):
-            symbol = model['symbols']
-        elif model.get('character_list'):
-            symbol = model['character_list']
-        else:
-            symbol = '0123456789!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ '
-        self.lang_char = set(self.lang_char).union(set(symbol))
-        self.lang_char = ''.join(self.lang_char)
+    # def setLanguageList(self, lang_list, model):
+    #     # self.lang_char = []
+    #     # for lang in lang_list:
+    #     #     char_file = os.path.join(BASE_PATH, 'character', lang + "_char.txt")
+    #     #     with open(char_file, "r", encoding="utf-8-sig") as input_file:
+    #     #         char_list = input_file.read().splitlines()
+    #     #     self.lang_char += char_list
+    #     # if model.get('symbols'):
+    #     #     symbol = model['symbols']
+    #     # elif model.get('character_list'):
+    #     #     symbol = model['character_list']
+    #     # else:
+    #     #     symbol = '0123456789!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ '
+    #     # self.lang_char = set(self.lang_char).union(set(symbol))
+    #     # self.lang_char = ''.join(self.lang_char)
 
     def detect(self, img, min_size=20, text_threshold=0.7, low_text=0.4,
                link_threshold=0.4, canvas_size=2560, mag_ratio=1.,
@@ -333,12 +333,14 @@ class Reader(object):
         if reformat:
             img, img_cv_grey = reformat_input(img_cv_grey)
 
-        if allowlist:
-            ignore_char = ''.join(set(self.character) - set(allowlist))
-        elif blocklist:
-            ignore_char = ''.join(set(blocklist))
-        else:
-            ignore_char = ''.join(set(self.character) - set(self.lang_char))
+        # if allowlist:
+        #     ignore_char = ''.join(set(self.character) - set(allowlist))
+        # elif blocklist:
+        #     ignore_char = ''.join(set(blocklist))
+        # else:
+        #     ignore_char = ''.join(set(self.character) - set(self.lang_char))
+
+        ignore_char = ""
 
         if self.model_lang in ['chinese_tra', 'chinese_sim']: decoder = 'greedy'
 
