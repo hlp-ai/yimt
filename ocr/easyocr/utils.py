@@ -233,15 +233,6 @@ def ctcBeamSearch(mat, classes, ignore_idx, beamWidth=25):
         if l not in ignore_idx and (not (i > 0 and bestLabeling[i - 1] == bestLabeling[i])):
             res += classes[l]
 
-    # if dict_list == []:
-    #     bestLabeling = last.sort()[0]  # get most probable labeling
-    #     res = ''
-    #     for i, l in enumerate(bestLabeling):
-    #         # removing repeated characters and blank.
-    #         if l not in ignore_idx and (not (i > 0 and bestLabeling[i - 1] == bestLabeling[i])):
-    #             res += classes[l]
-    # else:
-    #     res = last.wordsearch(classes, ignore_idx, 20, dict_list)
     return res
 
 
@@ -258,10 +249,7 @@ class CTCLabelConverter(object):
 
         self.character = ['[blank]'] + dict_character  # dummy '[blank]' token for CTCLoss (index 0)
 
-        # self.separator_list = separator_list
         separator_char = []
-        # for lang, sep in separator_list.items():
-        #     separator_char += sep
         self.ignore_idx = [0] + [i + 1 for i, item in enumerate(separator_char)]
 
     def encode(self, text, batch_max_length=25):
