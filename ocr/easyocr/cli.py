@@ -229,9 +229,9 @@ def main():
                                 batch_size=args.batch_size,\
                                 workers=args.workers,\
                                 detail=args.detail,\
-                                rotation_info=args.rotation_info,\
+                                rotation_info=args.rotation_info,
                                 paragraph=args.paragraph,\
-                                min_size=args.min_size,\
+                                min_size=args.min_size,
                                 contrast_ths=args.contrast_ths,\
                                 adjust_contrast=args.adjust_contrast,\
                                 text_threshold=args.text_threshold,\
