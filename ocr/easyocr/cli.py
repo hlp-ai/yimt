@@ -91,18 +91,6 @@ def parse_args():
         help="number of processing cpu cores",
     )
     parser.add_argument(
-        "--allowlist",
-        type=str,
-        default=None,
-        help="Force EasyOCR to recognize only subset of characters",
-    )
-    parser.add_argument(
-        "--blocklist",
-        type=str,
-        default=None,
-        help="Block subset of character. This argument will be ignored if allowlist is given.",
-    )
-    parser.add_argument(
         "--detail",
         type=int,
         choices=[0, 1],
@@ -240,8 +228,6 @@ def main():
                                 beamWidth=args.beamWidth,\
                                 batch_size=args.batch_size,\
                                 workers=args.workers,\
-                                allowlist=args.allowlist,\
-                                blocklist=args.blocklist,\
                                 detail=args.detail,\
                                 rotation_info=args.rotation_info,\
                                 paragraph=args.paragraph,\

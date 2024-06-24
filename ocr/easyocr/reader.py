@@ -303,7 +303,7 @@ class Reader(object):
 
     def recognize(self, img_cv_grey, horizontal_list=None, free_list=None,
                   decoder='greedy', beamWidth=5, batch_size=1,
-                  workers=0, allowlist=None, blocklist=None, detail=1,
+                  workers=0, detail=1,
                   rotation_info=None, paragraph=False,
                   contrast_ths=0.1, adjust_contrast=0.5, filter_ths=0.003,
                   y_ths=0.5, x_ths=1.0, reformat=True, output_format='standard'):
@@ -390,7 +390,7 @@ class Reader(object):
             return result
 
     def readtext(self, image, decoder='greedy', beamWidth=5, batch_size=1,
-                 workers=0, allowlist=None, blocklist=None, detail=1,
+                 workers=0, detail=1,
                  rotation_info=None, paragraph=False, min_size=20,
                  contrast_ths=0.1, adjust_contrast=0.5, filter_ths=0.003,
                  text_threshold=0.7, low_text=0.4, link_threshold=0.4,
@@ -419,7 +419,7 @@ class Reader(object):
         horizontal_list, free_list = horizontal_list[0], free_list[0]
         result = self.recognize(img_cv_grey, horizontal_list, free_list,
                                 decoder, beamWidth, batch_size,
-                                workers, allowlist, blocklist, detail, rotation_info,
+                                workers, detail, rotation_info,
                                 paragraph, contrast_ths, adjust_contrast,
                                 filter_ths, y_ths, x_ths, False, output_format)
 
