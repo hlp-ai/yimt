@@ -22,7 +22,7 @@ class Reader(object):
                  model_storage_directory=None,
                  user_network_directory=None,
                  recog_network='standard', download_enabled=True,
-                 detector=True, recognizer=True, verbose=True,
+                 verbose=True,
                  quantize=True, cudnn_benchmark=False):
         """Create an EasyOCR Reader
 
@@ -76,8 +76,7 @@ class Reader(object):
         self.quantize = quantize,
         self.cudnn_benchmark = cudnn_benchmark
 
-        if detector:
-            detector_path = self.getDetectorPath()
+        detector_path = self.getDetectorPath()
 
         if recog_network in ['standard'] + [model for model in recognition_models['gen1']] + [model for model in
                                                                                               recognition_models[
@@ -158,27 +157,25 @@ class Reader(object):
             model_path = os.path.join(self.model_storage_directory, model['filename'])
             print(model_path)
             # check recognition model file
-            if recognizer:
-                corrupt_msg = "model corrupt"
-                if os.path.isfile(model_path) == False:
-                    if not self.download_enabled:
-                        raise FileNotFoundError("Missing %s and downloads disabled" % model_path)
-                    LOGGER.warning('Downloading recognition model, please wait. '
-                                   'This may take several minutes depending upon your network connection.')
-                    download_and_unzip(model['url'], model['filename'], self.model_storage_directory, verbose)
-                    assert calculate_md5(model_path) == model['md5sum'], corrupt_msg
-                    LOGGER.info('Download complete.')
-                elif calculate_md5(model_path) != model['md5sum']:
-                    if not self.download_enabled:
-                        raise FileNotFoundError("MD5 mismatch for %s and downloads disabled" % model_path)
-                    LOGGER.warning(corrupt_msg)
-                    os.remove(model_path)
-                    LOGGER.warning('Re-downloading the recognition model, please wait. '
-                                   'This may take several minutes depending upon your network connection.')
-                    download_and_unzip(model['url'], model['filename'], self.model_storage_directory, verbose)
-                    assert calculate_md5(model_path) == model['md5sum'], corrupt_msg
-                    LOGGER.info('Download complete')
-            # self.setLanguageList(lang_list, model)
+            corrupt_msg = "model corrupt"
+            if os.path.isfile(model_path) == False:
+                if not self.download_enabled:
+                    raise FileNotFoundError("Missing %s and downloads disabled" % model_path)
+                LOGGER.warning('Downloading recognition model, please wait. '
+                               'This may take several minutes depending upon your network connection.')
+                download_and_unzip(model['url'], model['filename'], self.model_storage_directory, verbose)
+                assert calculate_md5(model_path) == model['md5sum'], corrupt_msg
+                LOGGER.info('Download complete.')
+            elif calculate_md5(model_path) != model['md5sum']:
+                if not self.download_enabled:
+                    raise FileNotFoundError("MD5 mismatch for %s and downloads disabled" % model_path)
+                LOGGER.warning(corrupt_msg)
+                os.remove(model_path)
+                LOGGER.warning('Re-downloading the recognition model, please wait. '
+                               'This may take several minutes depending upon your network connection.')
+                download_and_unzip(model['url'], model['filename'], self.model_storage_directory, verbose)
+                assert calculate_md5(model_path) == model['md5sum'], corrupt_msg
+                LOGGER.info('Download complete')
 
         else:  # user-defined model
             with open(os.path.join(self.user_network_directory, recog_network + '.yaml'), encoding='utf8') as file:
@@ -194,29 +191,26 @@ class Reader(object):
             self.character = recog_config['character_list']
             model_file = recog_network + '.pth'
             model_path = os.path.join(self.model_storage_directory, model_file)
-            # self.setLanguageList(lang_list, recog_config)
 
-        if detector:
-            self.detector = self.initDetector(detector_path)
+        self.detector = self.initDetector(detector_path)
 
-        if recognizer:
-            if recog_network == 'generation1':
-                network_params = {
-                    'input_channel': 1,
-                    'output_channel': 512,
-                    'hidden_size': 512
-                }
-            elif recog_network == 'generation2':
-                network_params = {
-                    'input_channel': 1,
-                    'output_channel': 256,
-                    'hidden_size': 256
-                }
-            else:
-                network_params = recog_config['network_params']
-            self.recognizer, self.converter = get_recognizer(recog_network, network_params,
-                                                             self.character,
-                                                             model_path, device=self.device, quantize=quantize)
+        if recog_network == 'generation1':
+            network_params = {
+                'input_channel': 1,
+                'output_channel': 512,
+                'hidden_size': 512
+            }
+        elif recog_network == 'generation2':
+            network_params = {
+                'input_channel': 1,
+                'output_channel': 256,
+                'hidden_size': 256
+            }
+        else:
+            network_params = recog_config['network_params']
+        self.recognizer, self.converter = get_recognizer(recog_network, network_params,
+                                                         self.character,
+                                                         model_path, device=self.device, quantize=quantize)
 
     def getDetectorPath(self):
         self.detect_network = 'craft'

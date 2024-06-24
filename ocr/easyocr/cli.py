@@ -45,20 +45,6 @@ def parse_args():
         help="Enable Download",
     )
     parser.add_argument(
-        "--detector",
-        type=bool,
-        choices=[True, False],
-        default=True,
-        help="Initialize text detector module",
-    )
-    parser.add_argument(
-        "--recognizer",
-        type=bool,
-        choices=[True, False],
-        default=True,
-        help="Initialize text recognizer module",
-    )
-    parser.add_argument(
         "--verbose",
         type=bool,
         choices=[True, False],
@@ -240,16 +226,15 @@ def parse_args():
 
 def main():
     args = parse_args()
-    reader = easyocr.Reader(lang_list=args.lang,\
-                            gpu=args.gpu,\
-                            model_storage_directory=args.model_storage_directory,\
-                            user_network_directory=args.user_network_directory,\
-                            recog_network=args.recog_network,\
-                            download_enabled=args.download_enabled,\
-                            detector=args.detector,\
-                            recognizer=args.recognizer,\
-                            verbose=args.verbose,\
+    reader = easyocr.Reader(lang_list=args.lang,
+                            gpu=args.gpu,
+                            model_storage_directory=args.model_storage_directory,
+                            user_network_directory=args.user_network_directory,
+                            recog_network=args.recog_network,
+                            download_enabled=args.download_enabled,
+                            verbose=args.verbose,
                             quantize=args.quantize)
+
     for line in reader.readtext(args.file,\
                                 decoder=args.decoder,\
                                 beamWidth=args.beamWidth,\
