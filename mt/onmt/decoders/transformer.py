@@ -479,7 +479,7 @@ class TransformerDecoderBase(DecoderBase):
             num_experts_per_tok=opt.num_experts_per_tok,
         )
 
-    def init_state(self, src, enc_out, enc_final_hs):
+    def init_state(self, src, enc_out):
         """Initialize decoder state."""
         self.state["src"] = src
 
@@ -909,8 +909,8 @@ class TransformerLMDecoder(TransformerDecoderBase):
             ]
         )
 
-    def init_state(self, src=None, enc_out=None, enc_final_hs=None):
-        super(TransformerLMDecoder, self).init_state(None, None, None)
+    def init_state(self, src=None, enc_out=None):
+        super(TransformerLMDecoder, self).init_state(None, None)
 
     def detach_state(self):
         pass

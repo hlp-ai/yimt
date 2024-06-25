@@ -271,13 +271,13 @@ class Inference(object):
             print(msg)
 
     def _gold_score(
-        self, batch, enc_out, src_len, enc_final_hs, batch_size, src
+        self, batch, enc_out, src_len, batch_size, src
     ):
         if "tgt" in batch.keys() and not self.tgt_file_prefix:
             gs, glp = self._score_target(
                 batch, enc_out, src_len
             )
-            self.model.decoder.init_state(src, enc_out, enc_final_hs)
+            self.model.decoder.init_state(src, enc_out)
         else:
             gs = [0] * batch_size
             glp = None
@@ -742,16 +742,16 @@ class Translator(Inference):
 
         n_best = batch_tgt_idxs.size(1)
         # (1) Encoder forward.
-        src, enc_states, enc_out, src_len = self._run_encoder(batch)
+        src, enc_out, src_len = self._run_encoder(batch)
 
         # (2) Repeat src objects `n_best` times.
         # We use batch_size x n_best, get ``(batch * n_best, src_len, nfeat)``
         src = tile(src, n_best, dim=0)
-        if enc_states is not None:
-            # Quick fix. Transformers return None as enc_states.
-            # enc_states are only used later on to init decoder's state
-            # but are never used in Transformer decoder, so we can skip
-            enc_states = tile(enc_states, n_best, dim=0)
+        # if enc_states is not None:
+        #     # Quick fix. Transformers return None as enc_states.
+        #     # enc_states are only used later on to init decoder's state
+        #     # but are never used in Transformer decoder, so we can skip
+        #     enc_states = tile(enc_states, n_best, dim=0)
         if isinstance(enc_out, tuple):
             enc_out = tuple(tile(x, n_best, dim=0) for x in enc_out)
         else:
@@ -759,7 +759,7 @@ class Translator(Inference):
         src_len = tile(src_len, n_best)  # ``(batch * n_best,)``
 
         # (3) Init decoder with n_best src,
-        self.model.decoder.init_state(src, enc_out, enc_states)
+        self.model.decoder.init_state(src, enc_out)
         # reshape tgt to ``(len, batch * n_best, nfeat)``
         # it should be done in a better way
         tgt = batch_tgt_idxs.view(-1, batch_tgt_idxs.size(-1)).T.unsqueeze(-1)
@@ -834,7 +834,7 @@ class Translator(Inference):
         src_len = batch["srclen"]
         batch_size = len(batch["srclen"])
 
-        enc_out, enc_final_hs, src_len = self.model.encoder(src, src_len)
+        enc_out, src_len = self.model.encoder(src, src_len)
 
         if src_len is None:
             assert not isinstance(
@@ -843,7 +843,7 @@ class Translator(Inference):
             src_len = (
                 torch.Tensor(batch_size).type_as(enc_out).long().fill_(enc_out.size(1))
             )
-        return src, enc_final_hs, enc_out, src_len
+        return src, enc_out, src_len
 
     def _translate_batch_with_strategy(self, batch, decode_strategy):
         """Translate a batch of sentences step by step using cache.
@@ -862,15 +862,14 @@ class Translator(Inference):
         batch_size = len(batch["srclen"])
 
         # (1) Run the encoder on the src.
-        src, enc_final_hs, enc_out, src_len = self._run_encoder(batch)
+        src, enc_out, src_len = self._run_encoder(batch)
 
-        self.model.decoder.init_state(src, enc_out, enc_final_hs)
+        self.model.decoder.init_state(src, enc_out)
 
         gold_score, gold_log_probs = self._gold_score(
             batch,
             enc_out,
             src_len,
-            enc_final_hs,
             batch_size,
             src,
         )
