@@ -223,28 +223,28 @@ def main():
                             verbose=args.verbose,
                             quantize=args.quantize)
 
-    for line in reader.readtext(args.file,\
-                                decoder=args.decoder,\
-                                beamWidth=args.beamWidth,\
-                                batch_size=args.batch_size,\
-                                workers=args.workers,\
-                                detail=args.detail,\
+    for line in reader.readtext(args.file,
+                                decoder=args.decoder,
+                                beamWidth=args.beamWidth,
+                                batch_size=args.batch_size,
+                                workers=args.workers,
+                                detail=args.detail,
                                 rotation_info=args.rotation_info,
-                                paragraph=args.paragraph,\
+                                paragraph=args.paragraph,
                                 min_size=args.min_size,
-                                contrast_ths=args.contrast_ths,\
-                                adjust_contrast=args.adjust_contrast,\
-                                text_threshold=args.text_threshold,\
-                                low_text=args.low_text,\
-                                link_threshold=args.link_threshold,\
-                                canvas_size=args.canvas_size,\
-                                mag_ratio=args.mag_ratio,\
-                                slope_ths=args.slope_ths,\
-                                ycenter_ths=args.ycenter_ths,\
-                                height_ths=args.height_ths,\
-                                width_ths=args.width_ths,\
-                                y_ths=args.y_ths,\
-                                x_ths=args.x_ths,\
+                                contrast_ths=args.contrast_ths,
+                                adjust_contrast=args.adjust_contrast,
+                                text_threshold=args.text_threshold,
+                                low_text=args.low_text,
+                                link_threshold=args.link_threshold,
+                                canvas_size=args.canvas_size,
+                                mag_ratio=args.mag_ratio,
+                                slope_ths=args.slope_ths,
+                                ycenter_ths=args.ycenter_ths,
+                                height_ths=args.height_ths,
+                                width_ths=args.width_ths,
+                                y_ths=args.y_ths,
+                                x_ths=args.x_ths,
                                 add_margin=args.add_margin,
                                 output_format=args.output_format):
         print(line)
