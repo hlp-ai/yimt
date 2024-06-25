@@ -67,6 +67,8 @@ class Translator:
             if callbacker:
                 callbacker.report(total, done)
 
+        self.tm_saver.flush()
+
         return results
 
     def _preprocess(self, texts, sl, tl):
