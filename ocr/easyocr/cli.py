@@ -245,7 +245,7 @@ def main():
                                 width_ths=args.width_ths,\
                                 y_ths=args.y_ths,\
                                 x_ths=args.x_ths,\
-                                add_margin=args.add_margin,\
+                                add_margin=args.add_margin,
                                 output_format=args.output_format):
         print(line)
 
