@@ -40,14 +40,16 @@ def train(opt, show_number = 2, amp=False):
     # opt.batch_ratio = opt.batch_ratio.split('-')
     train_dataset = Batch_Balanced_Dataset(opt)
 
-    log = open(f'./saved_models/{opt.experiment_name}/log_dataset.txt', 'a', encoding="utf8")
-    AlignCollate_valid = AlignCollate(imgH=opt.imgH, imgW=opt.imgW, keep_ratio_with_pad=opt.PAD, contrast_adjust=opt.contrast_adjust)
+    AlignCollate_valid = AlignCollate(imgH=opt.imgH, imgW=opt.imgW,
+                                      keep_ratio_with_pad=opt.PAD, contrast_adjust=opt.contrast_adjust)
     valid_dataset, valid_dataset_log = hierarchical_dataset(root=opt.valid_data, opt=opt)
     valid_loader = torch.utils.data.DataLoader(
         valid_dataset, batch_size=min(32, opt.batch_size),
         shuffle=True,  # 'True' to check training progress with validation function.
         num_workers=int(opt.workers), prefetch_factor=512,
         collate_fn=AlignCollate_valid, pin_memory=True)
+
+    log = open(f'./saved_models/{opt.experiment_name}/log_dataset.txt', 'a', encoding="utf8")
     log.write(valid_dataset_log)
     print('-' * 80)
     log.write('-' * 80 + '\n')
@@ -62,18 +64,20 @@ def train(opt, show_number = 2, amp=False):
     print('model input parameters', opt.imgH, opt.imgW, opt.num_fiducial, opt.input_channel, opt.output_channel,
           opt.hidden_size, opt.num_class, opt.batch_max_length)
 
-    if opt.saved_model != '':
-        pretrained_dict = torch.load(opt.saved_model)
-        if opt.new_prediction:
+    if opt.saved_model != '':  # 已有模型
+        pretrained_dict = torch.load(opt.saved_model)  # 加载权重字典
+        if opt.new_prediction:  # 使用新的预测层
             model.Prediction = nn.Linear(model.SequenceModeling_output, len(pretrained_dict['module.Prediction.weight']))  
         
         model = torch.nn.DataParallel(model).to(device) 
         print(f'loading pretrained model from {opt.saved_model}')
+        # 加载权重
         if opt.FT:
-            model.load_state_dict(pretrained_dict, strict=False)
+            model.load_state_dict(pretrained_dict, strict=False)  # 微调已有模型
         else:
             model.load_state_dict(pretrained_dict)
-        if opt.new_prediction:
+
+        if opt.new_prediction:  # 初始化新的预测层
             model.module.Prediction = nn.Linear(model.module.SequenceModeling_output, opt.num_class)  
             for name, param in model.module.Prediction.named_parameters():
                 if 'bias' in name:
@@ -81,7 +85,7 @@ def train(opt, show_number = 2, amp=False):
                 elif 'weight' in name:
                     init.kaiming_normal_(param)
             model = model.to(device) 
-    else:
+    else:  # 新模型
         # weight initialization
         for name, param in model.named_parameters():
             if 'localization_fc2' in name:
@@ -98,7 +102,8 @@ def train(opt, show_number = 2, amp=False):
                 continue
         model = torch.nn.DataParallel(model).to(device)
     
-    model.train() 
+    model.train()
+
     print("Model:")
     print(model)
     count_parameters(model)
@@ -109,7 +114,7 @@ def train(opt, show_number = 2, amp=False):
     # loss averager
     loss_avg = Averager()
 
-    # freeze some layers
+    # 冻结某些层
     try:
         if opt.freeze_FeatureFxtraction:
             for param in model.module.FeatureExtraction.parameters():
@@ -121,7 +126,7 @@ def train(opt, show_number = 2, amp=False):
         pass
     
     # filter that only require gradient decent
-    filtered_parameters = []
+    filtered_parameters = []  # 需要梯度的参数
     params_num = []
     for p in filter(lambda p: p.requires_grad, model.parameters()):
         filtered_parameters.append(p)
@@ -129,7 +134,7 @@ def train(opt, show_number = 2, amp=False):
     print('Trainable params num : ', sum(params_num))
     # [print(name, p.numel()) for name, p in filter(lambda p: p[1].requires_grad, model.named_parameters())]
 
-    # setup optimizer
+    # 设置优化器
     if opt.optim=='adam':
         #optimizer = optim.Adam(filtered_parameters, lr=opt.lr, betas=(opt.beta1, 0.999))
         optimizer = optim.Adam(filtered_parameters)
@@ -138,7 +143,7 @@ def train(opt, show_number = 2, amp=False):
     print("Optimizer:")
     print(optimizer)
 
-    """ final options """
+    # 保存配置信息
     with open(f'./saved_models/{opt.experiment_name}/opt.txt', 'a', encoding="utf8") as opt_file:
         opt_log = '------------ Options -------------\n'
         args = vars(opt)
@@ -150,7 +155,7 @@ def train(opt, show_number = 2, amp=False):
 
     """ start training """
     start_iter = 0
-    if opt.saved_model != '':
+    if opt.saved_model != '':  # 获取已有迭代数
         try:
             start_iter = int(opt.saved_model.split('_')[-1].split('.')[0])
             print(f'continue to train, start_iter: {start_iter}')
@@ -166,10 +171,10 @@ def train(opt, show_number = 2, amp=False):
     t1= time.time()
         
     while(True):
-        # train part
+        # 训练步
         optimizer.zero_grad(set_to_none=True)
         
-        if amp:
+        if amp:  # 自动混合精度训练
             with autocast():
                 image_tensors, labels = train_dataset.get_batch()
                 image = image_tensors.to(device)
@@ -188,13 +193,14 @@ def train(opt, show_number = 2, amp=False):
             torch.nn.utils.clip_grad_norm_(model.parameters(), opt.grad_clip)
             scaler.step(optimizer)
             scaler.update()
-        else:
+        else:  # 常规训练
             image_tensors, labels = train_dataset.get_batch()
             image = image_tensors.to(device)
             text, length = converter.encode(labels, batch_max_length=opt.batch_max_length)
             batch_size = image.size(0)
 
             preds = model(image).log_softmax(2)
+
             preds_size = torch.IntTensor([preds.size(1)] * batch_size)
             preds = preds.permute(1, 0, 2)
             torch.backends.cudnn.enabled = False
@@ -204,10 +210,11 @@ def train(opt, show_number = 2, amp=False):
             cost.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), opt.grad_clip) 
             optimizer.step()
+
         loss_avg.add(cost)
 
-        # validation part
-        if (i % opt.valInterval == 0) and (i!=0):
+        # 验证步
+        if (i % opt.valInterval == 0) and (i != 0):
             print('training time: ', time.time()-t1)
             t1=time.time()
             elapsed_time = time.time() - start_time

@@ -16,7 +16,8 @@ def get_config(file_path):
     with open(file_path, 'r', encoding="utf8") as stream:
         opt = yaml.safe_load(stream)
     opt = AttrDict(opt)
-    if opt.lang_char == 'None':
+
+    if opt.lang_char == 'None':  # 从文本标签中产生字符列表
         characters = ''
         for data in opt['select_data']:
             csv_path = os.path.join(opt['train_data'], data, 'labels.csv')
@@ -25,13 +26,17 @@ def get_config(file_path):
             characters += ''.join(set(all_char))
         characters = sorted(set(characters))
         opt.character= ''.join(characters)
-    else:
+    else:  # 从配置产生字符列表
         opt.character = opt.number + opt.symbol + opt.lang_char
+
     for i, c in enumerate(opt.character):
         print(c, i)
+
+    # 保存字典
     os.makedirs(f'./saved_models/{opt.experiment_name}', exist_ok=True)
     with open(os.path.join(f'./saved_models/{opt.experiment_name}', "vocab.txt"), "w", encoding="utf-8") as vf:
         vf.write(opt.character)
+
     return opt
 
 
