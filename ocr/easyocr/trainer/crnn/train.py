@@ -24,7 +24,6 @@ def count_parameters(model):
     for name, parameter in model.named_parameters():
         if not parameter.requires_grad: continue
         param = parameter.numel()
-        #table.add_row([name, param])
         total_params+=param
         print(name, param)
     print(f"Total Trainable Params: {total_params}")
@@ -56,12 +55,9 @@ def train(opt, show_number = 2, amp=False):
     
     """ model configuration """
     converter = CTCLabelConverter(opt.character)
-
     opt.num_class = len(converter.character)
-
     if opt.rgb:
         opt.input_channel = 3
-    # model = Model(opt)
     model = Model(opt.input_channel, opt.output_channel, opt.hidden_size, opt.num_class)
     print('model input parameters', opt.imgH, opt.imgW, opt.num_fiducial, opt.input_channel, opt.output_channel,
           opt.hidden_size, opt.num_class, opt.batch_max_length)
@@ -143,7 +139,6 @@ def train(opt, show_number = 2, amp=False):
     print(optimizer)
 
     """ final options """
-    # print(opt)
     with open(f'./saved_models/{opt.experiment_name}/opt.txt', 'a', encoding="utf8") as opt_file:
         opt_log = '------------ Options -------------\n'
         args = vars(opt)
@@ -181,7 +176,6 @@ def train(opt, show_number = 2, amp=False):
                 text, length = converter.encode(labels, batch_max_length=opt.batch_max_length)
                 batch_size = image.size(0)
 
-                # preds = model(image, text).log_softmax(2)
                 preds = model(image).log_softmax(2)
                 preds_size = torch.IntTensor([preds.size(1)] * batch_size)
                 preds = preds.permute(1, 0, 2)
@@ -200,7 +194,6 @@ def train(opt, show_number = 2, amp=False):
             text, length = converter.encode(labels, batch_max_length=opt.batch_max_length)
             batch_size = image.size(0)
 
-            # preds = model(image, text).log_softmax(2)
             preds = model(image).log_softmax(2)
             preds_size = torch.IntTensor([preds.size(1)] * batch_size)
             preds = preds.permute(1, 0, 2)
