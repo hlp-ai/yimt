@@ -1491,18 +1491,6 @@ def translate_opts(parser):
         "(cpu only)",
     )
     group.add(
-        "--fp32",
-        "-fp32",
-        action=DeprecateAction,
-        help="Deprecated use 'precision' instead",
-    )
-    group.add(
-        "--int8",
-        "-int8",
-        action=DeprecateAction,
-        help="Deprecated use 'precision' instead",
-    )
-    group.add(
         "--avg_raw_probs",
         "-avg_raw_probs",
         action="store_true",
@@ -1635,17 +1623,3 @@ class StoreLoggingLevelAction(configargparse.Action):
         # Get the key 'value' in the dict, or just use 'value'
         level = StoreLoggingLevelAction.LEVELS.get(value, value)
         setattr(namespace, self.dest, level)
-
-
-class DeprecateAction(configargparse.Action):
-    """Deprecate action"""
-
-    def __init__(self, option_strings, dest, help=None, **kwargs):
-        super(DeprecateAction, self).__init__(
-            option_strings, dest, nargs=0, help=help, **kwargs
-        )
-
-    def __call__(self, parser, namespace, values, flag_name):
-        help = self.help if self.help is not None else ""
-        msg = "Flag '%s' is deprecated. %s" % (flag_name, help)
-        raise configargparse.ArgumentTypeError(msg)
