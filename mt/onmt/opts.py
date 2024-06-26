@@ -134,7 +134,7 @@ def _add_reproducibility_opts(parser):
     )
 
 
-def _add_dataset_opts(parser, build_vocab_only=False):
+def _add_dataset_opts(parser):
     """Options related to training datasets, type: a list of dictionary."""
     group = parser.add_argument_group("Data")
     group.add(
@@ -167,7 +167,6 @@ def _add_dataset_opts(parser, build_vocab_only=False):
     group.add(
         "-save_data",
         "--save_data",
-        required=build_vocab_only,
         help="Output base path for objects that will "
         "be saved (vocab, transforms, embeddings, ...).",
     )
@@ -179,7 +178,7 @@ def _add_dataset_opts(parser, build_vocab_only=False):
     )
 
 
-def _add_vocab_opts(parser, build_vocab_only=False):
+def _add_vocab_opts(parser):
     """Options related to vocabulary and features.
 
     Add all options relate to vocabulary or features to parser.
@@ -189,15 +188,13 @@ def _add_vocab_opts(parser, build_vocab_only=False):
         "-src_vocab",
         "--src_vocab",
         required=True,
-        help=("Path to save" if build_vocab_only else "Path to")
-        + " src (or shared) vocabulary file. "
+        help="Path to src (or shared) vocabulary file. "
         "Format: one <word> or <word>\t<count> per line.",
     )
     group.add(
         "-tgt_vocab",
         "--tgt_vocab",
-        help=("Path to save" if build_vocab_only else "Path to")
-        + " tgt vocabulary file. "
+        help="Path to tgt vocabulary file. "
         "Format: one <word> or <word>\t<count> per line.",
     )
     group.add(
@@ -231,84 +228,83 @@ def _add_vocab_opts(parser, build_vocab_only=False):
         " typically <unk> <blank> <s> </s> ",
     )
 
-    if not build_vocab_only:
-        group.add(
-            "-src_vocab_size",
-            "--src_vocab_size",
-            type=int,
-            default=32768,
-            help="Maximum size of the source vocabulary.",
-        )
-        group.add(
-            "-tgt_vocab_size",
-            "--tgt_vocab_size",
-            type=int,
-            default=32768,
-            help="Maximum size of the target vocabulary",
-        )
-        group.add(
-            "-vocab_size_multiple",
-            "--vocab_size_multiple",
-            type=int,
-            default=8,
-            help="Make the vocabulary size a multiple of this value.",
-        )
+    group.add(
+        "-src_vocab_size",
+        "--src_vocab_size",
+        type=int,
+        default=32768,
+        help="Maximum size of the source vocabulary.",
+    )
+    group.add(
+        "-tgt_vocab_size",
+        "--tgt_vocab_size",
+        type=int,
+        default=32768,
+        help="Maximum size of the target vocabulary",
+    )
+    group.add(
+        "-vocab_size_multiple",
+        "--vocab_size_multiple",
+        type=int,
+        default=8,
+        help="Make the vocabulary size a multiple of this value.",
+    )
 
-        group.add(
-            "-src_words_min_frequency",
-            "--src_words_min_frequency",
-            type=int,
-            default=0,
-            help="Discard source words with lower frequency.",
-        )
-        group.add(
-            "-tgt_words_min_frequency",
-            "--tgt_words_min_frequency",
-            type=int,
-            default=0,
-            help="Discard target words with lower frequency.",
-        )
+    group.add(
+        "-src_words_min_frequency",
+        "--src_words_min_frequency",
+        type=int,
+        default=0,
+        help="Discard source words with lower frequency.",
+    )
+    group.add(
+        "-tgt_words_min_frequency",
+        "--tgt_words_min_frequency",
+        type=int,
+        default=0,
+        help="Discard target words with lower frequency.",
+    )
 
-        # Truncation options, for text corpus
-        group = parser.add_argument_group("Pruning")
-        group.add(
-            "--src_seq_length_trunc",
-            "-src_seq_length_trunc",
-            type=int,
-            default=None,
-            help="Truncate source sequence length.",
-        )
-        group.add(
-            "--tgt_seq_length_trunc",
-            "-tgt_seq_length_trunc",
-            type=int,
-            default=None,
-            help="Truncate target sequence length.",
-        )
+    # Truncation options, for text corpus
+    group = parser.add_argument_group("Pruning")
+    group.add(
+        "--src_seq_length_trunc",
+        "-src_seq_length_trunc",
+        type=int,
+        default=None,
+        help="Truncate source sequence length.",
+    )
+    group.add(
+        "--tgt_seq_length_trunc",
+        "-tgt_seq_length_trunc",
+        type=int,
+        default=None,
+        help="Truncate target sequence length.",
+    )
 
-        group = parser.add_argument_group("Embeddings")
-        group.add(
-            "-both_embeddings",
-            "--both_embeddings",
-            help="Path to the embeddings file to use "
-            "for both source and target tokens.",
-        )
-        group.add(
-            "-src_embeddings",
-            "--src_embeddings",
-            help="Path to the embeddings file to use for source tokens.",
-        )
-        group.add(
-            "-tgt_embeddings",
-            "--tgt_embeddings",
-            help="Path to the embeddings file to use for target tokens.",
-        )
-        group.add(
-            "-embeddings_type",
-            "--embeddings_type",
-            choices=["GloVe", "word2vec"],
-            help="Type of embeddings file.",
-        )
+    group = parser.add_argument_group("Embeddings")
+    group.add(
+        "-both_embeddings",
+        "--both_embeddings",
+        help="Path to the embeddings file to use "
+             "for both source and target tokens.",
+    )
+    group.add(
+        "-src_embeddings",
+        "--src_embeddings",
+        help="Path to the embeddings file to use for source tokens.",
+    )
+    group.add(
+        "-tgt_embeddings",
+        "--tgt_embeddings",
+        help="Path to the embeddings file to use for target tokens.",
+    )
+    group.add(
+        "-embeddings_type",
+        "--embeddings_type",
+        choices=["GloVe", "word2vec"],
+        help="Type of embeddings file.",
+    )
 
 
 def _add_transform_opts(parser):
@@ -321,21 +317,15 @@ def _add_transform_opts(parser):
         transform_cls.add_options(parser)
 
 
-def data_prepare_opts(parser, build_vocab_only=False):
+def data_prepare_opts(parser):
     """Options related to data prepare in dynamic mode.
 
     Add all dynamic data prepare related options to parser.
-    If `build_vocab_only` set to True, then only contains options that
-    will be used in `onmt/bin/build_vocab.py`.
     """
     config_opts(parser)
-    _add_dataset_opts(parser, build_vocab_only=build_vocab_only)
-    _add_vocab_opts(parser, build_vocab_only=build_vocab_only)
+    _add_dataset_opts(parser)
+    _add_vocab_opts(parser)
     _add_transform_opts(parser)
-
-    if build_vocab_only:
-        _add_reproducibility_opts(parser)
-        # as for False, this will be added in _add_train_general_opts
 
 
 def distributed_opts(parser):
@@ -1302,7 +1292,7 @@ def _add_quant_opts(parser):
 
 def train_opts(parser):
     """All options used in train."""
-    data_prepare_opts(parser, build_vocab_only=False)
+    data_prepare_opts(parser)
     distributed_opts(parser)
     model_opts(parser)
     _add_train_general_opts(parser)

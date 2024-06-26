@@ -119,13 +119,9 @@ class DataOptsCheckerMixin(object):
         opt._all_transform = opt.transforms
 
     @classmethod
-    def _validate_vocab_opts(cls, opt, build_vocab_only=False):
+    def _validate_vocab_opts(cls, opt):
         """Check options relate to vocab."""
 
-        if build_vocab_only:
-            if not opt.share_vocab:
-                assert opt.tgt_vocab, "-tgt_vocab is required if not -share_vocab."
-            return
         # validation when train:
         cls._validate_file(opt.src_vocab, info="src vocab")
         if not opt.share_vocab:
@@ -169,12 +165,12 @@ class DataOptsCheckerMixin(object):
         ), "Only transformer decoder is supported for LM task"
 
     @classmethod
-    def validate_prepare_opts(cls, opt, build_vocab_only=False):
+    def validate_prepare_opts(cls, opt):
         """Validate all options relate to prepare (data/transform/vocab)."""
         cls._validate_data(opt)
         cls._get_all_transform(opt)
         cls._validate_transforms_opts(opt)
-        cls._validate_vocab_opts(opt, build_vocab_only=build_vocab_only)
+        cls._validate_vocab_opts(opt)
 
     @classmethod
     def validate_model_opts(cls, opt):
