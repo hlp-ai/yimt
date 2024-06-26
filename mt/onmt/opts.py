@@ -29,14 +29,6 @@ def _add_logging_opts(parser, is_train=True):
         help="Output logs to a file under this path.",
     )
     group.add(
-        "--log_file_level",
-        "-log_file_level",
-        type=str,
-        action=StoreLoggingLevelAction,
-        choices=StoreLoggingLevelAction.CHOICES,
-        default="0",
-    )
-    group.add(
         "--verbose",
         "-verbose",
         action="store_true",
@@ -1591,35 +1583,3 @@ def translate_opts(parser):
     _add_transform_opts(parser)
 
     _add_quant_opts(parser)
-
-
-# Copyright 2016 The Chromium Authors. All rights reserved.
-# Use of this source code is governed by a BSD-style license that can be
-# found in the LICENSE file.
-
-
-class StoreLoggingLevelAction(configargparse.Action):
-    """Convert string to logging level"""
-
-    import logging
-
-    LEVELS = {
-        "CRITICAL": logging.CRITICAL,
-        "ERROR": logging.ERROR,
-        "WARNING": logging.WARNING,
-        "INFO": logging.INFO,
-        "DEBUG": logging.DEBUG,
-        "NOTSET": logging.NOTSET,
-    }
-
-    CHOICES = list(LEVELS.keys()) + [str(_) for _ in LEVELS.values()]
-
-    def __init__(self, option_strings, dest, help=None, **kwargs):
-        super(StoreLoggingLevelAction, self).__init__(
-            option_strings, dest, help=help, **kwargs
-        )
-
-    def __call__(self, parser, namespace, value, option_string=None):
-        # Get the key 'value' in the dict, or just use 'value'
-        level = StoreLoggingLevelAction.LEVELS.get(value, value)
-        setattr(namespace, self.dest, level)
