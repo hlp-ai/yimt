@@ -171,11 +171,6 @@ class DataOptsCheckerMixin(object):
     @classmethod
     def validate_prepare_opts(cls, opt, build_vocab_only=False):
         """Validate all options relate to prepare (data/transform/vocab)."""
-        # if opt.n_sample != 0:
-        #     assert (
-        #         opt.save_data
-        #     ), "-save_data should be set if \
-        #         want save samples."
         cls._validate_data(opt)
         cls._get_all_transform(opt)
         cls._validate_transforms_opts(opt)

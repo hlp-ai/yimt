@@ -1,5 +1,4 @@
 """ Implementation of all available options """
-import configargparse
 
 from onmt.transforms import AVAILABLE_TRANSFORMS
 from onmt.constants import ModelTask
