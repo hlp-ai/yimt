@@ -126,7 +126,7 @@ def hierarchical_dataset(root, opt, select_data='/'):
     for dirpath, dirnames, filenames in os.walk(root+'/'):
         if not dirnames:
             select_flag = False
-            for selected_d in select_data:
+            for selected_d in select_data:  # 选择验证数据子集
                 if selected_d in dirpath:
                     select_flag = True
                     break
@@ -150,22 +150,23 @@ class OCRDataset(Dataset):
         self.root = root
         self.opt = opt
         print(root)
-        self.df = pd.read_csv(os.path.join(root,'labels.csv'), sep='^([^,]+),', engine='python', usecols=['filename', 'words'], keep_default_na=False)
+        self.df = pd.read_csv(os.path.join(root,'labels.csv'), sep='^([^,]+),',
+                              engine='python', usecols=['filename', 'words'], keep_default_na=False)
         self.nSamples = len(self.df)
 
-        if self.opt.data_filtering_off:
+        if self.opt.data_filtering_off:  # 不过滤数据
             self.filtered_index_list = [index + 1 for index in range(self.nSamples)]
-        else:
+        else:  # 过滤数据
             self.filtered_index_list = []
             for index in range(self.nSamples):
-                label = self.df.at[index,'words']
+                label = self.df.at[index, 'words']
                 try:
-                    if len(label) > self.opt.batch_max_length:
+                    if len(label) > self.opt.batch_max_length:  # 长度过滤
                         continue
                 except:
                     print(label)
                 out_of_char = f'[^{self.opt.character}]'
-                if re.search(out_of_char, label.lower()):
+                if re.search(out_of_char, label.lower()):  # 非字典字符过滤
                     continue
                 self.filtered_index_list.append(index)
             self.nSamples = len(self.filtered_index_list)
@@ -175,21 +176,21 @@ class OCRDataset(Dataset):
 
     def __getitem__(self, index):
         index = self.filtered_index_list[index]
-        img_fname = self.df.at[index,'filename']
+        img_fname = self.df.at[index, 'filename']  # 图像文件
         img_fpath = os.path.join(self.root, img_fname)
-        label = self.df.at[index,'words']
+        label = self.df.at[index, 'words']  # 图像文本
 
         if self.opt.rgb:
             img = Image.open(img_fpath).convert('RGB')  # for color image
         else:
             img = Image.open(img_fpath).convert('L')
 
-        if not self.opt.sensitive:
+        if not self.opt.sensitive:  # 大小写不敏感
             label = label.lower()
 
         # We only train and evaluate on alphanumerics (or pre-defined character set in train.py)
         out_of_char = f'[^{self.opt.character}]'
-        label = re.sub(out_of_char, '', label)
+        label = re.sub(out_of_char, '', label)  # 去掉非字典字符
 
         return (img, label)
 
@@ -217,7 +218,7 @@ class AlignCollate(object):
         self.contrast_adjust = contrast_adjust
 
     def __call__(self, batch):
-        batch = filter(lambda x: x is not None, batch)
+        batch = filter(lambda x: x is not None, batch)  # 过滤掉空数据
         images, labels = zip(*batch)
 
         if self.keep_ratio_with_pad:  # same concept with 'Rosetta' paper

@@ -36,12 +36,13 @@ def train(opt, show_number = 2, amp=False):
         print('Filtering the images containing characters which are not in opt.character')
         print('Filtering the images whose label is longer than opt.batch_max_length')
 
-    # opt.select_data = opt.select_data.split('-')
-    # opt.batch_ratio = opt.batch_ratio.split('-')
+    # 创建训练集
     train_dataset = Batch_Balanced_Dataset(opt)
 
+    # 创建验证集
     AlignCollate_valid = AlignCollate(imgH=opt.imgH, imgW=opt.imgW,
-                                      keep_ratio_with_pad=opt.PAD, contrast_adjust=opt.contrast_adjust)
+                                      keep_ratio_with_pad=opt.PAD,
+                                      contrast_adjust=opt.contrast_adjust)
     valid_dataset, valid_dataset_log = hierarchical_dataset(root=opt.valid_data, opt=opt)
     valid_loader = torch.utils.data.DataLoader(
         valid_dataset, batch_size=min(32, opt.batch_size),
