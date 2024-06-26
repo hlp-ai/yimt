@@ -20,15 +20,10 @@ def validation(model, criterion, evaluation_loader, converter, opt, device):
         batch_size = image_tensors.size(0)
         length_of_data = length_of_data + batch_size
         image = image_tensors.to(device)
-        # For max length prediction
-        length_for_pred = torch.IntTensor([opt.batch_max_length] * batch_size).to(device)
-        text_for_pred = torch.LongTensor(batch_size, opt.batch_max_length + 1).fill_(0).to(device)
 
         text_for_loss, length_for_loss = converter.encode(labels, batch_max_length=opt.batch_max_length)
         
         start_time = time.time()
-
-        # preds = model(image, text_for_pred)
         preds = model(image)
         forward_time = time.time() - start_time
 

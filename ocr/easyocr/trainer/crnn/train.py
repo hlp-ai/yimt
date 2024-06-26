@@ -221,6 +221,7 @@ def train(opt, show_number = 2, amp=False):
             # for log
             with open(f'./saved_models/{opt.experiment_name}/log_train.txt', 'a', encoding="utf8") as log:
                 model.eval()
+                # 验证
                 with torch.no_grad():
                     valid_loss, current_accuracy, current_norm_ED, preds, confidence_score, labels,\
                     infer_time, length_of_data = validation(model, criterion, valid_loader, converter, opt, device)
@@ -232,7 +233,7 @@ def train(opt, show_number = 2, amp=False):
 
                 current_model_log = f'{"Current_accuracy":17s}: {current_accuracy:0.3f}, {"Current_norm_ED":17s}: {current_norm_ED:0.4f}'
 
-                # keep best accuracy model (on valid dataset)
+                # 根据验证数据保存最好的模型
                 if current_accuracy > best_accuracy:
                     best_accuracy = current_accuracy
                     torch.save(model.state_dict(), f'./saved_models/{opt.experiment_name}/best_accuracy.pth')
@@ -259,10 +260,9 @@ def train(opt, show_number = 2, amp=False):
                 print('validation time: ', time.time()-t1)
                 t1=time.time()
 
-        # save model per 1e+4 iter.
+        # 每10000步保存一次模型
         if (i + 1) % 1e+4 == 0:
-            torch.save(
-                model.state_dict(), f'./saved_models/{opt.experiment_name}/iter_{i+1}.pth')
+            torch.save(model.state_dict(), f'./saved_models/{opt.experiment_name}/iter_{i+1}.pth')
 
         if i == opt.num_iter:
             print('end the training')
