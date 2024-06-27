@@ -36,7 +36,7 @@ def validation(model, criterion, evaluation_loader, converter, opt, device):
             # Select max probabilty (greedy decoding) then decode index to character
             _, preds_index = preds.max(2)
             preds_index = preds_index.view(-1)
-            preds_str = converter.decode_greedy(preds_index.data, preds_size.data)
+            preds_str = converter.decode_greedy(preds_index.data.cpu(), preds_size.data.cpu())
         elif opt.decode == 'beamsearch':
             preds_str = converter.decode_beamsearch(preds, beamWidth=2)
 

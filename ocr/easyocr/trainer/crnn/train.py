@@ -10,10 +10,9 @@ from torch.cuda.amp import autocast, GradScaler
 import numpy as np
 
 from easyocr.model.vgg_model import Model
-from easyocr.trainer.crnn.utils import Averager
+from easyocr.trainer.crnn.utils import Averager, CTCLabelConverter
 from easyocr.trainer.crnn.dataset import hierarchical_dataset, AlignCollate, Batch_Balanced_Dataset
 from easyocr.trainer.crnn.test import validation
-from easyocr.utils import CTCLabelConverter
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 

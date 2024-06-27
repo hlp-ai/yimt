@@ -146,20 +146,24 @@ def hierarchical_dataset(root, opt, select_data='/'):
 class OCRDataset(Dataset):
 
     def __init__(self, root, opt):
-
         self.root = root
         self.opt = opt
         print(root)
-        self.df = pd.read_csv(os.path.join(root,'labels.csv'), sep='^([^,]+),',
-                              engine='python', usecols=['filename', 'words'], keep_default_na=False)
-        self.nSamples = len(self.df)
+        self.examples = []
+        with open(os.path.join(root,'labels.csv'), encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                parts = line.split("\t")
+                self.examples.append(parts)
+
+        self.nSamples = len(self.examples)
 
         if self.opt.data_filtering_off:  # 不过滤数据
             self.filtered_index_list = [index + 1 for index in range(self.nSamples)]
         else:  # 过滤数据
             self.filtered_index_list = []
             for index in range(self.nSamples):
-                label = self.df.at[index, 'words']
+                label = self.examples[index][1]
                 try:
                     if len(label) > self.opt.batch_max_length:  # 长度过滤
                         continue
@@ -176,9 +180,9 @@ class OCRDataset(Dataset):
 
     def __getitem__(self, index):
         index = self.filtered_index_list[index]
-        img_fname = self.df.at[index, 'filename']  # 图像文件
+        img_fname = self.examples[index][0]  # 图像文件
         img_fpath = os.path.join(self.root, img_fname)
-        label = self.df.at[index, 'words']  # 图像文本
+        label = self.examples[index][1]  # 图像文本
 
         if self.opt.rgb:
             img = Image.open(img_fpath).convert('RGB')  # for color image
