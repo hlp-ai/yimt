@@ -261,7 +261,8 @@ def train(opt, show_number = 2, amp=False):
                 t1=time.time()
 
         # 每10000步保存一次模型
-        if (i + 1) % 1e+4 == 0:
+        save_interval = opt.saveInterval
+        if (i + 1) % save_interval == 0:
             torch.save(model.state_dict(), f'./saved_models/{opt.experiment_name}/iter_{i+1}.pth')
 
         if i == opt.num_iter:
