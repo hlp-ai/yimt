@@ -11,7 +11,6 @@ def export_detector(detector_onnx_save_path,
                     lang_list=["en"],
                     model_storage_directory=None,
                     user_network_directory=None,
-                    download_enabled=True,
                     dynamic=True,
                     device="cpu",
                     quantize=True,
@@ -25,8 +24,7 @@ def export_detector(detector_onnx_save_path,
                                 recognizer=detector,
                                 quantize=quantize,
                                 model_storage_directory=model_storage_directory,
-                                user_network_directory=user_network_directory,
-                                download_enabled=download_enabled)
+                                user_network_directory=user_network_directory)
 
     # exporting detector if selected
     if detector:

@@ -38,13 +38,6 @@ def parse_args():
         help="Recognition networks",
     )
     parser.add_argument(
-        "--download_enabled",
-        type=bool,
-        choices=[True, False],
-        default=True,
-        help="Enable Download",
-    )
-    parser.add_argument(
         "--verbose",
         type=bool,
         choices=[True, False],
@@ -219,7 +212,6 @@ def main():
                             model_storage_directory=args.model_storage_directory,
                             user_network_directory=args.user_network_directory,
                             recog_network=args.recog_network,
-                            download_enabled=args.download_enabled,
                             verbose=args.verbose,
                             quantize=args.quantize)
 

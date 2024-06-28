@@ -19,7 +19,7 @@ class Reader(object):
     def __init__(self, lang_list, gpu=True,
                  model_storage_directory=None,
                  user_network_directory=None,
-                 recog_network='standard', download_enabled=True,
+                 recog_network='standard',
                  verbose=True,
                  quantize=True, cudnn_benchmark=False):
         """Create an EasyOCR Reader
@@ -40,7 +40,6 @@ class Reader(object):
             download_enabled (bool): Enabled downloading of model data via HTTP (default).
         """
         self.verbose = verbose
-        self.download_enabled = download_enabled
 
         self.model_storage_directory = MODULE_PATH + '/model'
         if model_storage_directory:
