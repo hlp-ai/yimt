@@ -1,8 +1,6 @@
 from easyocr.recognition import get_recognizer, get_text
 from easyocr.utils import group_text_box, get_image_list, get_paragraph, \
-    download_and_unzip, diff, reformat_input, \
-    make_rotated_img_list, set_result_with_confidence, \
-    merge_to_free
+    diff, reformat_input, make_rotated_img_list, set_result_with_confidence, merge_to_free
 from easyocr.config import *
 from bidi.algorithm import get_display
 import torch
@@ -156,15 +154,8 @@ class Reader(object):
 
             model_path = os.path.join(self.model_storage_directory, model['filename'])
             print(model_path)
-            # check recognition model file
-            corrupt_msg = "model corrupt"
-            if os.path.isfile(model_path) == False:
-                if not self.download_enabled:
-                    raise FileNotFoundError("Missing %s and downloads disabled" % model_path)
-                LOGGER.warning('Downloading recognition model, please wait. '
-                               'This may take several minutes depending upon your network connection.')
-                download_and_unzip(model['url'], model['filename'], self.model_storage_directory, verbose)
-                LOGGER.info('Download complete.')
+            if not os.path.isfile(model_path):
+                raise FileNotFoundError("Missing %s" % model_path)
 
         else:  # user-defined model
             with open(os.path.join(self.user_network_directory, recog_network + '.yaml'), encoding='utf8') as file:
@@ -206,18 +197,10 @@ class Reader(object):
         from .detection import get_detector, get_textbox
         self.get_textbox = get_textbox
         self.get_detector = get_detector
-        corrupt_msg = 'MD5 hash mismatch, possible file corruption'
         detector_path = os.path.join(self.model_storage_directory,
                                      self.detection_models[self.detect_network]['filename'])
-        if os.path.isfile(detector_path) == False:
-            if not self.download_enabled:
-                raise FileNotFoundError("Missing %s and downloads disabled" % detector_path)
-            LOGGER.warning('Downloading detection model, please wait. '
-                           'This may take several minutes depending upon your network connection.')
-            download_and_unzip(self.detection_models[self.detect_network]['url'],
-                               self.detection_models[self.detect_network]['filename'], self.model_storage_directory,
-                               self.verbose)
-            LOGGER.info('Download complete')
+        if not os.path.isfile(detector_path):
+            raise FileNotFoundError("Missing %s" % detector_path)
 
         return detector_path
 

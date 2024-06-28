@@ -7,13 +7,8 @@ import cv2
 from PIL import Image, JpegImagePlugin
 from scipy import ndimage
 import sys, os
-from zipfile import ZipFile
 from easyocr.imgproc import loadImage
-
-if sys.version_info[0] == 2:
-    from six.moves.urllib.request import urlretrieve
-else:
-    from urllib.request import urlretrieve
+from urllib.request import urlretrieve
 
 
 def consecutive(data, mode='first', stepsize=1):
@@ -537,15 +532,6 @@ def get_image_list(horizontal_list, free_list, img, model_height=64, sort_output
     if sort_output:
         image_list = sorted(image_list, key=lambda item: item[0][0][1])  # sort by vertical position
     return image_list, max_width
-
-
-def download_and_unzip(url, filename, model_storage_directory, verbose=True):
-    zip_path = os.path.join(model_storage_directory, 'temp.zip')
-    reporthook = printProgressBar(prefix='Progress:', suffix='Complete', length=50) if verbose else None
-    urlretrieve(url, zip_path, reporthook=reporthook)
-    with ZipFile(zip_path, 'r') as zipObj:
-        zipObj.extract(filename, model_storage_directory)
-    os.remove(zip_path)
 
 
 def diff(input_list):
