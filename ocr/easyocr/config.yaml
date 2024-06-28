@@ -1,0 +1,19 @@
+
+detection_models:
+  craft:
+    filename: 'craft_mlt_25k.pth'
+
+recognition_models:
+  gen1:
+    latin_g1:
+      filename: 'latin_g2.pth'
+      model_script: 'latin'
+      symbols: " !\"#$%&'()*+,-./0123456789:;<=>?@[\\]^_`{|}~ €"
+      characters: " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~ªÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿĀāĂăĄąĆćČčĎďĐđĒēĖėĘęĚěĞğĨĩĪīĮįİıĶķĹĺĻļĽľŁłŃńŅņŇňŒœŔŕŘřŚśŞşŠšŤťŨũŪūŮůŲųŸŹźŻżŽžƏƠơƯưȘșȚțə̇ḌḍḶḷṀṁṂṃṄṅṆṇṬṭẠạẢảẤấẦầẨẩẪẫẬậẮắẰằẲẳẴẵẶặẸẹẺẻẼẽẾếỀềỂểỄễỆệỈỉỊịỌọỎỏỐốỒồỔổỖỗỘộỚớỜờỞởỠỡỢợỤụỦủỨứỪừỬửỮữỰựỲỳỴỵỶỷỸỹ€"
+
+  gen2:
+    english_g2:
+      filename: 'english_g2.pth'
+      model_script: 'english'
+      symbols: "0123456789!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ €"
+      characters: "0123456789!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ €ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
