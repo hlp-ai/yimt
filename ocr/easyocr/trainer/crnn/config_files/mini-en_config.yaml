@@ -1,0 +1,44 @@
+lang_char: None
+
+experiment_name: mini-en
+train_data: 'all_data'
+valid_data: 'all_data/mini-en-val'
+manualSeed: 1111
+workers: 6
+batch_size: 32
+num_iter: 10000
+valInterval: 100
+saveInterval: 500
+saved_model: '' #'saved_models/en_filtered/iter_300000.pth'
+
+FT: False
+optim: False # default is Adadelta
+lr: 1.
+beta1: 0.9
+rho: 0.95
+eps: 0.00000001
+grad_clip: 5
+
+#Data processing
+select_data: ['mini-en'] # this is dataset folder in train_data
+batch_ratio: ['1']
+total_data_usage_ratio: 1.0
+batch_max_length: 34 
+imgH: 32
+imgW: 280
+rgb: False
+
+# contrast_adjust: False
+sensitive: True
+PAD: True
+contrast_adjust: 0.0
+data_filtering_off: False
+
+num_fiducial: 20
+input_channel: 1
+output_channel: 256
+hidden_size: 256
+decode: 'greedy'
+new_prediction: False
+freeze_FeatureFxtraction: False
+freeze_SequenceModeling: False

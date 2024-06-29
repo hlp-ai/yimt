@@ -13,7 +13,7 @@ recognition_models:
 
   gen2:
     english_g2:
-      filename: 'english_g2.pth'
+      filename: 'iter_3500.pth'
       model_script: 'english'
       symbols: "0123456789!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ €"
-      characters: "0123456789!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ €ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+      characters: " !\"$%'()+,-./0123456789:;?ABCDEFGHIJKLMNOPQRSTUVWXYZ[]abcdefghijklmnopqrstuvwxyz~¡¥©ª«°±²¶º»¼½¾¿ÀÁÂÃÄÅÈÉÍÎÔÖÚÜÝßàáâãäçèéêìíîïñòóôõöùúûüýāăĐđğĩłœşšũŸơưạẢảẤấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờỞởỡợụỦủứừửữựỳỷỹ–—‘’‚“”„…€"
