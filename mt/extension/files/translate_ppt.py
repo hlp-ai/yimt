@@ -49,6 +49,9 @@ def translate_ppt_auto(in_fn, source_lang="auto", target_lang="zh", translation_
 
     translator = translator_factory.get_translator(source_lang, target_lang)
 
+    if translator is None:
+        raise ValueError("给定语言不支持: {}".format(source_lang+"-"+target_lang))
+
     if callbacker:
         callbacker.set_tag(docx_fn)
 

@@ -15,7 +15,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Paragraph, Frame, KeepInFrame
 
-from service.mt import translator_factory
+from service.mt import translator_factory, Progress
 from service.utils import detect_lang
 
 fonts = {
@@ -310,6 +310,9 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
                 continue
 
             translator = translator_factory.get_translator(source_lang, target_lang)
+
+            if translator is None:
+                raise ValueError("给定语言不支持: {}".format(source_lang + "-" + target_lang))
 
             if callbacker:
                 callbacker.set_tag(pdf_fn)
