@@ -1,4 +1,5 @@
 import os
+import threading
 
 import yaml
 
@@ -19,6 +20,9 @@ class Progress:
 
     def set_tag(self, tag):
         self._tag = tag
+
+
+mutex = threading.Lock()
 
 
 class Translator:
@@ -54,7 +58,9 @@ class Translator:
 
             to_translate = self._preprocess(to_translate, sl, tl)
 
-            scores, preds = self.engine.infer_list(to_translate)
+            with mutex:
+                scores, preds = self.engine.infer_list(to_translate)
+
             translations = [p[0] for p in preds]
 
             lang_pair = sl + "-" + tl
