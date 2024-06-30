@@ -31,32 +31,16 @@
             var queryParams = new URLSearchParams(window.location.search);
             file_path = queryParams.get("file_path");
             translated_file_path = queryParams.get("translated_file_path");
-            file_type = queryParams.get("file_type");   
-               
-            console.log(file_type);
-            console.log(file_path);
-            console.log(translated_file_path);
+            translated_file_url = queryParams.get("translated_file_url");
+            file_type = queryParams.get("file_type");
 
             var randomNumber = Math.floor(Math.random() * 1000000);
-            document.getElementById("document-container").setAttribute("src", END_POINT + "/request_original" + '?timestamp=' + randomNumber + '&file_path=' + encodeURIComponent(file_path)+ '&file_type=' + file_type);
+            document.getElementById("document-container").setAttribute("src", END_POINT + "/request_source" + '?timestamp=' + randomNumber + '&file_path=' + encodeURIComponent(file_path)+ '&file_type=' + file_type);
             document.getElementById("document-container2").setAttribute("src", END_POINT+"/request_target"+ '?timestamp=' + randomNumber + '&translated_file_path=' + encodeURIComponent(translated_file_path)+ '&file_type=' + file_type);
-            get_download();
+            document.getElementById('download_link').innerHTML = "<a href=" + translated_file_url + ">下载翻译文件</a>";
             request_ad();
         }
 
-        async function get_download()
-        {
-            let xhr = new XMLHttpRequest();
-            var form = new FormData();
-            //var translated_file_path = '{{tgt}}';
-            form.append("translated_file_path", translated_file_path);
-            xhr.open('POST',END_POINT + "/get_download");
-            xhr.send(form);
-            xhr.onreadystatechange = function () {
-                console.log("get_download: "+ xhr.responseText);
-                document.getElementById('download_link').innerHTML = "<a href=" + xhr.responseText + ">下载翻译文件</a>";
-            }
-        }
 	</script>
 
     <title>YiMT Doc Translation</title>
@@ -86,12 +70,10 @@
         <div class="fanyi__input">
 
             <div class="file_view_original">
-                <!-- <iframe class="document-container" id="document-container" src="http://127.0.0.1:5555/media_original"></iframe> -->
                 <iframe class="document-container" id="document-container" ></iframe>
             </div>
 
             <div class="file_view_target">
-                <!-- <iframe class="document-container" id="document-container2" src="http://127.0.0.1:5555/media_target"></iframe> -->
                 <iframe class="document-container" id="document-container2" ></iframe>
             </div>
         </div>

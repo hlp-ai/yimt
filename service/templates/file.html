@@ -119,6 +119,7 @@
             var queryParams = new URLSearchParams();
             queryParams.append("file_path", file_path);
             queryParams.append("translated_file_path", translated_file_path);
+            queryParams.append("translated_file_url", res_json.translatedFileUrl);
             queryParams.append("file_type", file_type);
 
             var url = "{{ url_for('reference') }}?" + queryParams.toString();

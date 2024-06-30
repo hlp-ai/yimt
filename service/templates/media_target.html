@@ -11,7 +11,7 @@
         <script type="text/javascript" src="../static/plugin/jquery.media.js"></script>
 
         <!-- docx --> 
-        <script crossorigin src="https://unpkg.com/jszip/dist/jszip.min.js"></script>
+        <script crossorigin src="../static/plugin/jszip.min.js"></script>
         <script src="../static/plugin/docx-preview.js"></script>
 
         <!-- pptx --> 
@@ -40,14 +40,13 @@
                 if(!!server){
                     END_POINT = server;
                 }
-                check_file_type(); 
-                //Show_pptx();     
+
+                show_file();
             }
     
-            function check_file_type()
+            function show_file()
             {
                 var file_type = "{{ file_type }}";
-                console.log("media file_type :"+ file_type);
                 if(file_type =="docx"){
                     Show_docx();
                     //document.getElementById("preview-media").innerText="d";
@@ -72,11 +71,11 @@
 
             //把二进制文件转Blob-file类型
             function createFile(urlData,fileType){
-                var bytes=window.atob(urlData),
-                n=bytes.length,
-                u8arr=new Uint8Array(n);
+                var bytes = window.atob(urlData),
+                n = bytes.length,
+                u8arr = new Uint8Array(n);
                 while(n--){
-                    u8arr[n]=bytes.charCodeAt(n);
+                    u8arr[n] = bytes.charCodeAt(n);
                 }
                 return new Blob([u8arr],{type:fileType});
             }
@@ -87,22 +86,22 @@
                 get_blob_file();
 
                 async function get_blob_file(){
-                    //var translated_file_path = window.localStorage.getItem("translated_file_path");
                     const res = await fetch(END_POINT + "/get_blob_file", {
-                        method: "POST",
-                        body: JSON.stringify({file_path:file_path}),
-                        headers: { "Content-Type": "application/json" },
+                            method: "POST",
+                            body: JSON.stringify({file_path:file_path}),
+                            headers: { "Content-Type": "application/json" },
                         }
                     );
+
                     trans_json = await res.json();
                     data = trans_json.base64;
-                    // console.log(data); // for test
                     var str = data;   //str接收来自后端返回的base64
-                    var fileType = "application/msword";   //指定mime
+                    var fileType = "application/msword";
                     var myFile = createFile(str,fileType);
-                    // console.log(myFile); // for test
+
                     renderDocx(myFile)
                 }
+
                 const docxOptions = Object.assign(docx.defaultOptions, {
                     ignoreWidth: false,
                     experimental: true,
@@ -114,14 +113,14 @@
                     currentDocument = file; 
                     if (!currentDocument) 
                         return;
-                        docx.renderAsync(currentDocument, container, null, docxOptions)
+                    docx.renderAsync(currentDocument, container, null, docxOptions)
                 }
             }
+
             function Show_pptx()
             {
-                //var translated_file_path = window.localStorage.getItem("translated_file_path");
                 $("#preview-media").pptxToHtml({ 
-                    pptxFileUrl: END_POINT + "/pptx_target" + '?translated_file_path=' + encodeURIComponent(file_path), 
+                    pptxFileUrl: END_POINT + "/pptx" + '?file_path=' + encodeURIComponent(file_path),
                     slidesScale: "50%", 
                     slideMode: false, 
                     keyBoardShortCut: false 

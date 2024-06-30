@@ -631,66 +631,40 @@ def create_app(args):
     def get_blob_file():
         json = get_json_dict(request)
         file_path = json.get("file_path")
-        # print("get_blob_file()"+file_path)
-        # print("get_blob_file_path:" + file_path)  # for test
         import base64
         file_64_string = base64.b64encode(open(file_path, "rb").read())
-        # print(file_64_string.decode('utf-8'))  # for test
         resp = {
             'base64': file_64_string.decode('utf-8')
         }
         return jsonify(resp)
 
-    @app.post("/get_download")
-    def get_download():
-        translate_file_path = request.form.get("translated_file_path")
-        # print("download trans_path:" + translate_file_path)  # for test
-        return url_for('download_file', filename=os.path.basename(translate_file_path), _external=True)
-
-    @app.get("/pptx_original")
-    def pptx_original():
-        # print("path_original:")
+    @app.get("/pptx")
+    def pptx():
         file_path = request.args.get('file_path')
-        print("pptx_original: " + file_path)
         return send_file(file_path)
 
-    @app.get("/pptx_target")
-    def pptx_target():
-        # print("path_target:")
-        translate_file_path = request.args.get('translated_file_path')
-        print("pptx_target: " + translate_file_path)
-        return send_file(translate_file_path)
-
-    @app.get("/request_original")
-    def request_original():
-        # print("tph_original:")
+    @app.get("/request_source")
+    def request_source():
         file_type = request.args.get('file_type')
         file_path = request.args.get('file_path')
-        # print("type:"+file_type)
         if file_type == 'docx' or file_type == 'pptx' or file_type == 'xlsx':
-            # return send_file("templates/media_original.html")
             file_path_str = url_for('static', filename=file_path)
             file_path_str = file_path_str.replace('/static/', '/')
             file_path_str = file_path_str.lstrip('/')
-            # print("file_path_str:" + file_path_str)
-            return render_template("media_original.html", file_type=file_type, file_path=file_path_str)
-        # print("tph_original:"+ file_path)
+            return render_template("media_source.html", file_type=file_type, file_path=file_path_str)
+
         return send_file(file_path)
 
     @app.get("/request_target")
     def request_target():
-        # print("tph_target:")
         file_type = request.args.get('file_type')
         file_path = request.args.get('translated_file_path')
-        # print("type:" + file_type)
         if file_type == 'docx' or file_type == 'pptx' or file_type == 'xlsx':
-            # return send_file("templates/media_target.html")
             file_path_str = url_for('static', filename=file_path)
             file_path_str = file_path_str.replace('/static/', '/')
             file_path_str = file_path_str.lstrip('/')
-            # print("file_path_str:" + file_path_str)
             return render_template("media_target.html", file_type=file_type, file_path=file_path_str)
-        # print("tph_target:" + file_path)
+
         return send_file(file_path)
 
     return app
