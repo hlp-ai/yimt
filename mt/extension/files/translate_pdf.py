@@ -317,7 +317,7 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
             if callbacker:
                 callbacker.set_tag(pdf_fn)
 
-        translations = translator.translate_list(to_translate_texts)
+        translations = translator.translate_list(to_translate_texts, source_lang, target_lang, callbacker)
         for i in range(len(to_translate_blocks)):
             x, y, w, h, t = to_translate_blocks[i]
             print_to_canvas(translations[i], x, y, w, h, pdf, ft, target_lang)
