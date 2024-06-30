@@ -61,9 +61,8 @@
                     var percentComplete = Math.round(evt.loaded * 100 / evt.total);
                     if (percentComplete == 100){
                         setTimeout(function () {
-                        //document.getElementById("showProgress").innerHTML = '上传完成，正在翻译...';
                         document.getElementById("progress_line").value=percentComplete;
-                    },10)
+                      }, 10)
                     }else{
                         document.getElementById("showProgress").innerHTML = '已上传'+percentComplete+"%";
                         document.getElementById("progress_line").value=percentComplete;
@@ -71,17 +70,16 @@
                 }else {
                     document.getElementById("showProgress").innerHTML = '无法计算';
                 }
-                }, false);
+              }, false);
 
 		    xhr.open("post", url, true);
 		    xhr.onload = uploadComplete;
 		    xhr.send(form);
 
-            setInterval("translate_progress()",2000);  //每2秒发送查看进度
+            setInterval("translate_progress()", 2000);  //每2秒发送查看进度
 		}
 
         function translate_progress(){
-            //console.log(is_finished);  //测试用
             if(is_finished == false)
             {
                 var url = END_POINT + "/translate_file_progress";
@@ -92,8 +90,6 @@
                 xhr.onload = function(){
                     if(is_finished == false)  //得添加这句判断，否则会在上传结束后仍短暂执行下面的语句
                     {
-                        console.log(this.responseText);
-                        //console.log("is_finished?");
                         document.getElementById("showProgress").innerHTML = '上传完成，正在翻译,翻译进度：'+ this.responseText;
                     }
                 }
@@ -114,15 +110,11 @@
 			}
 
 			document.getElementById("download").style.display = "inline";
-            is_finished = true  //标记翻译结束
+            is_finished = true
 			document.getElementById('download').innerHTML = "<a href=" + res_json.translatedFileUrl + ">下载翻译文件</a>";
             var file_path = res_json.filepath;
             var translated_file_path = res_json.translated_file_path;
             var file_type = res_json.file_type;
-
-            //console.log("file_path: "+ file_path);
-            //console.log("translated_file_path: "+translated_file_path);
-            //console.log("file_type: "+file_type);
 
             var queryParams = new URLSearchParams();
             queryParams.append("file_path", file_path);
@@ -156,7 +148,6 @@
         <div class="fanyi__operations">
             <div class="fanyi__operations--left">
                 <div id="toolbar">
-    
                     <select id="source" name="source" class="source_select">
                     </select>
                     <span class="mid">-></span>
