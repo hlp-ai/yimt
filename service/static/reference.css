@@ -29,7 +29,7 @@
     position: relative;
     display: inline-block;
     width: 49%;
-    height: 800px;
+    height: 760px;
     font-size: 14px;
     background: #ffffff;
     vertical-align: top
@@ -43,7 +43,7 @@
     position: absolute;
     left: 0px;
     width: 100%;
-    height: 800px;
+    height: 760px;
     margin-bottom: 10px;
     margin-top: 0px;
 }
@@ -86,3 +86,11 @@
 
 }
 
+.doc_area {
+    position: relative;
+    margin: 0 10px;
+    margin-top: 18px;
+    margin:auto;
+    max-width: 1600px;
+    font-size: 0
+}
