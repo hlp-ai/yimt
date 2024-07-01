@@ -73,3 +73,10 @@ class CRAFT(nn.Module):
         y = self.conv_cls(feature)
 
         return y.permute(0,2,3,1), feature
+
+
+if __name__ == "__main__":
+    m = CRAFT()
+    x = torch.rand((1, 3, 200, 300))
+    y = m(x)
+    print(y[0].shape, y[1].shape)
