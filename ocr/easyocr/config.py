@@ -17,7 +17,7 @@ MODULE_PATH = os.environ.get("EASYOCR_MODULE_PATH") or \
 #     },
 # }
 
-with open("./config.yaml", 'r', encoding="utf-8") as stream:
+with open(os.path.join(os.path.dirname(__file__), "config.yaml"), encoding="utf-8") as stream:
     conf = yaml.safe_load(stream)
 
 detection_models = conf["detection_models"]
