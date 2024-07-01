@@ -21,7 +21,7 @@
         {
             set_setting();
             set_footer();
-            set_products();
+            // set_products();
 
             END_POINT = "http://127.0.0.1:5555";
             var server = window.localStorage.getItem("server");
@@ -38,7 +38,7 @@
             document.getElementById("document-container").setAttribute("src", END_POINT + "/request_source" + '?timestamp=' + randomNumber + '&file_path=' + encodeURIComponent(file_path)+ '&file_type=' + file_type);
             document.getElementById("document-container2").setAttribute("src", END_POINT+"/request_target"+ '?timestamp=' + randomNumber + '&translated_file_path=' + encodeURIComponent(translated_file_path)+ '&file_type=' + file_type);
             document.getElementById('download_link').innerHTML = "<a href=" + translated_file_url + ">下载翻译文件</a>";
-            request_ad();
+            // request_ad();
         }
 
 	</script>
@@ -78,19 +78,6 @@
             </div>
         </div>
 
-        <div class ="download_area">
-            
-        </div>
-
-        <div class="inside__products" style="display: block;">
-            <div class="product1_area" id = "product1_area">
-                <div class="product1_content" id="product1_content"></div>
-                <a class="product1_url" id="product1_url"></a>
-            </div>
-            <div class="product2_area" id="product2_area"></div>
-        </div>
-    
-        
     </div>
 
     <div class="fanyi__footer" id="fanyi__footer"></div>
