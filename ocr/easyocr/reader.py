@@ -212,11 +212,6 @@ class Reader(object):
 
     def setModelLanguage(self, language, lang_list, list_lang, list_lang_string):
         self.model_lang = language
-        # if set(lang_list) - set(list_lang) != set():
-        #     if language == 'ch_tra' or language == 'ch_sim':
-        #         language = 'chinese'
-        #     raise ValueError(
-        #         language.capitalize() + ' is only compatible with English, try lang_list=' + list_lang_string)
 
     def detect(self, img, min_size=20, text_threshold=0.7, low_text=0.4,
                link_threshold=0.4, canvas_size=2560, mag_ratio=1.,

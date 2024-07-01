@@ -6,10 +6,6 @@ from easyocr.reader import Reader
 class OCR:
 
     def __init__(self, lang, models_dir='D:\kidden\github\yimt\pretrained\ocr\easyocr'):
-        # if lang != "en":
-        #     langs = [lang, 'en']
-        # else:
-        #     langs = [lang]
         langs = [lang]
         self._reader = Reader(langs, model_storage_directory=models_dir)
 
