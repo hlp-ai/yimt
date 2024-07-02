@@ -23,15 +23,13 @@ fonts = {
     'en': 'Arial',
     # Add more languages and their corresponding fonts here
 }
+
 pdfmetrics.registerFont(TTFont('SimSun', os.path.join(os.path.dirname(__file__), 'SimSun.ttf')))
 styles = getSampleStyleSheet()
 styles.add(ParagraphStyle(fontName='SimSun', name='Song', fontSize=9, wordWrap='CJK'))
 
-
 p_chars_lang_independent = re.compile(r"[0123456789+\-*/=~!@$%^()\[\]{}<>\|,\.\?\"]")
-
 p_en_chars = re.compile(r"[a-zA-Z]+")
-
 
 font_size_list = []
 dimlimit = 0  # 100  # each image side must be greater than this
@@ -83,24 +81,24 @@ def recoverpix(doc, item):
     return doc.extract_image(xref)
 
 
-def extract_draw_save(translate_file, translated_file=None):
-    if translated_file is None:
-        paths = os.path.splitext(translate_file)
+def extract_draw_save(source_pdf_fn, target_pdf_fn=None):
+    if target_pdf_fn is None:
+        paths = os.path.splitext(source_pdf_fn)
         translated_fn = paths[0] + "-translated" + paths[1]
     else:
-        translated_fn = translated_file
+        translated_fn = target_pdf_fn
 
-    doc = fitz.open(translate_file)
-    page_count = doc.page_count
-    outpdf = fitz.open(translated_fn)
+    in_pdf = fitz.open(source_pdf_fn)
+    page_count = in_pdf.page_count
+    out_pdf = fitz.open(translated_fn)
     for i in range(page_count):
-        page = doc[i]
+        page = in_pdf[i]
         paths = page.get_drawings()  # extract existing drawings
 
-        if i >= len(outpdf):  # 如果 outpdf 中没有第 i 页，那么添加一个新的页面
-            outpdf.new_page(width=page.rect.width, height=page.rect.height)
+        if i >= len(out_pdf):  # 如果 outpdf 中没有第 i 页，那么添加一个新的页面
+            out_pdf.new_page(width=page.rect.width, height=page.rect.height)
 
-        outpage = outpdf[i]
+        outpage = out_pdf[i]
         shape = outpage.new_shape()  # make a drawing canvas for the output page
         # define some output page with the same dimensions
 
@@ -137,8 +135,10 @@ def extract_draw_save(translate_file, translated_file=None):
                 stroke_opacity=path["stroke_opacity"],
                 fill_opacity=path["fill_opacity"],
             )
+
         shape.commit()
-    return outpdf
+
+    return out_pdf
 
 
 def ensure_values(dictionary, keys, default_value=1):
@@ -147,22 +147,22 @@ def ensure_values(dictionary, keys, default_value=1):
             dictionary[key] = default_value
 
 
-def extract_img_save(translate_file, translated_file):
-    if translated_file is None:
-        paths = os.path.splitext(translate_file)
+def extract_img_save(source_pdf_fn, target_pdf_fn):
+    if target_pdf_fn is None:
+        paths = os.path.splitext(source_pdf_fn)
         translated_fn = paths[0] + "-translated" + paths[1]
     else:
-        translated_fn = translated_file
+        translated_fn = target_pdf_fn
 
-    doc = fitz.open(translate_file)
-    page_count = doc.page_count  # number of pages
-    doc_new = fitz.open(translated_fn)
+    in_pdf = fitz.open(source_pdf_fn)
+    page_count = in_pdf.page_count  # number of pages
+    out_pdf = fitz.open(translated_fn)
 
     xreflist = []
     imglist = []
     for pno in range(page_count):
-        page = doc[pno]
-        il = doc.get_page_images(pno)
+        page = in_pdf[pno]
+        il = in_pdf.get_page_images(pno)
         # print(il)
         imglist.extend([x[0] for x in il])
         for img in il:
@@ -175,7 +175,7 @@ def extract_img_save(translate_file, translated_file):
             height = img[3]
             if min(width, height) <= dimlimit:
                 continue
-            image = recoverpix(doc, img)
+            image = recoverpix(in_pdf, img)
             n = image["colorspace"]
             imgdata = image["image"]
 
@@ -184,20 +184,21 @@ def extract_img_save(translate_file, translated_file):
             if len(imgdata) / (width * height * n) <= relsize:
                 continue
 
-            # imgfile = os.path.join(imgdir, "img%05i.%s" % (xref, image["ext"]))
-            # print(imgfile)
-            # fout = open(imgfile, "wb")
-            # fout.write(imgdata)
-            # fout.close()
+            imgfile = os.path.join(imgdir, "img%05i.%s" % (xref, image["ext"]))
+            print(imgfile)
+            fout = open(imgfile, "wb")
+            fout.write(imgdata)
+            fout.close()
+
             xreflist.append(xref)
-            doc_new[pno].insert_image(rect=img_rect[0], stream=imgdata)
+            out_pdf[pno].insert_image(rect=img_rect[0], stream=imgdata)
 
     imglist = list(set(imglist))
     # print(len(set(imglist)), "images in total")
     # print(imglist)
     # print(len(xreflist), "images extracted")
     # print(xreflist)
-    return doc_new
+    return out_pdf
 
 
 def get_fontsize(block):
@@ -238,11 +239,9 @@ def preprocess_txt(t):
     return t.replace("-\n", "").replace("\n", " ").replace("<", "&lt;").strip()
 
 
-def print_to_canvas(t, x, y, w, h, c, ft, tgt_lang="zh"):
-    if h < 24:
-        h = 24
-    if w < 24:
-        w = 24
+def print_to_canvas(t, x, y, w, h, pdf, ft, tgt_lang="zh"):
+    h = max(24, h)
+    w = max(24, w)
     frame = Frame(x, y, w, h, showBoundary=0)
 
     font = fonts.get(tgt_lang, 'SimSun')  # 根据目标语言获取字体，如果没有对应的字体，则使用 'SimSun' 作为默认字体
@@ -252,7 +251,7 @@ def print_to_canvas(t, x, y, w, h, c, ft, tgt_lang="zh"):
         styles.add(ParagraphStyle(fontName=font, name=style_name, fontSize=ft, wordWrap='CJK'))  # 使用获取到的字体
     story = [Paragraph(t, styles[style_name])]
     story_inframe = KeepInFrame(w, h, story)
-    frame.addFromList([story_inframe], c)
+    frame.addFromList([story_inframe], pdf)
 
 
 def get_pdf_page_count(filename):
@@ -260,6 +259,13 @@ def get_pdf_page_count(filename):
         parser = PDFParser(file)
         document = PDFDocument(parser)
         return resolve1(document.catalog['Pages'])['Count']
+
+
+def is_translatable(txt, source_lang):
+    if source_lang == "en":
+        return should_translate_en(txt)
+
+    return True
 
 
 def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation_file=None, callbacker=None):
@@ -271,8 +277,8 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
 
     translator = None
 
-    MIN_WIDTH = 7
-    MIN_HEIGHT = 7
+    # MIN_WIDTH = 7
+    # MIN_HEIGHT = 7
 
     total_pages = get_pdf_page_count(pdf_fn)
 
@@ -291,23 +297,23 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
                 t = preprocess_txt(t)
                 block = (x, y, w, h, t)
 
-                if w < MIN_WIDTH or h < MIN_HEIGHT:
-                    print("***TooSmall", block)
+                # if w < MIN_WIDTH or h < MIN_HEIGHT:
+                #     print("***TooSmall", block)
+                #     print_to_canvas(t, x, y, w, h, pdf, ft, target_lang)
+                #     continue
+
+                if not is_translatable(t, source_lang):
+                    print("***未翻译", block)
                     print_to_canvas(t, x, y, w, h, pdf, ft, target_lang)
                     continue
 
-                print("***Translating", block)
+                print("***翻译", block)
                 to_translate_blocks.append(block)
                 to_translate_texts.append(t)
 
         if translator is None:
             if source_lang == "auto":
                 source_lang = detect_lang(t)
-
-            if source_lang == "en" and not should_translate_en(t):
-                print("***Skipping", block)
-                print_to_canvas(t, x, y, w, h, pdf, ft, target_lang)
-                continue
 
             translator = translator_factory.get_translator(source_lang, target_lang)
 
