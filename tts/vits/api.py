@@ -49,8 +49,9 @@ class TextMapper(object):
         cmd = perl_path + " " + uroman_pl
         cmd += f" -l {iso} "
         cmd += f" < {txt_fn} > {roman_fn}"
-        print(cmd)
+        # print(cmd)
         os.system(cmd)
+
         outtexts = []
         with open(roman_fn, encoding="utf-8") as f:
             for line in f:
@@ -61,9 +62,13 @@ class TextMapper(object):
         return outtext
 
     def get_text(self, text, hps):
+        """获得文本的张量"""
         text_norm = self.text_to_sequence(text, hps.data.text_cleaners)
+
+        # 添加符号间空白
         if hps.data.add_blank:
             text_norm = commons.intersperse(text_norm, 0)
+
         text_norm = torch.LongTensor(text_norm)
         return text_norm
 
