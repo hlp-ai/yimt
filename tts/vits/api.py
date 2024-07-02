@@ -19,7 +19,6 @@ def preprocess_char(text, lang=None):
     """
     Special treatement of characters in certain languages
     """
-    # print(lang)
     if lang == 'ron':
         text = text.replace("ț", "ţ")
     return text
@@ -30,17 +29,10 @@ class TextMapper(object):
         self.symbols = [x.replace("\n", "") for x in open(vocab_file, encoding="utf-8").readlines()]
         self.SPACE_ID = self.symbols.index(" ")
         self._symbol_to_id = {s: i for i, s in enumerate(self.symbols)}
-        print(self._symbol_to_id)
         self._id_to_symbol = {i: s for i, s in enumerate(self.symbols)}
 
     def text_to_sequence(self, text, cleaner_names):
-        '''Converts a string of text to a sequence of IDs corresponding to the symbols in the text.
-        Args:
-        text: string to convert to a sequence
-        cleaner_names: names of the cleaner functions to run the text through
-        Returns:
-        List of integers corresponding to the symbols in the text
-        '''
+        """文本清理和向量化"""
         sequence = []
         clean_text = text.strip()
         for symbol in clean_text:
@@ -72,29 +64,13 @@ class TextMapper(object):
         text_norm = self.text_to_sequence(text, hps.data.text_cleaners)
         if hps.data.add_blank:
             text_norm = commons.intersperse(text_norm, 0)
-        # print(text_norm)
         text_norm = torch.LongTensor(text_norm)
         return text_norm
 
     def filter_oov(self, text):
         val_chars = self._symbol_to_id
         txt_filt = "".join(list(filter(lambda x: x in val_chars, text)))
-        # print(f"text after filtering OOV: {txt_filt}")
         return txt_filt
-
-
-def preprocess_text(txt, text_mapper, hps, uroman_dir=None, lang=None, perl_path=f"c:/Strawberry/perl/bin/perl.exe"):
-    txt = preprocess_char(txt, lang=lang)
-    print(hps.data.training_files)
-    is_uroman = hps.data.training_files.split('.')[-1] == 'uroman'
-    if is_uroman:
-        uroman_pl = os.path.join(uroman_dir, "bin", "uroman.pl")
-        print(f"uromanize")
-        txt = text_mapper.uromanize(txt, uroman_pl, perl_path=perl_path)
-        print(f"uroman text: {txt}")
-    txt = txt.lower()
-    txt = text_mapper.filter_oov(txt)
-    return txt
 
 
 class TTS:
@@ -116,65 +92,66 @@ class TTS:
         self._load_model()
 
     def _load_model(self):
-        self.net_g = SynthesizerTrn(
-            len(self.text_mapper.symbols),
-            self.hps.data.filter_length // 2 + 1,
-            self.hps.train.segment_size // self.hps.data.hop_length,
-            **self.hps.model)
+        self.net_g = SynthesizerTrn(len(self.text_mapper.symbols),
+                                    self.hps.data.filter_length // 2 + 1,
+                                    self.hps.train.segment_size // self.hps.data.hop_length,
+                                    **self.hps.model)
         self.net_g.to(self.device)
         _ = self.net_g.eval()
 
         g_pth = f"{self.ckpt_dir}/G_100000.pth"
         print(f"load {g_pth}")
-
         _ = utils.load_checkpoint(g_pth, self.net_g, None)
 
     def preprocess_text(self, txt, text_mapper, hps, uroman_dir=None, lang=None,
                         perl_path=f"c:/Strawberry/perl/bin/perl.exe"):
         txt = preprocess_char(txt, lang=lang)
-        print(hps.data.training_files)
+
         is_uroman = hps.data.training_files.split('.')[-1] == 'uroman'
-        if is_uroman:
+        if is_uroman:  # 文本需要罗马化
             uroman_pl = os.path.join(uroman_dir, "bin", "uroman.pl")
-            print(f"uromanize")
             txt = text_mapper.uromanize(txt, uroman_pl, perl_path=perl_path)
             print(f"uroman text: {txt}")
+
         txt = txt.lower()
         txt = text_mapper.filter_oov(txt)
         return txt
 
-    def synthesize(self, txt, uroman_dir="D:/kidden/github/yimt/tts/vits/uroman", perl_path=f"c:/Strawberry/perl/bin/perl.exe"):
-        # print(f"text: {txt}")
-        txt = self.preprocess_text(txt, self.text_mapper, self.hps, lang=self.lang, uroman_dir=uroman_dir, perl_path=perl_path)
+    def synthesize(self, txt, uroman_dir="D:/kidden/github/yimt/tts/vits/uroman",
+                   perl_path=f"c:/Strawberry/perl/bin/perl.exe"):
+        # 文本预处理：可选罗马化、小写、去掉OOV符号等
+        txt = self.preprocess_text(txt, self.text_mapper, self.hps, lang=self.lang, uroman_dir=uroman_dir,
+                                   perl_path=perl_path)
+
+        # 文本向量化
         stn_tst = self.text_mapper.get_text(txt, self.hps)
+
         with torch.no_grad():
             x_tst = stn_tst.unsqueeze(0).to(self.device)
             x_tst_lengths = torch.LongTensor([stn_tst.size(0)]).to(self.device)
-            hyp = self.net_g.infer(
-                x_tst, x_tst_lengths, noise_scale=.667,
-                noise_scale_w=0.8, length_scale=1.0
-            )[0][0, 0].cpu().float().numpy()
-
-        # print(f"Generated audio")
+            hyp = self.net_g.infer(x_tst, x_tst_lengths, noise_scale=.667,
+                                   noise_scale_w=0.8, length_scale=1.0
+                                   )[0][0, 0].cpu().float().numpy()
 
         return hyp, self.hps.data.sampling_rate
 
 
 if __name__ == "__main__":
-    tts = TTS("fra")
-
-    audio, sr = tts.synthesize("Bonjour, je m'appelle Sophie. J'ai 25 ans et j'adore voyager.")
-    write("./fra1.wav", sr, audio)
-
-    audio, sr = tts.synthesize("Salut à tous! Aujourd'hui, c'est une journée ensoleillée et pleine de promesses.")
-    write("./fra2.wav", sr, audio)
-
-    tts_kor = TTS("kor")
-
-    audio, sr = tts_kor.synthesize("안녕하세요, 저는 지금 한국에 살고 있는 청년입니다. 여러분들과 소통하며 즐거운 시간을 보내고 싶어요.")
-    write("./kor1.wav", sr, audio)
+    # tts = TTS("fra")
+    #
+    # audio, sr = tts.synthesize("Bonjour, je m'appelle Sophie. J'ai 25 ans et j'adore voyager.")
+    # write("./fra1.wav", sr, audio)
+    #
+    # audio, sr = tts.synthesize("Salut à tous! Aujourd'hui, c'est une journée ensoleillée et pleine de promesses.")
+    # write("./fra2.wav", sr, audio)
+    #
+    # tts_kor = TTS("kor")
+    #
+    # audio, sr = tts_kor.synthesize("안녕하세요, 저는 지금 한국에 살고 있는 청년입니다. 여러분들과 소통하며 즐거운 시간을 보내고 싶어요.")
+    # write("./kor1.wav", sr, audio)
 
     tts_eng = TTS("eng")
 
-    audio, sr = tts_eng.synthesize("He made the remarks while presiding over a group study session of the Political Bureau of the CPC Central Committee on Thursday.")
+    audio, sr = tts_eng.synthesize(
+        "He made the remarks while presiding over a group study session of the Political Bureau of the CPC Central Committee on Thursday.")
     write("./eng1.wav", sr, audio)
