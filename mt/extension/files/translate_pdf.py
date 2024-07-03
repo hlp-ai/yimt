@@ -1,5 +1,6 @@
 """PDF file translation"""
 import argparse
+import logging
 import os
 import re
 import fitz
@@ -17,6 +18,10 @@ from reportlab.platypus import Paragraph, Frame, KeepInFrame
 
 from service.mt import translator_factory, Progress
 from service.utils import detect_lang
+
+
+logging.getLogger("pdfminer").setLevel(logging.WARNING)
+
 
 fonts = {
     'zh': 'SimSun',

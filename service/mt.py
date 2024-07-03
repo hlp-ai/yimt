@@ -15,10 +15,10 @@ class Progress:
     def __init__(self):
         self._tag = ""
 
-    def report(self, total, done):
+    def report(self, total, done, fid="F001"):
         print(self._tag, total, done)
 
-    def set_tag(self, tag):
+    def set_tag(self, tag, fid="F001"):
         self._tag = tag
 
 

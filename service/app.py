@@ -26,14 +26,19 @@ log_service = get_logger(log_filename="service.log", name="service")
 
 class TranslationProgress(Progress):
     def __init__(self):
-        self._progress_info = ""
+        self.info_dict = {}
 
-    def report(self, total, done):
-        self._progress_info = "{}/{}".format(done, total)
-        print(self._progress_info)
+    def report(self, total, done, fid="F001"):
+        progress_info = "{}/{}".format(done, total)
+        print(fid, progress_info)
 
-    def get_info(self):
-        return self._progress_info
+        self.info_dict[fid] = progress_info
+
+    def get_info(self, fid="F001"):
+        if fid in self.info_dict:
+            return self.info_dict[fid]
+        else:
+            return ""
 
 
 
