@@ -90,7 +90,7 @@
                 xhr.onload = function(){
                     if(is_finished == false)  //得添加这句判断，否则会在上传结束后仍短暂执行下面的语句
                     {
-                        document.getElementById("showProgress").innerHTML = '上传完成，正在翻译,翻译进度：'+ this.responseText;
+                        document.getElementById("showProgress").innerHTML = '上传完成, 正在翻译, 翻译进度：'+ this.responseText;
                     }
                 }
                 xhr.open("POST",url);

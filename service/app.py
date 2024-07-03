@@ -35,10 +35,11 @@ class TranslationProgress(Progress):
         self.info_dict[fid] = progress_info
 
     def get_info(self, fid="F001"):
-        if fid in self.info_dict:
-            return self.info_dict[fid]
-        else:
-            return ""
+        for f, p in self.info_dict.items():
+            if f == fid or f.endswith(fid):
+                return p
+
+        return ""
 
 
 
@@ -322,12 +323,6 @@ def create_app(args):
         if source_lang == "auto":
             source_lang = detect_lang(q)
 
-        # if source_lang not in from_langs:
-        #     abort(400, description="Source language %s is not supported" % source_lang)
-        #
-        # if target_lang not in to_langs:
-        #     abort(400, description="Target language %s is not supported" % target_lang)
-
         src = q
         lang_pair = source_lang + "-" + target_lang
 
@@ -518,6 +513,8 @@ def create_app(args):
             filepath = os.path.join(get_upload_dir(), filename)
             file.save(filepath)
 
+            translate_progress.report(0, 0, fid=filepath)
+
             translated_file_path = translate_doc(filepath, source_lang, target_lang, callbacker=translate_progress)
             translated_filename = os.path.basename(translated_file_path)
 
@@ -626,8 +623,8 @@ def create_app(args):
     @app.route("/translate_file_progress", methods=['GET', 'POST'])
     def get_translate_progress():
         file = request.files['file']
-        file_type = os.path.splitext(file.filename)[1]
-        progress = translate_progress.get_info()
+        log_service.info("/translate_file_progress: {}".format(file.filename))
+        progress = translate_progress.get_info(fid=file.filename)
 
         return progress
 
