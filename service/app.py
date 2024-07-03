@@ -34,6 +34,9 @@ class TranslationProgress(Progress):
 
         self.info_dict[fid] = progress_info
 
+    def set_info(self, info, fid):
+        self.info_dict[fid] = info
+
     def get_info(self, fid="F001"):
         for f, p in self.info_dict.items():
             if f == fid or f.endswith(fid):
@@ -533,6 +536,100 @@ def create_app(args):
         except Exception as e:
             abort(500, description=e)
 
+    @app.post("/translate_file2")
+    @access_check
+    def translate_file2():
+        if args.disable_files_translation:
+            abort(403, description="Files translation are disabled on this server.")
+
+        source_lang = request.form.get("source")
+        target_lang = request.form.get("target")
+        file = request.form.get('file')
+
+        api_key = request.form.get("api_key")
+        if not api_key:
+            api_key = ""
+
+        if not file:
+            abort(400, description="Invalid request: missing file parameter")
+        if not source_lang:
+            abort(400, description="Invalid request: missing source parameter")
+        if not target_lang:
+            abort(400, description="Invalid request: missing target parameter")
+
+        filename = file
+
+        log_service.info("/translate_file2: " + filename + "&source=" + source_lang + "&target=" + target_lang
+                         + "&api_key=" + api_key)
+
+        file_type = os.path.splitext(filename)[1]
+
+        if not support(file_type):
+            abort(400, description="Invalid request: file format not supported")
+
+        try:
+            filepath = os.path.join(get_upload_dir(), filename)
+
+            translate_progress.report(0, 0, fid=filename)
+
+            translated_file_path = translate_doc(filepath, source_lang, target_lang, callbacker=translate_progress)
+            translated_filename = os.path.basename(translated_file_path)
+
+            suffix = filepath.split(".")[-1]
+
+            return jsonify(
+                {
+                    "translatedFileUrl": url_for('download_file', filename=translated_filename, _external=True),
+                    "filepath": filepath,
+                    "translated_file_path": translated_file_path,
+                    "file_type": suffix
+                }
+            )
+        except Exception as e:
+            abort(500, description=e)
+
+    @app.post("/upload_file")
+    @access_check
+    def upload_file():
+        if args.disable_files_translation:
+            abort(403, description="Files translation are disabled on this server.")
+
+        file = request.files['file']
+
+        api_key = request.form.get("api_key")
+        if not api_key:
+            api_key = ""
+
+        if not file:
+            abort(400, description="Invalid request: missing file parameter")
+
+        if file.filename == '':
+            abort(400, description="Invalid request: empty file")
+
+        log_service.info("/upload_file: " + file.filename + "&api_key=" + api_key)
+
+        file_type = os.path.splitext(file.filename)[1]
+
+        if not support(file_type):
+            abort(400, description="Invalid request: file format not supported")
+
+        try:
+            filename = str(uuid.uuid4()) + '.' + secure_filename(file.filename)  # 安全文件名
+            filepath = os.path.join(get_upload_dir(), filename)
+            file.save(filepath)  # 保存上传文件
+
+            translate_progress.set_info("文件已上传", filename)
+
+            return jsonify(
+                {
+                    "filename": filename,
+                    "filepath": filepath,
+                    "file_type": file_type
+                }
+            )
+        except Exception as e:
+            abort(500, description=e)
+
     @app.get("/download_file/<string:filename>")
     def download_file(filename: str):
         """Download a translated file"""
@@ -620,11 +717,19 @@ def create_app(args):
             abort(404)
         return render_template('reference.html')
 
+    # @app.route("/translate_file_progress", methods=['GET', 'POST'])
+    # def get_translate_progress():
+    #     file = request.files['file']
+    #     log_service.info("/translate_file_progress: {}".format(file.filename))
+    #     progress = translate_progress.get_info(fid=file.filename)
+    #
+    #     return progress
+
     @app.route("/translate_file_progress", methods=['GET', 'POST'])
     def get_translate_progress():
-        file = request.files['file']
-        log_service.info("/translate_file_progress: {}".format(file.filename))
-        progress = translate_progress.get_info(fid=file.filename)
+        file = request.form.get("file")
+        log_service.info("/translate_file_progress: {}".format(file))
+        progress = translate_progress.get_info(fid=file)
 
         return progress
 

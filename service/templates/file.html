@@ -22,14 +22,14 @@
             if(!!server)
                 END_POINT = server;
 
-            var is_finished = true;
-
             request_languages();
 
             request_ad();
         }
 
         var is_finished = true;
+        var uploaded = false;
+        var upload_file = "";
         var xhr;
        
 		function uploadFile() {
@@ -43,16 +43,12 @@
             document.getElementById("progress_line").style.display ="block";
             document.getElementById("download").style.display = "none";
 
-            source_lang = document.getElementById('source').value;
-            target_lang = document.getElementById('target').value;
-
 		    var form = new FormData();
 		    form.append("file", fileObj);
-		    form.append("source", source_lang);
-		    form.append("target", target_lang);
+
             form.append("api_key", API_KEY);
 
-		    var url = END_POINT + "/translate_file";
+		    var url = END_POINT + "/upload_file";
 		    xhr = new XMLHttpRequest();
             is_finished = false;
 
@@ -76,6 +72,32 @@
 		    xhr.onload = uploadComplete;
 		    xhr.send(form);
 
+            // setInterval("translate_progress()", 2000);  //每2秒发送查看进度
+		}
+
+		async function translateFile() {
+		    if(uploaded==false || upload_file=="") {
+		      alert("文件未上传，请先上传文件");
+		      return;
+		    }
+
+            source_lang = document.getElementById('source').value;
+            target_lang = document.getElementById('target').value;
+
+		    var form = new FormData();
+		    form.append("file", upload_file);
+		    form.append("source", source_lang);
+		    form.append("target", target_lang);
+            form.append("api_key", API_KEY);
+
+		    var url = END_POINT + "/translate_file2";
+		    xhr = new XMLHttpRequest();
+            is_finished = false;
+
+		    xhr.open("post", url, true);
+		    xhr.onload = translateComplete;
+		    xhr.send(form);
+
             setInterval("translate_progress()", 2000);  //每2秒发送查看进度
 		}
 
@@ -83,22 +105,17 @@
             if(is_finished == false)
             {
                 var url = END_POINT + "/translate_file_progress";
-                var fileObj = document.getElementById("select_file").files[0];
                 var form = new FormData();
-		        form.append("file", fileObj);
+		        form.append("file", upload_file);
                 xhr = new XMLHttpRequest();
                 xhr.onload = function(){
-                    if(is_finished == false)  //得添加这句判断，否则会在上传结束后仍短暂执行下面的语句
+                    if(is_finished == false)
                     {
-                        document.getElementById("showProgress").innerHTML = '上传完成, 正在翻译, 翻译进度：'+ this.responseText;
+                        document.getElementById("showProgress").innerHTML = '正在翻译：'+ this.responseText;
                     }
                 }
                 xhr.open("POST",url);
                 xhr.send(form);
-            }
-            else
-            {
-                document.getElementById("showProgress").innerHTML = "翻译完成，点击链接下载";
             }
         }
 
@@ -109,9 +126,19 @@
 			    return;
 			}
 
-			document.getElementById("download").style.display = "inline";
+			document.getElementById("showProgress").innerHTML = '待翻译文件已上传';
+            uploaded = true
+            upload_file = res_json.filename;
+		}
+
+		function translateComplete(evt) {
+			res_json = JSON.parse(evt.target.responseText);
+			if(res_json.error){
+			    alert(res_json.error);
+			    return;
+			}
+
             is_finished = true
-			document.getElementById('download').innerHTML = "<a href=" + res_json.translatedFileUrl + ">下载翻译文件</a>";
             var file_path = res_json.filepath;
             var translated_file_path = res_json.translated_file_path;
             var file_type = res_json.file_type;
@@ -154,7 +181,7 @@
                     <span class="mid">-></span>
                     <select id="target" name="target" class="target_select">
                     </select>
-                    <input type="button" class="fanyi__operations--machine" id="transMachine" value="翻译" >
+                    <input type="button" class="fanyi__operations--machine" id="transMachine" value="翻译" onclick='translateFile()'>
                 </div>
     
             </div>
