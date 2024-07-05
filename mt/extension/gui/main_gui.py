@@ -3,6 +3,7 @@ from functools import partial
 from tkinter import *
 import tkinter as tk
 
+from extension.gui.compare_frame import create_sarcebleu_trans
 from extension.gui.corpus_frame import create_sample_corpus, create_mono2tsv_corpus, \
     create_tsv2mono_corpus
 from extension.gui.train_frame import create_sp_tokenize, create_sp_train
@@ -50,6 +51,11 @@ if __name__ == "__main__":
     create_sp_tokenize(sp_tokenize_frame)
     frames.append(sp_tokenize_frame)
 
+    bleu_frame = tk.Frame(win_main)
+    bleu_frame.pack()
+    create_sarcebleu_trans(bleu_frame)
+    frames.append(bleu_frame)
+
 
     ####################################################################
 
@@ -70,6 +76,11 @@ if __name__ == "__main__":
     train_menu.add_command(label="Tokenize with SP", command=partial(on_menu, sp_tokenize_frame))
 
     mainmenu.add_cascade(label="Train", menu=train_menu)
+
+    app_menu = Menu(mainmenu, tearoff=False)
+    app_menu.add_command(label="Calculate Bleu", command=partial(on_menu, bleu_frame))
+
+    mainmenu.add_cascade(label="Application", menu=app_menu)
 
     win_main.config(menu=mainmenu)
 
