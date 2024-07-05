@@ -570,7 +570,7 @@ def create_app(args):
         try:
             filepath = os.path.join(get_upload_dir(), filename)
 
-            translate_progress.report(0, 0, fid=filename)
+            translate_progress.report(0, 0, fid=filepath)
 
             translated_file_path = translate_doc(filepath, source_lang, target_lang, callbacker=translate_progress)
             translated_filename = os.path.basename(translated_file_path)
@@ -618,7 +618,7 @@ def create_app(args):
             filepath = os.path.join(get_upload_dir(), filename)
             file.save(filepath)  # 保存上传文件
 
-            translate_progress.set_info("文件已上传", filename)
+            translate_progress.set_info("文件已上传", filepath)
 
             return jsonify(
                 {
@@ -717,19 +717,11 @@ def create_app(args):
             abort(404)
         return render_template('reference.html')
 
-    # @app.route("/translate_file_progress", methods=['GET', 'POST'])
-    # def get_translate_progress():
-    #     file = request.files['file']
-    #     log_service.info("/translate_file_progress: {}".format(file.filename))
-    #     progress = translate_progress.get_info(fid=file.filename)
-    #
-    #     return progress
-
     @app.route("/translate_file_progress", methods=['GET', 'POST'])
     def get_translate_progress():
         file = request.form.get("file")
-        log_service.info("/translate_file_progress: {}".format(file))
         progress = translate_progress.get_info(fid=file)
+        log_service.info("/translate_file_progress: {}: {}".format(file, progress))
 
         return progress
 
