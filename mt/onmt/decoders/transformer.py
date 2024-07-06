@@ -58,7 +58,7 @@ class TransformerDecoderLayerBase(nn.Module):
             attention_dropout (float): dropout in context_attn  (and
                 self-attn(avg))
             self_attn_type (string): type of self-attention scaled-dot,
-                flash-scaled-dot, average
+                flash-scaled-dot
             max_relative_positions (int):
                 Max distance between inputs in relative positions
                 representations
@@ -94,23 +94,22 @@ class TransformerDecoderLayerBase(nn.Module):
         """
         super(TransformerDecoderLayerBase, self).__init__()
 
-        if self_attn_type in ["scaled-dot", "scaled-dot-flash"]:
-            self.self_attn = MultiHeadedAttention(
-                heads,
-                d_model,
-                dropout=attention_dropout,
-                max_relative_positions=max_relative_positions,
-                relative_positions_buckets=relative_positions_buckets,
-                rotary_interleave=rotary_interleave,
-                rotary_theta=rotary_theta,
-                rotary_dim=rotary_dim,
-                attn_type="self",
-                self_attn_type=self_attn_type,
-                add_qkvbias=add_qkvbias,
-                num_kv=num_kv,
-                use_ckpting=use_ckpting,
-                parallel_gpu=parallel_gpu,
-            )
+        self.self_attn = MultiHeadedAttention(
+            heads,
+            d_model,
+            dropout=attention_dropout,
+            max_relative_positions=max_relative_positions,
+            relative_positions_buckets=relative_positions_buckets,
+            rotary_interleave=rotary_interleave,
+            rotary_theta=rotary_theta,
+            rotary_dim=rotary_dim,
+            attn_type="self",
+            self_attn_type=self_attn_type,
+            add_qkvbias=add_qkvbias,
+            num_kv=num_kv,
+            use_ckpting=use_ckpting,
+            parallel_gpu=parallel_gpu,
+        )
 
         if num_experts > 0:
             self.feed_forward = MoE(

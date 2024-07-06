@@ -18,5 +18,4 @@ class DecoderBase(nn.Module):
 
         Subclasses should override this method.
         """
-
         raise NotImplementedError
