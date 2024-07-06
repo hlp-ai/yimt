@@ -9,41 +9,19 @@ from flask import (Flask, abort, jsonify, render_template, request, send_file, u
 from scipy.io.wavfile import write
 from werkzeug.utils import secure_filename
 
-from extension.files.translate_files import translate_doc, support
+from extension.files.translate_files import translate_doc, support, TranslationProgress
 from extension.files.translate_html import translate_tag_list
 from extension.files.translate_tag import translate_html
 from service import remove_translated_files
 from service.ad_db import get_addb
 from service.api_keys import APIKeyDB
 from service.asr import AudioRecognizers, amr2wav
-from service.mt import Progress, translator_factory
+from service.mt import translator_factory
 from service.ocr import TextRecognizers
 from service.tts import AudioGenerators
 from service.utils import get_logger, path_traversal_check, SuspiciousFileOperation, detect_lang
 
 log_service = get_logger(log_filename="service.log", name="service")
-
-
-class TranslationProgress(Progress):
-    def __init__(self):
-        self.info_dict = {}
-
-    def report(self, total, done, fid="F001"):
-        progress_info = "{}/{}".format(done, total)
-        print(fid, progress_info)
-
-        self.info_dict[fid] = progress_info
-
-    def set_info(self, info, fid):
-        self.info_dict[fid] = info
-
-    def get_info(self, fid="F001"):
-        for f, p in self.info_dict.items():
-            if f == fid or f.endswith(fid):
-                return p
-
-        return ""
-
 
 
 def get_upload_dir():

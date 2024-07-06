@@ -2,7 +2,7 @@
 import os
 import argparse
 
-from service.mt import Progress, translator_factory
+from service.mt import translator_factory
 from service.utils import detect_lang
 
 
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     out_file = args.output_file
     to_lang = args.to_lang
 
-    callback = Progress()
+    callback = None
 
     translated_txt_fn = translate_txt_auto(in_file, target_lang=to_lang, translation_file=out_file, callbacker=callback)
 

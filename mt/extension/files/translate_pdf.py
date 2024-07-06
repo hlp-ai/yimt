@@ -16,7 +16,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Paragraph, Frame, KeepInFrame
 
-from service.mt import translator_factory, Progress
+from service.mt import translator_factory
 from service.utils import detect_lang
 
 
@@ -363,7 +363,7 @@ if __name__ == "__main__":
     in_file = args.input_file
     out_file = args.output_file
 
-    callback = Progress()
+    callback = None
 
     translated_fn = translate_pdf_auto(in_file, target_lang=to_lang, translation_file=out_file, callbacker=callback)
 

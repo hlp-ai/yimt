@@ -10,18 +10,6 @@ from service.split_text import paragraph_tokenizer, paragraph_detokenizer
 from service.tm import get_tm_saver
 
 
-class Progress:
-
-    def __init__(self):
-        self._tag = ""
-
-    def report(self, total, done, fid="F001"):
-        print(self._tag, total, done)
-
-    def set_tag(self, tag, fid="F001"):
-        self._tag = tag
-
-
 mutex = threading.Lock()
 
 
