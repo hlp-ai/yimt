@@ -692,8 +692,6 @@ class TransformerDecoder(TransformerDecoderBase):
         dec_out = self.layer_norm(dec_out)
 
         attns = {"std": attn}
-        # if self._copy:
-        #     attns["copy"] = attn
         if with_align:
             attns["align"] = attn_aligns[self.alignment_layer]  # `(B, Q, K)`
             # attns["align"] = torch.stack(attn_aligns, 0).mean(0)  # All avg
@@ -702,9 +700,6 @@ class TransformerDecoder(TransformerDecoderBase):
         return dec_out, attns
 
     def _init_cache(self, enc_out):
-        batch_size = enc_out.size(0)
-        depth = enc_out.size(-1)
-
         for layer in self.transformer_layers:
             # first value set to True triggered by the beginning of decoding
             # layer_cache becomes active in the MultiHeadedAttention fwd
@@ -953,8 +948,6 @@ class TransformerLMDecoder(TransformerDecoderBase):
         dec_out = self.layer_norm(dec_out)
 
         attns = {"std": attn}
-        # if self._copy:
-        #     attns["copy"] = attn
 
         # TODO change the way attns is returned dict => list or tuple (onnx)
         return dec_out, attns
