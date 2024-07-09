@@ -14,7 +14,6 @@
         {
             set_setting();
             set_footer();
-            set_products();
 
             var server = window.localStorage.getItem("server");
             var key = window.localStorage.getItem("key");
@@ -150,7 +149,7 @@
         <div class="fanyi__input">
             <div class="input__original">
                 <div class="fanyi__input__bg">
-                    <textarea id="q" name="q" rows="20" maxlength="700" cols="50" class="input__original__area" placeholder="请输入您要翻译的文字"></textarea>
+                    <textarea id="q" name="q" rows="25" maxlength="1000" cols="50" class="input__original__area" placeholder="请输入您要翻译的文字"></textarea>
 
                     <script>
                         document.getElementById("q").oninput = function() {myFunction();getc_num()};
@@ -174,7 +173,7 @@
 
                     <a id="inputDelete" class="input__original_delete"></a>
                     <div id="words_count" class="words_count" style="visibility: hidden;">
-                        <span id="c1"></span>/700
+                        <span id="c1"></span>/1000
                     </div>
                     <script>
                         function clear_func()
@@ -237,7 +236,7 @@
 
             <div class="input__target">
                 <div class="fanyi__input__bg">
-                    <textarea id="translation" name="translation" rows="20" cols="50" class="input__target__area"></textarea>
+                    <textarea id="translation" name="translation" rows="25" cols="50" class="input__target__area"></textarea>
                     <a id="target_copy" class="target_copy"></a>
                 </div>
                 <script>
@@ -254,11 +253,8 @@
     
         <div class="inside__products" style="display: block;">
             <div class="product1_area" id = "product1_area">
-                <div class="product1_content" id="product1_content"></div>
                 <a class="product1_url" id="product1_url"></a>
             </div>
-
-            <div class="product2_area" id="product2_area"></div>
         </div>
     </div>
 
