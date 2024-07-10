@@ -218,13 +218,13 @@ def create_app(args):
 
         return render_template('usage.html')
 
-    @app.route('/api_usage')
+    @app.route('/others')
     @limiter.exempt
-    def api_usage():
+    def others():
         if args.disable_web_ui:
             abort(404)
 
-        return render_template('api_usage.html')
+        return render_template('others.html')
 
     ##############################################################################################
     #

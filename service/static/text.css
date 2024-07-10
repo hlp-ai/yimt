@@ -437,8 +437,6 @@ body {
     cursor:pointer;
 }
 
-
-
 .fanyi__operations--file{
     display: inline-block;
     vertical-align: middle;
@@ -497,6 +495,7 @@ body {
     cursor: pointer;
     z-index: 1;
 }
+
 .progress_line{
     display: none;
     margin-left: 20%;
@@ -505,7 +504,8 @@ body {
     color: #357aa1;
     z-index: 5;
 }
-.inside__products{
+
+.bottom_block{
     display: none;
     font-family: PingFangSC-Semibold;
     border-top: 1px solid #e8e8e8;
@@ -561,7 +561,7 @@ body {
     margin-right: 11px;
 }
 
-.product1_area{
+.ad_area{
     position: relative;
     margin: 0 0px;
     right: 28px;
@@ -570,7 +570,7 @@ body {
     background-color: #062b66;
 }
 
-.product1_url{
+.ad_url{
     visibility: hidden;
     position: absolute;
     opacity: 0;
@@ -729,21 +729,6 @@ body {
 .target_copy-hover,.target_copy:hover {
     cursor:pointer;
     background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABcAAAAWCAYAAAArdgcFAAAAAXNSR0IArs4c6QAAANdJREFUOBFj/Pz5c/3///8bGKgMGBkZG5iobCaKcTQ1nAXFKjTO57xKht9HTqCJ4uay2lgw8E5qhyvA63JSDAaZiK4er8thThA6tx/GxEm/M3LEkMNruMCuNRgaSBFAMZzSMEa3GCXM0cMMXTE6n5B6FJfDNPNO64ExcdKfs0pwysEkUFwOE6QWPWo41pCkSrB8cA+hneEwk9lsLWBMMI01KaKoIIIjsBN7TqZKsOCyH6vLickguAxEFkdxOag8JgWghzG6XhSXIxf06ArJ4aO4nBwD8OkBAKfJLIzQd5MHAAAAAElFTkSuQmCC) 50% 50% no-repeat
-}
-
-.ad_delete{
-    position: absolute;
-    width: 18px;
-    height: 18px;
-    top: 18px;
-    right: 18px;
-    
-    cursor:pointer;
-    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAAAXNSR0IArs4c6QAAAYNJREFUOBGtk72qwkAQhU9iVIw/vbXiIwQEtbHSyncVC60C+gD2voCGQNAmiGK8Z2CWbO4KFg5I4uzsxzkzE+92uxX4Qfg/YAjCgIqiQJZlX3Efjwf+nFi1AiIkjmOs12ucz2eroPqHkN1uh81mg+v1ao4F5Hke6vU6ns+nFF0uF1NQflEIz2u1mvz03FibTCYYjUYC2263qMII0Xyn08FyuQSfGgbExCeYKkmSRC4vFgsLwruea/z7/R6n0wlBEGA+n+N4PIpCKiCk2+3yrhVOECsUxv5xGO12W+y4IKy3rDGhMR6P0Wq1BEJYFEVOJVrvBHF6bGye52KPig6HA9ijT/EPpBBOjXZWqxWGwyF0ap9gFqi8R4Swsb1eD7PZzIJVV4MqDUgh3OwyRK2UYdzsKkxAr9dLNpqQMAyNEoXoczqdYjAYiE3C0jTVIwR8830f/X5fPkRuLO24gtOjMgY/8PIqWHt0v9/RbDZdDCvHKbL5jUbD5E2PmPkGwjoqK0OYewPmV+Tmqat5EwAAAABJRU5ErkJggg==) 50% 50% no-repeat
-}
-
-.ad_delete-hover{
-    visibility: visible;
 }
 
 .image{

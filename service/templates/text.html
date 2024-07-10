@@ -19,9 +19,7 @@
             var key = window.localStorage.getItem("key");
             API_KEY=key;
             if(!!server)
-            {
                 END_POINT = server;
-            }
 
             var userAgentInfo = navigator.userAgent;
             var Agents = ["Android","iPhone","SymbianOS","Windows Phone","iPad","iPod"];
@@ -35,9 +33,7 @@
                 }
             }
             if(mobile)
-            {
                 window.location.href="{{url_for('mobile')}}"
-            }
 
             request_languages();
 
@@ -94,6 +90,7 @@
             qstr = document.getElementById('q').value;
             qstr = qstr.trim();
             if(qstr.length==0) return;
+
             source_lang = document.getElementById('source').value;
             target_lang = document.getElementById('target').value;
             const res = await fetch(END_POINT + "/translate", {
@@ -104,7 +101,6 @@
 
             trans_json = await res.json();
             if(res.ok){
-                console.log(trans_json);
                 //p = trans_json.translatedText.replace("\n", "<br>");
                 document.getElementById('translation').value = trans_json.translatedText;
             }
@@ -126,7 +122,7 @@
         <div class="fanyi__nav__container" id="fanyi__nav__container">
                 <a href="/" class="fanyi__nav__logo"></a>
                 <div class="nav_left">
-                    <a target="_blank" class="nav" href="/file">文档翻译</a><a href="/api_usage" target="_blank" class="nav">翻译API</a><a target="_blank" class="nav" href="/">登录</a><a target="_blank" id="url_setting_label" class="nav" >设置</a>
+                    <a target="_blank" class="nav" href="/file">文档翻译</a><a href="/others" target="_blank" class="nav">其他产品</a><a target="_blank" class="nav" href="/">登录</a><a target="_blank" id="url_setting_label" class="nav" >设置</a>
                 </div>  
         </div>
     </div>
@@ -251,9 +247,9 @@
             </div>
         </div>
     
-        <div class="inside__products" style="display: block;">
-            <div class="product1_area" id = "product1_area">
-                <a class="product1_url" id="product1_url"></a>
+        <div class="bottom_block" style="display: block;">
+            <div class="ad_area" id = "ad_area">
+                <a class="ad_url" id="ad_url"></a>
             </div>
         </div>
     </div>

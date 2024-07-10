@@ -12,12 +12,12 @@ async function request_ad(){
     content = trans_json.content;
     url = trans_json.url;
 
-     ad_url = document.getElementById("product1_url");
+     ad_url = document.getElementById("ad_url");
      ad_url.style.visibility='visible';
      ad_url.href = url;
 
      const base64String = content;
-     ad_img_div = document.getElementById("product1_area");
+     ad_img_div = document.getElementById("ad_area");
      ad_img_div.style.backgroundImage='url('+'data:image/png;base64,'+content+')';
      ad_img_div.style.backgroundSize = "contain";
      ad_img_div.style.backgroundPosition = "center";
