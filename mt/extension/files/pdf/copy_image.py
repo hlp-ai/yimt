@@ -1,15 +1,11 @@
 import os
+import tempfile
 from pprint import pprint
 
 import fitz
 import pymupdf
 
-from extension.files.copy_drawings import copy_drawings
-
-imgdir = "output"  # found images are stored in this subfolder
-
-if not os.path.exists(imgdir):  # make subfolder if necessary
-    os.mkdir(imgdir)
+imgdir = temp_dir = tempfile.mkdtemp()
 
 
 def recoverpix(doc, item):
@@ -79,9 +75,8 @@ outpdf = fitz.open()
 
 for page in doc:
     outpage = outpdf.new_page(width=page.rect.width, height=page.rect.height)
-    copy_drawings(page, outpage)
     copy_images(page, outpage, doc)
 
 
-target_pdf_fn = "copy.pdf"
+target_pdf_fn = "copy-img.pdf"
 outpdf.save(target_pdf_fn)
