@@ -10,20 +10,25 @@ def copy_text(page, outpage):
     # print(len(blocks), "blocks")
     # pprint(blocks)
     for i, b in enumerate(blocks):  # iterate through the text blocks
-        print("****block {}****".format(i+1))
+        # print("****block {}****".format(i+1))
         if b["type"] != 0:  # XXX:为什么这里有图片？
             continue
 
         #print(len(b["lines"]), "lines")
         #print(b["number"], b["type"], b["bbox"])
         for j, l in enumerate(b["lines"]):  # iterate through the text lines
+            cos, sin = l["dir"]
+            rotate = 0
+            if cos == 0 and sin == -1:  # TODO: 方向处理全面
+                rotate = 90
             #print("*****line {}*****".format(j + 1))
             #print(len(l["spans"]), "spans")
             for s in l["spans"]:  # iterate through the text spans
                 # print("color", s["color"])
                 # TODO: 颜色处理，字体处理，文本方向处理，文本区域大小
                 shape.insert_text(s["origin"], s["text"],
-                                  fontsize=s["size"]-0.8)
+                                  fontsize=s["size"]-0.8,
+                                  rotate=rotate)
 
                 # shape.insert_text(s["origin"], s["text"],
                 #                   fontsize=s["size"], fontname="china-ss")

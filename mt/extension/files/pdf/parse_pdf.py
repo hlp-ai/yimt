@@ -46,7 +46,7 @@ def parse_page(page):
     # read page text as a dictionary, suppressing extra spaces in CJK fonts
     blocks = page.get_text("dict")["blocks"]
     print(len(blocks), "blocks")
-    # print(blocks)
+    pprint(blocks)
     for i, b in enumerate(blocks):  # iterate through the text blocks
         print("****block {}****".format(i+1))
         print(len(b["lines"]), "lines")
@@ -55,7 +55,6 @@ def parse_page(page):
             print("*****line {}*****".format(j + 1))
             print(len(l["spans"]), "spans")
             for s in l["spans"]:  # iterate through the text spans
-                print("")
                 font_properties = "Font: '%s' (%s), size %g, color #%06x" % (
                     s["font"],  # font name
                     flags_decomposer(s["flags"]),  # readable font flags
@@ -64,6 +63,9 @@ def parse_page(page):
                 )
                 print("Text: '%s'" % s["text"])  # simple print of text
                 print(font_properties)
+            print()
+
+        print("\n")
 
 
 def parse_shape(page):
@@ -93,9 +95,9 @@ def parse_pdf(fn):
 
     print()
 
-    # parse_page(doc[1])
+    parse_page(doc[0])
 
-    parse_shape(doc[0])
+    # parse_shape(doc[0])
 
 
 parse_pdf(r"D:\kidden\Conformer2020.pdf")
