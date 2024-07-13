@@ -1,4 +1,8 @@
+import os
+import sys
+
 import fitz
+import pymupdf
 
 from extension.files.pdf.copy_drawings import copy_drawings
 from extension.files.pdf.copy_image import copy_images
@@ -6,7 +10,10 @@ from extension.files.pdf.copy_text import copy_text
 
 
 if __name__ == "__main__":
-    doc = fitz.open(r"D:/kidden/Conformer2020.pdf")
+    pdf_file = sys.argv[1]
+    copy_fn = os.path.join(os.path.dirname(pdf_file), "copy-" + os.path.basename(pdf_file))
+
+    doc = pymupdf.open(pdf_file)
     outpdf = fitz.open()
 
     for page in doc:
@@ -15,5 +22,4 @@ if __name__ == "__main__":
         copy_images(page, outpage, doc)
         copy_text(page, outpage)
 
-    target_pdf_fn = "copy.pdf"
-    outpdf.save(target_pdf_fn)
+    outpdf.save(copy_fn)
