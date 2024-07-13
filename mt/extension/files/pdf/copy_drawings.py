@@ -56,10 +56,11 @@ def copy_drawings(page, outpage):
     shape.commit()
 
 
-doc = pymupdf.open(r"D:/kidden/GKBM.pdf")
-outpdf = pymupdf.open()
-for page in doc:
-    outpage = outpdf.new_page(width=page.rect.width, height=page.rect.height)
-    copy_drawings(page, outpage)
+if __name__ == "__main__":
+    doc = pymupdf.open(r"D:/kidden/GKBM.pdf")
+    outpdf = pymupdf.open()
+    for page in doc:
+        outpage = outpdf.new_page(width=page.rect.width, height=page.rect.height)
+        copy_drawings(page, outpage)
 
-outpdf.save("copy-drawings.pdf")
+    outpdf.save("copy-drawings.pdf")

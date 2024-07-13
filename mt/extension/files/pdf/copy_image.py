@@ -70,13 +70,13 @@ def copy_images(page, outpage, in_pdf):
             outpage.insert_image(rect=img_rect[0], stream=imgdata)
 
 
-doc = fitz.open(r"D:/kidden/vits2021.pdf")
-outpdf = fitz.open()
+if __name__ == "__main__":
+    doc = fitz.open(r"D:/kidden/vits2021.pdf")
+    outpdf = fitz.open()
 
-for page in doc:
-    outpage = outpdf.new_page(width=page.rect.width, height=page.rect.height)
-    copy_images(page, outpage, doc)
+    for page in doc:
+        outpage = outpdf.new_page(width=page.rect.width, height=page.rect.height)
+        copy_images(page, outpage, doc)
 
-
-target_pdf_fn = "copy-img.pdf"
-outpdf.save(target_pdf_fn)
+    target_pdf_fn = "copy-img.pdf"
+    outpdf.save(target_pdf_fn)
