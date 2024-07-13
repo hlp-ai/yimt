@@ -50,7 +50,7 @@ def parse_page(page):
     for i, b in enumerate(blocks):  # iterate through the text blocks
         print("****block {}****".format(i+1))
         print(len(b["lines"]), "lines")
-        print(b["number"], b["type"], b["bbox"])
+        # print(b["number"], b["type"], b["bbox"])
         for j, l in enumerate(b["lines"]):  # iterate through the text lines
             print("*****line {}*****".format(j + 1))
             print(len(l["spans"]), "spans")

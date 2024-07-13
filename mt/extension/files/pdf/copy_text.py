@@ -26,9 +26,13 @@ def copy_text(page, outpage):
             for s in l["spans"]:  # iterate through the text spans
                 # print("color", s["color"])
                 # TODO: 颜色处理，字体处理，文本方向处理，文本区域大小
-                shape.insert_text(s["origin"], s["text"],
-                                  fontsize=s["size"]-0.8,
-                                  rotate=rotate)
+                shape.insert_textbox(s["bbox"], s["text"],
+                                  fontsize=s["size"]*0.85,
+                                  rotate=rotate, lineheight=0.05)
+
+                # shape.insert_text(s["origin"], s["text"],
+                #                   fontsize=s["size"] - 0.8,
+                #                   rotate=rotate)
 
                 # shape.insert_text(s["origin"], s["text"],
                 #                   fontsize=s["size"], fontname="china-ss")
@@ -47,7 +51,7 @@ def copy_text(page, outpage):
 
 
 if __name__ == "__main__":
-    doc = pymupdf.open(r"D:/kidden/jd0207.pdf")
+    doc = pymupdf.open(r"D:/kidden/Conformer2020.pdf")
     outpdf = pymupdf.open()
     for page in doc:
         outpage = outpdf.new_page(width=page.rect.width, height=page.rect.height)
