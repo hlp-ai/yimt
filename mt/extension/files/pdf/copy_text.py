@@ -21,7 +21,7 @@ def copy_text(page, outpage):
             #print(len(l["spans"]), "spans")
             for s in l["spans"]:  # iterate through the text spans
                 # print("color", s["color"])
-                # TODO: 颜色处理，字体处理，文本方向处理
+                # TODO: 颜色处理，字体处理，文本方向处理，文本区域大小
                 shape.insert_text(s["origin"], s["text"],
                                   fontsize=s["size"])
 
