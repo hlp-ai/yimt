@@ -23,7 +23,7 @@ def copy_text(page, outpage):
                 # print("color", s["color"])
                 # TODO: 颜色处理，字体处理，文本方向处理，文本区域大小
                 shape.insert_text(s["origin"], s["text"],
-                                  fontsize=s["size"])
+                                  fontsize=s["size"]-0.8)
 
                 # shape.insert_text(s["origin"], s["text"],
                 #                   fontsize=s["size"], fontname="china-ss")
