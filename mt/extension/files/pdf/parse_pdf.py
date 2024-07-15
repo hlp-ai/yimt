@@ -46,9 +46,10 @@ def parse_page(page):
     # read page text as a dictionary, suppressing extra spaces in CJK fonts
     blocks = page.get_text("dict")["blocks"]
     print(len(blocks), "blocks")
-    pprint(blocks)
+    # pprint(blocks)
     for i, b in enumerate(blocks):  # iterate through the text blocks
         print("****block {}****".format(i+1))
+        pprint(b)
         print(len(b["lines"]), "lines")
         # print(b["number"], b["type"], b["bbox"])
         for j, l in enumerate(b["lines"]):  # iterate through the text lines

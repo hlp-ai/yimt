@@ -1,21 +1,23 @@
 """PDF file translation"""
 import argparse
+import io
 import logging
 import os
 import re
-import fitz
+import pymupdf
+from PyPDF2 import PdfReader, PdfWriter, Transformation
 
-from pdfminer.high_level import extract_pages
-from pdfminer.layout import LTTextBoxHorizontal, LTTextLine, LTChar
 from pdfminer.pdfdocument import PDFDocument
 from pdfminer.pdfparser import PDFParser
 from pdfminer.pdftypes import resolve1
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfgen import canvas
+from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Paragraph, Frame, KeepInFrame
 
+from extension.files.pdf.copy_drawings import copy_drawings
+from extension.files.pdf.copy_image import copy_images
 from service.mt import translator_factory
 from service.utils import detect_lang
 
@@ -35,183 +37,6 @@ styles.add(ParagraphStyle(fontName='SimSun', name='Song', fontSize=9, wordWrap='
 
 p_chars_lang_independent = re.compile(r"[0123456789+\-*/=~!@$%^()\[\]{}<>\|,\.\?\"]")
 p_en_chars = re.compile(r"[a-zA-Z]+")
-
-font_size_list = []
-dimlimit = 0  # 100  # each image side must be greater than this
-relsize = 0  # 0.05  # image : image size ratio must be larger than this (5%)
-abssize = 0  # 2048  # absolute image size limit 2 KB: ignore if smaller
-imgdir = "output"  # found images are stored in this subfolder
-
-if not os.path.exists(imgdir):  # make subfolder if necessary
-    os.mkdir(imgdir)
-
-
-def recoverpix(doc, item):
-    xref = item[0]  # xref of PDF image
-    smask = item[1]  # xref of its /SMask
-
-    # special case: /SMask or /Mask exists
-    if smask > 0:
-        pix0 = fitz.Pixmap(doc.extract_image(xref)["image"])
-        if pix0.alpha:  # catch irregular situation
-            pix0 = fitz.Pixmap(pix0, 0)  # remove alpha channel
-        mask = fitz.Pixmap(doc.extract_image(smask)["image"])
-
-        try:
-            pix = fitz.Pixmap(pix0, mask)
-        except:  # fallback to original base image in case of problems
-            pix = fitz.Pixmap(doc.extract_image(xref)["image"])
-
-        if pix0.n > 3:
-            ext = "pam"
-        else:
-            ext = "png"
-
-        return {  # create dictionary expected by caller
-            "ext": ext,
-            "colorspace": pix.colorspace.n,
-            "image": pix.tobytes(ext),
-        }
-
-    # special case: /ColorSpace definition exists
-    # to be sure, we convert these cases to RGB PNG images
-    if "/ColorSpace" in doc.xref_object(xref, compressed=True):
-        pix = fitz.Pixmap(doc, xref)
-        pix = fitz.Pixmap(fitz.csRGB, pix)
-        return {  # create dictionary expected by caller
-            "ext": "png",
-            "colorspace": 3,
-            "image": pix.tobytes("png"),
-        }
-    return doc.extract_image(xref)
-
-
-def extract_draw_save(source_pdf_fn, target_pdf_fn=None):
-    if target_pdf_fn is None:
-        paths = os.path.splitext(source_pdf_fn)
-        translated_fn = paths[0] + "-translated" + paths[1]
-    else:
-        translated_fn = target_pdf_fn
-
-    in_pdf = fitz.open(source_pdf_fn)
-    page_count = in_pdf.page_count
-    out_pdf = fitz.open(translated_fn)
-    for i in range(page_count):
-        page = in_pdf[i]
-        paths = page.get_drawings()  # extract existing drawings
-
-        if i >= len(out_pdf):  # 如果 outpdf 中没有第 i 页，那么添加一个新的页面
-            out_pdf.new_page(width=page.rect.width, height=page.rect.height)
-
-        outpage = out_pdf[i]
-        shape = outpage.new_shape()  # make a drawing canvas for the output page
-        # define some output page with the same dimensions
-
-        # loop through the paths and draw them
-        for path in paths:
-            # draw each entry of the 'items' list
-            for item in path["items"]:  # these are the draw commands
-                if item[0] == "l":  # line
-                    shape.draw_line(item[1], item[2])
-                elif item[0] == "re":  # rectangle
-                    shape.draw_rect(item[1])
-                elif item[0] == "qu":  # quad
-                    shape.draw_quad(item[1])
-                elif item[0] == "c":  # curve
-                    shape.draw_bezier(item[1], item[2], item[3], item[4])
-                else:
-                    raise ValueError("unhandled drawing", item)
-
-            keys = ["fill", "color", "dashes", "even_odd", "closePath", "lineJoin", "lineCap", "width",
-                    "stroke_opacity", "fill_opacity"]
-            ensure_values(path, keys)
-            lineCap = path.get("lineCap", [0])
-            if isinstance(lineCap, int):
-                lineCap = [lineCap]
-            shape.finish(
-                fill=path["fill"],  # fill color
-                color=path["color"],  # line color
-                dashes=path["dashes"],  # line dashing
-                even_odd=path["even_odd"],  # control color of overlaps
-                closePath=path["closePath"],  # whether to connect last and first point
-                lineJoin=path["lineJoin"],  # how line joins should look like
-                lineCap=max(lineCap),  # how line ends should look like
-                width=path["width"],  # line width
-                stroke_opacity=path["stroke_opacity"],
-                fill_opacity=path["fill_opacity"],
-            )
-
-        shape.commit()
-
-    return out_pdf
-
-
-def ensure_values(dictionary, keys, default_value=1):
-    for key in keys:
-        if key not in dictionary or dictionary[key] is None:
-            dictionary[key] = default_value
-
-
-def extract_img_save(source_pdf_fn, target_pdf_fn):
-    if target_pdf_fn is None:
-        paths = os.path.splitext(source_pdf_fn)
-        translated_fn = paths[0] + "-translated" + paths[1]
-    else:
-        translated_fn = target_pdf_fn
-
-    in_pdf = fitz.open(source_pdf_fn)
-    page_count = in_pdf.page_count  # number of pages
-    out_pdf = fitz.open(translated_fn)
-
-    xreflist = []
-    imglist = []
-    for pno in range(page_count):
-        page = in_pdf[pno]
-        il = in_pdf.get_page_images(pno)
-        # print(il)
-        imglist.extend([x[0] for x in il])
-        for img in il:
-            xref = img[0]
-            img_rect = page.get_image_rects(xref)
-            # print(img_rect)
-            if xref in xreflist:
-                continue
-            width = img[2]
-            height = img[3]
-            if min(width, height) <= dimlimit:
-                continue
-            image = recoverpix(in_pdf, img)
-            n = image["colorspace"]
-            imgdata = image["image"]
-
-            if len(imgdata) <= abssize:
-                continue
-            if len(imgdata) / (width * height * n) <= relsize:
-                continue
-
-            imgfile = os.path.join(imgdir, "img%05i.%s" % (xref, image["ext"]))
-            print(imgfile)
-            fout = open(imgfile, "wb")
-            fout.write(imgdata)
-            fout.close()
-
-            xreflist.append(xref)
-            out_pdf[pno].insert_image(rect=img_rect[0], stream=imgdata)
-
-    imglist = list(set(imglist))
-    # print(len(set(imglist)), "images in total")
-    # print(imglist)
-    # print(len(xreflist), "images extracted")
-    # print(xreflist)
-    return out_pdf
-
-
-def get_fontsize(block):
-    for line in block:
-        if isinstance(line, LTTextLine):
-            for char in line:
-                if isinstance(char, LTChar):
-                    return char.size
 
 
 def remove_lang_independent(t):
@@ -244,6 +69,63 @@ def preprocess_txt(t):
     return t.replace("-\n", "").replace("\n", " ").replace("<", "&lt;").strip()
 
 
+font_dict = {
+    "en": "helv",
+    "zh": "china-ss",
+}
+
+
+def span_len(span):
+    return len(span["text"].split())
+
+
+def merge_block(block):
+    sizes = []
+    for line in block["lines"]:
+        for span in line["spans"]:
+            sizes.append(span["size"])
+
+    text = ""
+    for line in block["lines"]:
+        line_text = ""
+        for span in line["spans"]:
+            line_text += span["text"]
+        text += line_text + "\n"
+
+    return [{"text":text, "bbox":block["bbox"], "font":font_dict["en"], "size":min(sizes), "dir":(1.0, 0.0)}]
+
+
+def get_candidate_block(block):
+    if len(block["lines"]) == 1:
+        line = block["lines"][0]
+        if len(line["spans"]) == 1:  # 单行单段
+            span = line["spans"][0]
+            return [{"text":span["text"], "bbox":span["bbox"], "font":font_dict["en"], "size":span["size"], "dir":line["dir"]}]
+        else:  # 单行多段
+            lens = [span_len(s) for s in line["spans"]]
+            if sum(lens)/len(line["spans"]) < 3:  # 每段很短
+                return [{"text":s["text"], "bbox":s["bbox"], "font":font_dict["en"], "size":s["size"], "dir":(1.0, 0.0)} for s in line["spans"]]
+            else:
+                return merge_block(block)
+    else:  # 多行
+        fonts = []
+        sizes = []
+        lens = []
+        for line in block["lines"]:
+            for span in line["spans"]:
+                fonts.append(span["font"])
+                sizes.append(span["size"])
+                lens.append(span_len(span))
+
+        if sum(lens) / len(lens) < 3:  # 每段很短
+            result = []
+            for line in block["lines"]:
+                result.extend([{"text":s["text"], "bbox":s["bbox"], "font":font_dict["en"], "size":s["size"], "dir":(1.0, 0.0)} for s in line["spans"]])
+            return result
+        else:
+            return merge_block(block)
+
+
 def print_to_canvas(t, x, y, w, h, pdf, ft, tgt_lang="zh"):
     h = max(24, h)
     w = max(24, w)
@@ -257,6 +139,33 @@ def print_to_canvas(t, x, y, w, h, pdf, ft, tgt_lang="zh"):
     story = [Paragraph(t, styles[style_name])]
     story_inframe = KeepInFrame(w, h, story)
     frame.addFromList([story_inframe], pdf)
+
+
+def print_to_page(block, canvas, page_h, tgt_lang="zh"):
+    t = block["text"]
+    x1, y1, x2, y2 = block["bbox"]
+    h = y2 - y1
+    w = x2 - x1
+
+    y1 = page_h - y1
+    y2 = page_h - y2
+
+    x = x1
+    y = y2
+
+    ft = block["size"]
+    h = max(24, h)
+    w = max(24, w)
+    frame = Frame(x, y, w, h, showBoundary=0)
+
+    font = fonts.get(tgt_lang, 'SimSun')  # 根据目标语言获取字体，如果没有对应的字体，则使用 'SimSun' 作为默认字体
+    ft = round(ft)  # 将字体大小四舍五入到最接近的整数
+    style_name = font + str(ft)
+    if style_name not in styles:  # 如果样式不存在，则添加新样式
+        styles.add(ParagraphStyle(fontName=font, name=style_name, fontSize=ft, wordWrap='CJK'))  # 使用获取到的字体
+    story = [Paragraph(t, styles[style_name])]
+    story_inframe = KeepInFrame(w, h, story)
+    frame.addFromList([story_inframe], canvas)
 
 
 def get_pdf_page_count(filename):
@@ -280,76 +189,78 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
     else:
         translated_fn = translation_file
 
+    doc = pymupdf.open(pdf_fn)
+    total_pages = doc.page_count
+    outpdf = pymupdf.open()
+
+    pages = []  # 每页文本块
+
     translator = None
 
-    # MIN_WIDTH = 7
-    # MIN_HEIGHT = 7
+    print("复制图形和图像，提取文本信息...")
 
-    total_pages = get_pdf_page_count(pdf_fn)
+    for page in doc:
+        outpage = outpdf.new_page(width=page.rect.width, height=page.rect.height)
+        copy_drawings(page, outpage)
+        copy_images(page, outpage, doc)
 
-    pdf = canvas.Canvas(translated_fn)
-    p = 1
+        blocks = page.get_text("dict")["blocks"]
+        candidates = []
+        for block in blocks:
+            cb = get_candidate_block(block)
+            candidates.extend(cb)
+        pages.append(candidates)
 
-    for page_layout in extract_pages(pdf_fn):  # for each page in pdf file
-        print("*"*20, "Page", p, "*"*20, "\n")
-        to_translate_blocks = []
-        to_translate_texts = []
-        for element in page_layout:
-            if isinstance(element, LTTextBoxHorizontal):
-                x, y, w, h = int(element.x0), int(element.y0), int(element.width), int(element.height)
-                t = element.get_text()
-                ft = get_fontsize(element)
-                t = preprocess_txt(t)
-                block = (x, y, w, h, t)
+    outpdf.save("temp.pdf")
 
-                # if w < MIN_WIDTH or h < MIN_HEIGHT:
-                #     print("***TooSmall", block)
-                #     print_to_canvas(t, x, y, w, h, pdf, ft, target_lang)
-                #     continue
+    print("翻译和输出...")
 
-                if not is_translatable(t, source_lang):
-                    print("***未翻译", block)
-                    print_to_canvas(t, x, y, w, h, pdf, ft, target_lang)
-                    continue
+    input_df = PdfReader(open("temp.pdf", "rb"))  # 输入
+    output_pdf = open(translated_fn, "wb")  # 输出
+    output = PdfWriter()
+    for i, template_page in enumerate(input_df.pages):  # 循环每一页
+        print("页面{}".format(i+1))
+        packet = io.BytesIO()
+        # 设置中文（如果不这样设置中文，中文会变成黑色的方块）
+        # pdfmetrics.registerFont(TTFont("SimHei", "SimHei.ttf"))  # 步骤1
+        canvas_draw = Canvas(packet,
+                             pagesize=(input_df.pages[0].mediabox.width, input_df.pages[0].mediabox.height))
 
-                print("***翻译", block)
-                to_translate_blocks.append(block)
-                to_translate_texts.append(t)
+        page_h = float(input_df.pages[0].mediabox.height)
 
         if translator is None:
-            if source_lang == "auto":
-                source_lang = detect_lang(t)
-
             translator = translator_factory.get_translator(source_lang, target_lang)
 
-            if translator is None:
-                raise ValueError("给定语言不支持: {}".format(source_lang + "-" + target_lang))
+        blocks = pages[i]
+        for c in blocks:
+            text = c["text"]
+            text = text.replace("-\n", "").replace("\n", " ").replace("<", "&lt;").strip()
+            if len(text) == 0:
+                continue
 
-            if callbacker:
-                callbacker.set_tag(pdf_fn)
+            toks = text.split()
+            avg_len = sum([len(t) for t in toks]) / len(toks)
+            if avg_len > 3 and len(toks) > 1:
+                c["text"] = translator.translate_paragraph(text, source_lang, target_lang)
 
-        translations = translator.translate_list(to_translate_texts, source_lang, target_lang)
-        for i in range(len(to_translate_blocks)):
-            x, y, w, h, t = to_translate_blocks[i]
-            print_to_canvas(translations[i], x, y, w, h, pdf, ft, target_lang)
+            print(c)
 
-        if callbacker:
-            callbacker.report(total_pages, p, fid=pdf_fn)
+            print_to_page(c, canvas_draw, page_h)
 
-        pdf.showPage()
-        p += 1
+        # canvas_draw.setFont("SimHei", 20)  # 支持中文
+        # canvas_draw.drawString(100, 500, "随便添加一句话")  # 添加内容
 
-    pdf.save()
+        canvas_draw.save()
 
-    # 保存绘制内容到翻译文档
-    tf_draw = extract_draw_save(pdf_fn, translated_fn)
-    tf_draw.saveIncr()
+        template_page.add_transformation(Transformation().rotate(0).translate(tx=0, ty=0))
+        template_page.merge_page(PdfReader(packet).pages[0])
 
-    # 保存图片到翻译文档
-    translated_file = extract_img_save(pdf_fn, tf_draw)
-    translated_file.saveIncr()
+        output.add_page(template_page)
+        output.write(output_pdf)
 
-    return translated_file.name
+    output_pdf.close()
+
+    return translated_fn
 
 
 if __name__ == "__main__":
@@ -365,7 +276,7 @@ if __name__ == "__main__":
 
     callback = None
 
-    translated_fn = translate_pdf_auto(in_file, target_lang=to_lang, translation_file=out_file, callbacker=callback)
+    translated_fn = translate_pdf_auto(in_file, source_lang="en", target_lang=to_lang, translation_file=out_file, callbacker=callback)
 
     import webbrowser
 
