@@ -142,7 +142,7 @@ def print_to_canvas(t, x, y, w, h, pdf, ft, tgt_lang="zh"):
 
 
 def print_to_page(block, canvas, page_h, tgt_lang="zh"):
-    t = block["text"]
+    t = block["text"].replace("<", "&lt;")
     x1, y1, x2, y2 = block["bbox"]
     h = y2 - y1
     w = x2 - x1
@@ -151,11 +151,11 @@ def print_to_page(block, canvas, page_h, tgt_lang="zh"):
     y2 = page_h - y2
 
     x = x1
-    y = y2
+    y = y2 - 12
 
     ft = block["size"]
     h = max(24, h)
-    w = max(24, w)
+    w = max(48, w)
     frame = Frame(x, y, w, h, showBoundary=0)
 
     font = fonts.get(tgt_lang, 'SimSun')  # 根据目标语言获取字体，如果没有对应的字体，则使用 'SimSun' 作为默认字体
@@ -207,6 +207,9 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
         blocks = page.get_text("dict")["blocks"]
         candidates = []
         for block in blocks:
+            if block["type"] != 0:  # XXX:为什么这里有图片？
+                continue
+
             cb = get_candidate_block(block)
             candidates.extend(cb)
         pages.append(candidates)
@@ -234,7 +237,7 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
         blocks = pages[i]
         for c in blocks:
             text = c["text"]
-            text = text.replace("-\n", "").replace("\n", " ").replace("<", "&lt;").strip()
+            text = text.replace("-\n", "").replace("\n", " ").strip()
             if len(text) == 0:
                 continue
 
@@ -252,7 +255,7 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
 
         canvas_draw.save()
 
-        template_page.add_transformation(Transformation().rotate(0).translate(tx=0, ty=0))
+        # template_page.add_transformation(Transformation().rotate(0).translate(tx=0, ty=0))
         template_page.merge_page(PdfReader(packet).pages[0])
 
         output.add_page(template_page)
