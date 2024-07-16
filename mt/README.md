@@ -2,15 +2,6 @@
 
 
 ----
-## For beginners:
-
-There is a step-by-step and explained tuto (Thanks to Yasmin Moslem): [Tutorial](https://github.com/ymoslem/OpenNMT-Tutorial)
-
-Please try to read and/or follow before raising newbies issues.
-
-Otherwise you can just have a look at the [Quickstart](https://opennmt.net/OpenNMT-py/quickstart.html) steps
-
-----
 ## New:
 
 * You will need Pytorch v2 preferably v2.2 which fixes some `scaled_dot_product_attention` issues
@@ -24,49 +15,9 @@ Otherwise you can just have a look at the [Quickstart](https://opennmt.net/OpenN
 
 For all usecases including NMT, you can now use Multiquery instead of Multihead attention (faster at training and inference) and remove biases from all Linear (QKV as well as FeedForward modules).
 
-
-If you used previous versions of OpenNMT-py, you can check the [Changelog](https://github.com/OpenNMT/OpenNMT-py/blob/master/CHANGELOG.md) or the [Breaking Changes](https://github.com/OpenNMT/OpenNMT-py/blob/master/docs/source/changes.md)
-
-----
-
-## Tutorials:
-
-* How to replicate Vicuna with a 7B or 13B llama (or Open llama, MPT-7B, Redpajama)  Language Model: [Tuto Vicuna](https://github.com/OpenNMT/OpenNMT-py/blob/master/docs/source/examples/replicate_vicuna/ReplicateVicuna.md)
-* How to finetune NLLB-200 with your dataset: [Tuto Finetune NLLB-200](https://forum.opennmt.net/t/finetuning-and-curating-nllb-200-with-opennmt-py/5238)
-* How to create a simple OpenNMT-py REST Server: [Tuto REST](https://forum.opennmt.net/t/simple-opennmt-py-rest-server/1392)
-* How to create a simple Web Interface: [Tuto Streamlit](https://forum.opennmt.net/t/simple-web-interface/4527)
-* Replicate the WMT17 en-de experiment: [WMT17 ENDE](https://github.com/OpenNMT/OpenNMT-py/blob/master/docs/source/examples/wmt17/Translation.md)
-
 ----
 
 ## Setup
-
-### Installing locally
-
-OpenNMT-py requires:
-
-- Python >= 3.8
-- PyTorch >= 2.0 <2.2
-
-Install `OpenNMT-py` from `pip`:
-```bash
-pip install OpenNMT-py
-```
-
-or from the source:
-```bash
-git clone https://github.com/OpenNMT/OpenNMT-py.git
-cd OpenNMT-py
-pip install -e .
-```
-
-Note: if you encounter a `MemoryError` during installation, try to use `pip` with `--no-cache-dir`.
-
-*(Optional)* Some advanced features (e.g. working pretrained models or specific transforms) require extra packages, you can install them with:
-
-```bash
-pip install -r requirements.opt.txt
-```
 
 ### Manual installation of some dependencies
 

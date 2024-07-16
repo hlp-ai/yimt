@@ -7,3 +7,17 @@ bitsandbytes>=0.41.2
 safetensors
 spacy
 gradio
+"torch>=2.0.1,<2.3",
+"configargparse",
+"ctranslate2>=3.24,<5",
+"tensorboard>=2.3",
+"flask",
+"waitress",
+"pyonmttok>=1.35,<2",
+"pyyaml",
+"sacrebleu",
+"rapidfuzz",
+"pyahocorasick",
+"fasttext-wheel",
+"spacy",
+"six",
