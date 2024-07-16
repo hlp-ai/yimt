@@ -351,8 +351,8 @@ def create_app(args):
         import base64
         image_data = base64.b64decode(image_64_string)
 
-        # filepath = os.path.join(get_upload_dir(), "decoded_image.{}".format(format))
-        filepath = "decoded_image.{}".format(format)
+        # TODO: 直接对内存中图片进行识别
+        filepath = os.path.join(tempfile.gettempdir(), str(random.randint(0, 10000)) + ".{}".format(format))
 
         with open(filepath, "wb") as image_file:
             image_file.write(image_data)
@@ -390,13 +390,13 @@ def create_app(args):
 
         import base64
         audio_data = base64.b64decode(audio_64_string)
-        temp_audio_file = "temp_audo.{}".format(format)
+        temp_audio_file = os.path.join(tempfile.gettempdir(), str(random.randint(0, 10000)) + ".{}".format(format))
         with open(temp_audio_file, "wb") as audio_file:
             audio_file.write(audio_data)
 
         if format == "amr":
             print("转换AMR文件...")
-            temp_wav_file = "temp_audo.wav"
+            temp_wav_file = os.path.join(tempfile.gettempdir(), str(random.randint(0, 10000)) + ".wav")
             amr2wav(temp_audio_file, temp_wav_file)
             # audio = AudioSegment.from_file(temp_audio_file)
             # # print(len(song)) #时长，单位：毫秒
