@@ -1,5 +1,6 @@
 import io
 import os
+import random
 import tempfile
 import uuid
 from functools import wraps
@@ -443,7 +444,7 @@ def create_app(args):
         r = result[0]
 
         print("写临时声音文件...")
-        tmp_file = "./temp.wav"
+        tmp_file = os.path.join(tempfile.gettempdir(), str(random.randint(0, 10000)) + ".wav")
         write(tmp_file, r["sr"], r["audio"])
 
         audio_64_string = base64.b64encode(open(tmp_file, "rb").read())
