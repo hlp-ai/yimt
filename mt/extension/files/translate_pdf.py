@@ -250,16 +250,14 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
 
             print_to_page(c, canvas_draw, page_h)
 
-        # canvas_draw.setFont("SimHei", 20)  # 支持中文
-        # canvas_draw.drawString(100, 500, "随便添加一句话")  # 添加内容
-
         canvas_draw.save()
-
-        # template_page.add_transformation(Transformation().rotate(0).translate(tx=0, ty=0))
         template_page.merge_page(PdfReader(packet).pages[0])
 
         output.add_page(template_page)
         output.write(output_pdf)
+
+        if callbacker:
+            callbacker.report(total_pages, i+1, fid=pdf_fn)
 
     output_pdf.close()
 
