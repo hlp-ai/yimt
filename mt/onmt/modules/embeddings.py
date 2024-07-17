@@ -81,11 +81,6 @@ class PositionalEncoding(nn.Module):
 class Embeddings(nn.Module):
     """Words embeddings for encoder/decoder.
 
-    Additionally includes ability to add sparse input features
-    based on "Linguistic Input Features Improve Neural Machine Translation"
-    :cite:`sennrich2016linguistic`.
-
-
     .. mermaid::
 
        graph LR
@@ -104,17 +99,6 @@ class Embeddings(nn.Module):
         word_vocab_size (int): size of dictionary of embeddings for words.
         word_padding_idx (int): padding index for words in the embeddings.
         position_encoding (bool): see :class:`~onmt.modules.PositionalEncoding`
-        feat_merge (string): merge action for the features embeddings:
-            concat, sum or mlp.
-        feat_vec_exponent (float): when using `-feat_merge concat`, feature
-            embedding size is N^feat_dim_exponent, where N is the
-            number of values the feature takes.
-        feat_vec_size (int): embedding dimension for features when using
-            `-feat_merge mlp`
-        feat_padding_idx (List[int]): padding index for a list of features
-                                   in the embeddings.
-        feat_vocab_sizes (List[int], optional): list of size of dictionary
-            of embeddings for each feature.
         dropout (float): dropout probability.
         sparse (bool): sparse embbedings default False
         freeze_word_vecs (bool): freeze weights of word vectors.
@@ -153,21 +137,10 @@ class Embeddings(nn.Module):
             )
             for vocab, dim, pad in emb_params
         ]
-        # emb_luts = Elementwise(feat_merge, embeddings)
         emb_luts = Elementwise(None, embeddings)
 
-        # The final output size of word + feature vectors. This can vary
-        # from the word vector size if and only if features are defined.
-        # This is the attribute you should access if you need to know
-        # how big your embeddings are going to be.
-        # self.embedding_size = sum(emb_dims) if feat_merge == "concat" else word_vec_size
         self.embedding_size = word_vec_size
 
-        # The sequence of operations that converts the input sequence
-        # into a sequence of embeddings. At minimum this consists of
-        # looking up the embeddings for each word and feature in the
-        # input. Model parameters may require the sequence to contain
-        # additional operations as well.
         super(Embeddings, self).__init__()
         self.make_embedding = nn.Sequential()
         self.make_embedding.add_module("emb_luts", emb_luts)
@@ -211,7 +184,7 @@ class Embeddings(nn.Module):
                 self.word_lut.weight.data.copy_(pretrained)
 
     def forward(self, source, step=None):
-        """Computes the embeddings for words and features.
+        """Computes the embeddings for words.
 
         Args:
             source (LongTensor): index tensor ``(batch, len, nfeat)``
