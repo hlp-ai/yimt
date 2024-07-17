@@ -3,77 +3,15 @@
 
 ## Step 0: Download and clean the data
 
-Preliminary steps are defined in the [`docs/source/examples/wiki_103/prepare_wikitext-103_data.sh`](https://github.com/OpenNMT/OpenNMT-py/tree/master/docs/sources/examples/wiki_103/prepare_wikitext-103_data.sh). The following command will download the [WikiText103 dataset](https://blog.einstein.ai/the-wikitext-long-term-dependency-language-modeling-dataset/), remove empty lines and shuffle the training corpus:
+The following command will download the [WikiText103 dataset](https://blog.einstein.ai/the-wikitext-long-term-dependency-language-modeling-dataset/), remove empty lines and shuffle the training corpus:
 ```bash
 chmod u+x prepare_wikitext-103_data.sh
 ./prepare_wikitext-103_data.sh
 ```
 
-## Step 1: Prepare the subword model - BPE with pyonmttok
-
-This snippet will train a bpe of 40000 symbols on the training dataset using pyonmttok. The bpe model will be stored in `subwords.bpe` and the train/valid/test sets will be tokenized and saved.
-
-The tokenized files won't be used for training. Indeed, dynamic iteration over the training dataset enables on the fly tokenization using transforms (see step 2).
-
-```python
-import pyonmttok
-
-args = {
-    "mode": "aggressive",
-    "joiner_annotate": True,
-    "preserve_placeholders": True,
-    "case_markup": True,
-    "soft_case_regions": True,
-    "preserve_segmented_tokens": True,
-}
-n_symbols = 40000
-
-tokenizer_default = pyonmttok.Tokenizer(**args)
-learner = pyonmttok.BPELearner(tokenizer=tokenizer_default, symbols=n_symbols)
-# load training corpus
-learner.ingest_file("wiki.train.raw")
-
-# learn and store bpe model
-tokenizer = learner.learn("subwords.bpe")
-
-# tokenize corpus and save results
-for data_file in ["wiki.valid", "wiki.test", "wiki.train"]:
-    tokenizer.tokenize_file(f"{data_file}.raw", f"{data_file}.bpe")
-```
+## Step 1: Prepare the subword model`
 
 ## Step 2: Build the vocabulary
-An example of yaml configuration for language modeling task is available in [`examples/wiki_103.yaml`](https://github.com/OpenNMT/OpenNMT-py/tree/master/docs/source/examples/wiki_103/wiki_103.yaml). This configuration will be used for building the vocabulary and training the model.
-BPE and language modeling specificities are explained in the following sections.
-
-### Language Model specificities
-
-In LM tasks we expect a single source, therefore path_tgt is not required for LM tasks.
-
-```yaml
-data:
-    corpus_1:
-        path_src: data/wikitext-103-raw/wiki.train.raw
-```
-
-### BPE specificities
-
-To use BPE tokenization on the fly, the following parameters must be in the config file.
-Slight differences between on the fly tokenization and outputed tokenized files from step 1 can be observed.
-
-```yaml
-src_subword_type: bpe
-src_subword_model: data/wikitext-103-raw/subwords.bpe
-src_onmttok_kwargs: '{"mode": "aggressive", "joiner_annotate": True, "preserve_placeholders":
-  True, "case_markup": True, "soft_case_regions": True, "preserve_segmented_tokens":
-  True}'
-transforms: [onmt_tokenize]
-```
-
-### Build vocabulary command
-The vocabulary is built using:
-```bash
-onmt_build_vocab -config examples/wiki_103.yaml -n_sample -1
-```
 
 ## Step 3: Train the model
 To train a model for LM tasks, the following parameters are required:
