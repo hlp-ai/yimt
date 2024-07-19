@@ -1,9 +1,7 @@
 import json
 import os
-import re
 import sys
-import zlib
-from typing import Callable, List, Optional, TextIO
+from typing import Callable, Optional, TextIO
 
 system_encoding = sys.getdefaultencoding()
 
@@ -76,28 +74,6 @@ class WriteTXT(ResultWriter):
             print(segment["text"].strip(), file=file, flush=True)
 
 
-class WriteTSV(ResultWriter):
-    """
-    Write a transcript to a file in TSV (tab-separated values) format containing lines like:
-    <start time in integer milliseconds>\t<end time in integer milliseconds>\t<transcript text>
-
-    Using integer milliseconds as start and end times means there's no chance of interference from
-    an environment setting a language encoding that causes the decimal in a floating point number
-    to appear as a comma; also is faster and more efficient to parse & store, e.g., in C++.
-    """
-
-    extension: str = "tsv"
-
-    def write_result(
-        self, result: dict, file: TextIO, options: Optional[dict] = None, **kwargs
-    ):
-        print("start", "end", "text", sep="\t", file=file)
-        for segment in result["segments"]:
-            print(round(1000 * segment["start"]), file=file, end="\t")
-            print(round(1000 * segment["end"]), file=file, end="\t")
-            print(segment["text"].strip().replace("\t", " "), file=file, flush=True)
-
-
 class WriteJSON(ResultWriter):
     extension: str = "json"
 
@@ -112,7 +88,6 @@ def get_writer(
 ) -> Callable[[dict, TextIO, dict], None]:
     writers = {
         "txt": WriteTXT,
-        "tsv": WriteTSV,
         "json": WriteJSON,
     }
 
