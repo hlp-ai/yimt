@@ -19,6 +19,7 @@ from service.api_keys import APIKeyDB
 from service.asr import AudioRecognizers, amr2wav
 from service.mt import translator_factory
 from service.ocr import TextRecognizers
+from service.split_text import may_combine_paragraph
 from service.tts import AudioGenerators
 from service.utils import get_logger, path_traversal_check, SuspiciousFileOperation, detect_lang
 
@@ -315,6 +316,7 @@ def create_app(args):
         if text_format == "html":
             translation = str(translate_html(translator, src))
         else:
+            src = may_combine_paragraph(src)
             translation = translator.translate_paragraph(src, source_lang, target_lang)
 
         log_service.info("/translate: " + "&source=" + source_lang + "&target=" + target_lang
