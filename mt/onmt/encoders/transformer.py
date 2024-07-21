@@ -32,8 +32,6 @@ class TransformerEncoderLayer(nn.Module):
         add_qkvbias (bool): whether to add bias to the Key/Value nn.Linear
         num_kv (int): number of heads for KV when different vs Q (multiquery)
         add_ffnbias (bool): whether to add bias to the FF nn.Linear
-        parallel_residual (bool): Use parallel residual connections in each layer block, as used
-            by the GPT-J and GPT-NeoX models
         layer_norm (string): type of layer normalization standard/rms
         norm_eps (float): layer norm epsilon
         use_ckpting (List): layers for which we checkpoint for backward
@@ -57,7 +55,6 @@ class TransformerEncoderLayer(nn.Module):
         add_qkvbias=False,
         num_kv=0,
         add_ffnbias=True,
-        parallel_residual=False,
         layer_norm="standard",
         norm_eps=1e-6,
         use_ckpting=[],
@@ -90,13 +87,11 @@ class TransformerEncoderLayer(nn.Module):
             dropout,
             pos_ffn_activation_fn,
             add_ffnbias,
-            parallel_residual,
             layer_norm,
             norm_eps,
             use_ckpting=use_ckpting,
             parallel_gpu=parallel_gpu,
         )
-        self.parallel_residual = parallel_residual
         if layer_norm == "standard":
             self.layer_norm = nn.LayerNorm(d_model, eps=norm_eps)
         elif layer_norm == "rms":
@@ -122,14 +117,8 @@ class TransformerEncoderLayer(nn.Module):
         )
         if self.dropout_p > 0:
             context = self.dropout(context)
-        if self.parallel_residual:
-            # feed_forward applies residual, so we remove and apply residual with un-normed
-            layer_out = (
-                self.feed_forward(norm_layer_in) - norm_layer_in + layer_in + context
-            )
-        else:
-            layer_out = context + layer_in
-            layer_out = self.feed_forward(layer_out)
+        layer_out = context + layer_in
+        layer_out = self.feed_forward(layer_out)
 
         return layer_out
 
@@ -177,7 +166,6 @@ class TransformerEncoder(EncoderBase):
         add_qkvbias=False,
         num_kv=0,
         add_ffnbias=True,
-        parallel_residual=False,
         layer_norm="standard",
         norm_eps=1e-6,
         use_ckpting=[],
@@ -203,7 +191,6 @@ class TransformerEncoder(EncoderBase):
                     add_qkvbias=add_qkvbias,
                     num_kv=num_kv,
                     add_ffnbias=add_ffnbias,
-                    parallel_residual=parallel_residual,
                     layer_norm=layer_norm,
                     norm_eps=norm_eps,
                     use_ckpting=use_ckpting,
@@ -241,7 +228,6 @@ class TransformerEncoder(EncoderBase):
             add_qkvbias=opt.add_qkvbias,
             num_kv=opt.num_kv,
             add_ffnbias=opt.add_ffnbias,
-            parallel_residual=opt.parallel_residual,
             layer_norm=opt.layer_norm,
             norm_eps=opt.norm_eps,
             use_ckpting=opt.use_ckpting,

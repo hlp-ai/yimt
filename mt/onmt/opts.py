@@ -700,21 +700,6 @@ def model_opts(parser):
         action="store_true",
         help="Add bias to nn.linear of Position_wise FFN",
     )
-    group.add(
-        "--parallel_residual",
-        "-parallel_residual",
-        action="store_true",
-        help="Use Parallel residual in Decoder Layer"
-        "Note: this is used by GPT-J / Falcon Architecture",
-    )
-    group.add(
-        "--shared_layer_norm",
-        "-shared_layer_norm",
-        action="store_true",
-        help="Use a shared layer_norm in parallel residual attention"
-        "Note: must be true for Falcon 7B / false for Falcon 40B"
-        "same for GPT-J and GPT-NeoX models",
-    )
     # Alignement options
     group = parser.add_argument_group("Model - Alignement")
     group.add(

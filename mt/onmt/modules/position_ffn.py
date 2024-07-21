@@ -43,7 +43,6 @@ class PositionwiseFeedForward(nn.Module):
         dropout=0.1,
         activation_fn=ActivationFunction.relu,
         add_ffnbias=True,
-        parallel_residual=False,
         layer_norm="standard",
         norm_eps=1e-6,
         use_ckpting=[],
@@ -65,13 +64,11 @@ class PositionwiseFeedForward(nn.Module):
             out_features=d_model,
             bias=add_ffnbias,
         )
-        if layer_norm == "standard" and not parallel_residual:
+        if layer_norm == "standard":
             self.layer_norm = nn.LayerNorm(d_model, eps=norm_eps)
-        elif layer_norm == "rms" and not parallel_residual:
+        elif layer_norm == "rms":
             self.layer_norm = RMSNorm(d_model, eps=norm_eps)
-        elif not parallel_residual:
-            raise ValueError(f"{layer_norm} layer norm type is not supported")
-        self.parallel_residual = parallel_residual
+
         self.dropout_p = dropout
         self.dropout_1 = nn.Dropout(dropout)
         self.dropout_2 = nn.Dropout(dropout)
@@ -97,10 +94,8 @@ class PositionwiseFeedForward(nn.Module):
         Returns:
             (FloatTensor): Output ``(batch_size, input_len, model_dim)``.
         """
-        if not self.parallel_residual:
-            norm_x = self.layer_norm(x)
-        else:
-            norm_x = x.clone()
+        norm_x = self.layer_norm(x)
+
         inter = self.maybe_ckpt(self.w_1, norm_x)
         inter = self.activation(inter)
         if self.w_3 is not None:

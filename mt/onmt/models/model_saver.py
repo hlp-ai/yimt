@@ -55,10 +55,6 @@ def load_checkpoint(ckpt_path):
             checkpoint["opt"].num_kv = 0
         if not hasattr(checkpoint["opt"], "add_ffnbias"):
             checkpoint["opt"].add_ffnbias = False
-        if not hasattr(checkpoint["opt"], "parallel_residual"):
-            checkpoint["opt"].parallel_residual = False
-        if not hasattr(checkpoint["opt"], "shared_layer_norm"):
-            checkpoint["opt"].shared_layer_norm = False
         if not hasattr(checkpoint["opt"], "use_ckpting"):
             checkpoint["opt"].use_ckpting = []
         if not hasattr(checkpoint["opt"], "relative_positions_buckets"):

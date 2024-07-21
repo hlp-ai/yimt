@@ -32,8 +32,6 @@ class TransformerDecoderLayerBase(nn.Module):
         add_qkvbias=False,
         num_kv=0,
         add_ffnbias=True,
-        parallel_residual=False,
-        shared_layer_norm=False,
         layer_norm="standard",
         norm_eps=1e-6,
         use_ckpting=[],
@@ -76,10 +74,6 @@ class TransformerDecoderLayerBase(nn.Module):
             add_qkvbias (bool): whether to add bias to the Key/Value nn.Linear
             num_kv (int): number of heads for KV when different vs Q (multiquery)
             add_ffnbias (bool): whether to add bias to the FF nn.Linear
-            parallel_residual (bool): Use parallel residual connections in each layer block, as used
-                by the GPT-J and GPT-NeoX models
-            shared_layer_norm (bool): When using parallel residual, share the input and post
-                attention layer norms.
             layer_norm (string): type of layer normalization standard/rms
             norm_eps (float): layer norm epsilon
             use_ckpting (List): layers for which we checkpoint for backward
@@ -120,7 +114,6 @@ class TransformerDecoderLayerBase(nn.Module):
                 dropout,
                 pos_ffn_activation_fn,
                 add_ffnbias,
-                parallel_residual,
                 layer_norm,
                 norm_eps,
                 use_ckpting=use_ckpting,
@@ -133,22 +126,15 @@ class TransformerDecoderLayerBase(nn.Module):
                 dropout,
                 pos_ffn_activation_fn,
                 add_ffnbias,
-                parallel_residual,
                 layer_norm,
                 norm_eps,
                 use_ckpting=use_ckpting,
                 parallel_gpu=parallel_gpu,
             )
-        self.parallel_residual = parallel_residual
-        self.shared_layer_norm = shared_layer_norm
         if layer_norm == "standard":
             self.layer_norm_1 = nn.LayerNorm(d_model, eps=norm_eps)
-            if parallel_residual and not shared_layer_norm:
-                self.layer_norm_res = nn.LayerNorm(d_model, eps=norm_eps)
         elif layer_norm == "rms":
             self.layer_norm_1 = RMSNorm(d_model, eps=norm_eps)
-            if parallel_residual and not shared_layer_norm:
-                self.layer_norm_res = RMSNorm(d_model, eps=norm_eps)
         else:
             raise ValueError(f"{layer_norm} layer norm type is not supported")
 
@@ -266,8 +252,6 @@ class TransformerDecoderLayer(TransformerDecoderLayerBase):
         add_qkvbias=False,
         num_kv=0,
         add_ffnbias=True,
-        parallel_residual=False,
-        shared_layer_norm=False,
         layer_norm="standard",
         norm_eps=1e-6,
         use_ckpting=[],
@@ -299,8 +283,6 @@ class TransformerDecoderLayer(TransformerDecoderLayerBase):
             add_qkvbias=add_qkvbias,
             num_kv=num_kv,
             add_ffnbias=add_ffnbias,
-            parallel_residual=parallel_residual,
-            shared_layer_norm=shared_layer_norm,
             layer_norm=layer_norm,
             norm_eps=norm_eps,
             use_ckpting=use_ckpting,
@@ -383,31 +365,14 @@ class TransformerDecoderLayer(TransformerDecoderLayerBase):
         )
         if self.dropout_p > 0:
             self_attn = self.dropout(self_attn)
-        if self.parallel_residual:
-            ctx_attn, attns = self.context_attn(
-                enc_out,
-                enc_out,
-                norm_layer_in,
-                mask=src_pad_mask,
-                return_attn=return_attn,
-            )
-            # feed_forward applies residual, so we remove and apply residual with un-normed
-            layer_out = (
-                self.feed_forward(norm_layer_in)
-                - norm_layer_in
-                + layer_in
-                + self_attn
-                + ctx_attn
-            )
-        else:
-            query = self_attn + layer_in
-            norm_query = self.layer_norm_2(query)
-            ctx_attn, attns = self.context_attn(
-                enc_out, enc_out, norm_query, mask=src_pad_mask, return_attn=return_attn
-            )
-            if self.dropout_p > 0:
-                ctx_attn = self.dropout(ctx_attn)
-            layer_out = self.feed_forward(ctx_attn + query)
+        query = self_attn + layer_in
+        norm_query = self.layer_norm_2(query)
+        ctx_attn, attns = self.context_attn(
+            enc_out, enc_out, norm_query, mask=src_pad_mask, return_attn=return_attn
+        )
+        if self.dropout_p > 0:
+            ctx_attn = self.dropout(ctx_attn)
+        layer_out = self.feed_forward(ctx_attn + query)
 
         return layer_out, attns
 
@@ -459,8 +424,6 @@ class TransformerDecoderBase(DecoderBase):
             add_qkvbias=opt.add_qkvbias,
             num_kv=opt.num_kv,
             add_ffnbias=opt.add_ffnbias,
-            parallel_residual=opt.parallel_residual,
-            shared_layer_norm=opt.shared_layer_norm,
             layer_norm=opt.layer_norm,
             norm_eps=opt.norm_eps,
             use_ckpting=opt.use_ckpting,
@@ -546,10 +509,6 @@ class TransformerDecoder(TransformerDecoderBase):
         add_qkvbias (bool): whether to add bias to the Key/Value nn.Linear
         num_kv (int): number of heads for KV when different vs Q (multiquery)
         add_ffnbias (bool): whether to add bias to the FF nn.Linear
-        parallel_residual (bool): Use parallel residual connections in each layer block, as used
-            by the GPT-J and GPT-NeoX models
-        shared_layer_norm (bool): When using parallel residual, share the input and post
-            attention layer norms.
         layer_norm (string): type of layer normalization standard/rms
         norm_eps (float): layer norm epsilon
         use_ckpting (List): layers for which we checkpoint for backward
@@ -582,8 +541,6 @@ class TransformerDecoder(TransformerDecoderBase):
         add_qkvbias=False,
         num_kv=0,
         add_ffnbias=True,
-        parallel_residual=False,
-        shared_layer_norm=False,
         layer_norm="standard",
         norm_eps=1e-6,
         use_ckpting=[],
@@ -617,8 +574,6 @@ class TransformerDecoder(TransformerDecoderBase):
                     add_qkvbias=add_qkvbias,
                     num_kv=num_kv,
                     add_ffnbias=add_ffnbias,
-                    parallel_residual=parallel_residual,
-                    shared_layer_norm=shared_layer_norm,
                     layer_norm=layer_norm,
                     norm_eps=norm_eps,
                     use_ckpting=use_ckpting,
@@ -771,17 +726,8 @@ class TransformerLMDecoderLayer(TransformerDecoderLayerBase):
         )
         if self.dropout_p > 0:
             attn_output = self.dropout(attn_output)
-        if self.parallel_residual:
-            # feed_forward applies residual, so we remove and apply residual with un-normed
-            if not self.shared_layer_norm:
-                norm_res_layer_in = self.layer_norm_res(layer_in)
-                ff_in = norm_res_layer_in
-            else:
-                ff_in = norm_layer_in
-            layer_out = self.feed_forward(ff_in) - ff_in + layer_in + attn_output
-        else:
-            layer_out = attn_output + layer_in
-            layer_out = self.feed_forward(layer_out)
+        layer_out = attn_output + layer_in
+        layer_out = self.feed_forward(layer_out)
 
         return layer_out, attns
 
@@ -813,10 +759,6 @@ class TransformerLMDecoder(TransformerDecoderBase):
         add_qkvbias (bool): whether to add bias to the Key/Value nn.Linear
         num_kv (int): number of heads for KV when different vs Q (multiquery)
         add_ffnbias (bool): whether to add bias to the FF nn.Linear
-        parallel_residual (bool): Use parallel residual connections in each layer block, as used
-            by the GPT-J and GPT-NeoX models
-        shared_layer_norm (bool): When using parallel residual, share the input and post
-            attention layer norms.
         layer_norm (string): type of layer normalization standard/rms
         norm_eps (float): layer norm epsilon
         use_ckpting (List): layers for which we checkpoint for backward
@@ -849,8 +791,6 @@ class TransformerLMDecoder(TransformerDecoderBase):
         add_qkvbias=False,
         num_kv=0,
         add_ffnbias=True,
-        parallel_residual=False,
-        shared_layer_norm=False,
         layer_norm="standard",
         norm_eps=1e-6,
         use_ckpting=[],
@@ -883,8 +823,6 @@ class TransformerLMDecoder(TransformerDecoderBase):
                     add_qkvbias=add_qkvbias,
                     num_kv=num_kv,
                     add_ffnbias=add_ffnbias,
-                    parallel_residual=parallel_residual,
-                    shared_layer_norm=shared_layer_norm,
                     layer_norm=layer_norm,
                     norm_eps=norm_eps,
                     use_ckpting=use_ckpting,
