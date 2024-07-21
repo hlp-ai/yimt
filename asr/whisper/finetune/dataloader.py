@@ -1,4 +1,3 @@
-import re
 from typing import List, Optional, Tuple
 
 import torch
@@ -9,29 +8,22 @@ from whisper.finetune.create_data import Record, DataProcessor
 from whisper.tokenizer import Tokenizer
 
 
-
 class AudioDataset(Dataset):
     def __init__(
         self,
         records: List[Record],
         tokenizer: Tokenizer,
         fp16: bool = True,
-        no_timestamps_training: bool = False,
         max_prompt_length: int = 223,  # The maximum number of tokens to use for the prompt
         prompt_use_rate: float = 0.5,
-        no_timestamps_rate: float = 0.5,
     ) -> None:
         self.records = records
         self.tokenizer = tokenizer
         self.fp16 = fp16
-        self.no_timestamps_training = no_timestamps_training
         self.max_prompt_length = max_prompt_length
         self.prompt_use_rate = prompt_use_rate
-        self.no_timestamps_rate = no_timestamps_rate
 
         self.num_frames_per_second = N_FRAMES / CHUNK_LENGTH
-        # timestamps tokens are from <|0.00|> to <|30.00|> with a step of 0.02
-        self.timestamp_pattern = re.compile(r"(<\|[123]?[0-9]\.[0-9][0-9]\|>)")
         self.model_n_text_ctx = 448
 
     def __len__(self) -> int:
@@ -39,7 +31,7 @@ class AudioDataset(Dataset):
 
     def _get_prompt_tokens(self, prompt: str) -> List[int]:
         if len(prompt) > 0 and torch.rand(1) < self.prompt_use_rate:
-            prompt_tokens = self._encode_text_with_timestamps(prompt)[-self.max_prompt_length :]
+            prompt_tokens = self._encode_text(prompt)[-self.max_prompt_length :]
             prompt_tokens = [self.tokenizer.sot_prev] + prompt_tokens
         else:
             prompt_tokens = []
@@ -62,22 +54,12 @@ class AudioDataset(Dataset):
 
         return special_tokens
 
-    def _encode_text_with_timestamps(self, text: str) -> List[int]:
-        parts = self.timestamp_pattern.split(text)
+    def _encode_text(self, text: str) -> List[int]:
+        parts = text.split()
         parts = [token for token in parts if token != ""]
         tokens = []
         for part in parts:
-            if self.timestamp_pattern.fullmatch(part) is not None:
-                timestamp = float(part[2:-2])
-
-                # timestamp must be in the range [0, 30] and be a multiple of 0.02 seconds
-                if timestamp < 0 or timestamp > 30 or round(timestamp * 100) % 2 != 0:
-                    raise ValueError(f"Invalid timestamp: {timestamp}")
-
-                token = self.tokenizer.timestamp_begin + round(timestamp * 100) // 2
-                tokens.append(token)
-            else:
-                tokens.extend(self.tokenizer.encode(part))
+            tokens.extend(self.tokenizer.encode(part))
 
         return tokens
 
@@ -91,19 +73,17 @@ class AudioDataset(Dataset):
         else:
             return None
 
-    def _get_text_tokens(self, text: str, no_timestamps: bool) -> Tuple[List[int], Optional[float]]:
-        text_tokens = self._encode_text_with_timestamps(text)
+    def _get_text_tokens(self, text: str) -> Tuple[List[int], Optional[float]]:
+        text_tokens = self._encode_text(text)
         next_partial_segment_start = self._get_partial_segment_start(text_tokens)
-        if no_timestamps:
-            text_tokens = list(filter(lambda x: x < self.tokenizer.timestamp_begin, text_tokens))
+        text_tokens = list(filter(lambda x: x < self.tokenizer.timestamp_begin, text_tokens))
 
         return text_tokens, next_partial_segment_start
 
     def _calculate_mel(
-        self, audio_path: str, next_partial_segment_start: Optional[float], no_timestamps: bool
-    ) -> torch.Tensor:
+        self, audio_path: str, next_partial_segment_start: Optional[float]) -> torch.Tensor:
         mel = log_mel_spectrogram(audio_path)
-        if no_timestamps and next_partial_segment_start is not None:
+        if next_partial_segment_start is not None:
             mel = mel[:, : int(next_partial_segment_start * self.num_frames_per_second)]
         mel = pad_or_trim(mel, N_FRAMES)
         if self.fp16:
@@ -132,12 +112,11 @@ class AudioDataset(Dataset):
 
     def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         record = self.records[index]
-        no_timestamps = self.no_timestamps_training or torch.rand(1) < self.no_timestamps_rate
 
         prompt_tokens = self._get_prompt_tokens(record.prompt)
-        text_tokens, next_partial_segment_start = self._get_text_tokens(record.text, no_timestamps)
+        text_tokens, next_partial_segment_start = self._get_text_tokens(record.text)
         is_text_empty = len(text_tokens) == 0
-        special_tokens = self._get_special_tokens(is_text_empty, record.language, no_timestamps)
+        special_tokens = self._get_special_tokens(is_text_empty, record.language)
 
         decoder_input = prompt_tokens + special_tokens + text_tokens
         if len(decoder_input) > self.model_n_text_ctx:
@@ -145,7 +124,7 @@ class AudioDataset(Dataset):
 
         decoder_output = self._construct_decoder_output(prompt_tokens, special_tokens, text_tokens)
 
-        mel = self._calculate_mel(record.audio_path, next_partial_segment_start, no_timestamps)
+        mel = self._calculate_mel(record.audio_path, next_partial_segment_start)
 
         return (
             mel,
@@ -167,10 +146,8 @@ def get_dataloader(
     tokenizer: Tokenizer,
     batch_size: int = 1,
     fp16: bool = True,
-    no_timestamps_training: bool = False,
     max_prompt_length: int = 223,
     prompt_use_rate: float = 0.5,
-    no_timestamps_rate: float = 0.5,
     shuffle: bool = True,
 ) -> DataLoader:
     records = DataProcessor.read_records(json)
@@ -178,10 +155,8 @@ def get_dataloader(
         records,
         tokenizer,
         fp16=fp16,
-        no_timestamps_training=no_timestamps_training,
         max_prompt_length=max_prompt_length,
         prompt_use_rate=prompt_use_rate,
-        no_timestamps_rate=no_timestamps_rate,
     )
     return DataLoader(
         dataset,

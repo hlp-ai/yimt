@@ -37,24 +37,10 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument("--batch-size", type=int, default=1, help="Batch size for training")
     parser.add_argument("--dev-batch-size", type=int, default=16, help="Batch size for validation")
     parser.add_argument(
-        "--no-timestamps-training",
-        action="store_true",
-        help="Always use the no-timestamps training mode",
-    )
-    parser.add_argument(
         "--prompt-use-rate",
         type=float,
         default=0.5,
         help="How often to use prompts for conditioning the generation",
-    )
-    parser.add_argument(
-        "--no-timestamps-rate",
-        type=float,
-        default=0.5,
-        help=(
-            "How often to use the no-timestamps mode. Only used if --no-timestamps-training "
-            "is NOT set"
-        ),
     )
 
     # Training-related arguments
@@ -250,10 +236,8 @@ def main():
         tokenizer=tokenizer,
         batch_size=args.batch_size,
         fp16=fp16,
-        no_timestamps_training=args.no_timestamps_training,
         max_prompt_length=max_prompt_length,
         prompt_use_rate=args.prompt_use_rate,
-        no_timestamps_rate=args.no_timestamps_rate,
         shuffle=True,
     )
     dev_loader = get_dataloader(
@@ -261,11 +245,9 @@ def main():
         tokenizer=tokenizer,
         batch_size=args.dev_batch_size,
         fp16=fp16,
-        no_timestamps_training=args.no_timestamps_training,
         max_prompt_length=max_prompt_length,
         # always use prompts and timestamps for validation to make it deterministic
         prompt_use_rate=1.0,
-        no_timestamps_rate=0.0,
         shuffle=False,
     )
     if args.use_adam_8bit:
