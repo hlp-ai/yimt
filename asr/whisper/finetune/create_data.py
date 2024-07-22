@@ -16,9 +16,10 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--data-file",
         type=str,
+        required=True,
         help=(
             "Path to a text file containing audio filenames and transcriptions. This option is "
-            "used only when `--without-timestamps` is set. Each line must be in the format of "
+            "Each line must be in the format of "
             "`<audio_path>\t<transcription>`."
         ),
     )
@@ -84,18 +85,6 @@ DURATION_IN_SAMPLES = int(DURATION * SAMPLE_RATE / 1000)
 
 
 @dataclass
-class Utterance:
-    """
-    Representing a single segment of audio with a transcription. Corresponds to a single chunk in a
-    .srt (or .vtt) file.
-    """
-
-    text: str
-    start: Optional[int] = None  # in milliseconds
-    end: Optional[int] = None  # in milliseconds
-
-
-@dataclass
 class Record:
     """
     A single training instance for Whisper.
@@ -106,12 +95,6 @@ class Record:
     text: str  # text including timestamps
     language: str = "en"
     prompt: str = ""  # previous text including timestamps
-
-
-@dataclass
-class PromptNode:
-    text: str  # text including timestamps
-    num_tokens: int
 
 
 class DataProcessor:
