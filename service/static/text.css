@@ -520,27 +520,23 @@ body {
     min-width: 760px
 }
 
-.fanyi__footer {
-    display: block;
-    font-family: PingFangSC-Semibold;
+.footer {
     border-top: 1px solid #e8e8e8;
-    padding-top: 30px;
+    padding-top: 20px;
     padding-bottom: 20px;
     margin: 0 auto;
-    font-size: 14px;
-    text-align: center;
     color: #999;
-    min-width: 960px
 }
 
 .bottom__nav{
-    display: none;
-    font-family: PingFangSC-Semibold;
-   
-    font-size: 14px;
-    text-align: center;
-    color: #999;
-    min-width: 960px;
+    margin-bottom: 15px;
+}
+
+.footer a{
+    text-decoration:none;
+    white-space:pre;
+    margin-left: 11px;
+    margin-right: 11px;
 }
 
 .nav{
@@ -550,15 +546,6 @@ body {
     white-space:pre;
     margin-left: 22px;
     cursor: pointer;
-}
-
-.nav2{
-    font-size: 14px;
-    text-decoration:none;
-    color: #999;
-    white-space:pre;
-    margin-left: 11px;
-    margin-right: 11px;
 }
 
 .ad_area{
