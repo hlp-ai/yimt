@@ -103,4 +103,4 @@ def may_combine_paragraph(text):
         else:
             txt = txt + " " + p
 
-    return txt
+    return txt.strip()
