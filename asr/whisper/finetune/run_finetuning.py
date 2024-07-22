@@ -54,7 +54,7 @@ def get_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--model",
-        default="large",
+        required=True,
         choices=whisper.available_models(),
         help="name of the Whisper model to use",
     )
