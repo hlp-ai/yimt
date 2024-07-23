@@ -15,7 +15,7 @@ function set_setting(){
         <input type="button" class="url_button" id="url_button" value="设置" onclick="url_resetting_func()">
     `;
 
-    document.getElementById("url_setting_label").addEventListener("click", url_setting_func);
+    document.getElementById("settings").addEventListener("click", url_setting_func);
 }
 
 function url_setting_func()
