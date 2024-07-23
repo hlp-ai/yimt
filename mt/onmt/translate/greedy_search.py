@@ -290,27 +290,3 @@ class GreedySearch(DecodeStrategy):
             self.alive_attn = self.alive_attn[self.select_indices]
         self.original_batch_idx = self.original_batch_idx[self.select_indices]
         self.maybe_update_target_prefix(self.select_indices)
-
-
-class GreedySearchLM(GreedySearch):
-    def update_finished(self):
-        super(GreedySearchLM, self).update_finished()
-
-    def initialize(self, src, src_len, device=None, target_prefix=None):
-        """Initialize for decoding."""
-
-        if device is None:
-            device = src.device
-
-        (fn_map_state, _) = super(GreedySearchLM, self).initialize(
-            None, src_len, device, target_prefix
-        )
-
-        return fn_map_state, src
-
-    def advance(self, log_probs, attn):
-        super(GreedySearchLM, self).advance(log_probs, attn)
-
-        # in LM task src_len is associated with currently generated src
-        # and therefore needs to follow the generation
-        self.src_len += 1

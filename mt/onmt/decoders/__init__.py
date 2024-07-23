@@ -3,17 +3,15 @@ import os
 import importlib
 
 from onmt.decoders.decoder import DecoderBase
-from onmt.decoders.transformer import TransformerDecoder, TransformerLMDecoder
+from onmt.decoders.transformer import TransformerDecoder
 
 str2dec = {
     "transformer": TransformerDecoder,
-    "transformer_lm": TransformerLMDecoder,
 }
 
 __all__ = [
     "TransformerDecoder",
     "str2dec",
-    "TransformerLMDecoder",
 ]
 
 

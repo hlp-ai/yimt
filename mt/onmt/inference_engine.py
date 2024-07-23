@@ -235,12 +235,7 @@ class InferenceEngineCT2(InferenceEngine):
             self.device = "cpu"
         self.transforms_cls = get_transforms_cls(self.opt._all_transform)
         # Build translator
-        if opt.model_task == ModelTask.LANGUAGE_MODEL:
-            self.translator = ctranslate2.Generator(
-                opt.models[0], device=self.device, device_index=self.device_index
-            )
-        else:
-            self.translator = ctranslate2.Translator(
+        self.translator = ctranslate2.Translator(
                 self.opt.models[0], device=self.device, device_index=self.device_index
             )
         # Build vocab
@@ -268,26 +263,7 @@ class InferenceEngineCT2(InferenceEngine):
                 if id != self.vocabs["src"].lookup_token(DefaultTokens.PAD)
             ]
             input_tokens.append(_input_tokens)
-        if opt.model_task == ModelTask.LANGUAGE_MODEL:
-            translated_batch = self.translator.generate_batch(
-                start_tokens=input_tokens,
-                batch_type=("examples" if opt.batch_type == "sents" else "tokens"),
-                max_batch_size=opt.batch_size,
-                beam_size=opt.beam_size,
-                num_hypotheses=opt.n_best,
-                max_length=opt.max_length,
-                return_scores=True,
-                include_prompt_in_result=False,
-                sampling_topk=opt.random_sampling_topk,
-                sampling_topp=opt.random_sampling_topp,
-                sampling_temperature=opt.random_sampling_temp,
-            )
-            preds = [
-                [self.transform.apply_reverse(tokens) for tokens in out.sequences]
-                for out in translated_batch
-            ]
-            scores = [out.scores for out in translated_batch]
-        elif opt.model_task == ModelTask.SEQ2SEQ:
+        if opt.model_task == ModelTask.SEQ2SEQ:
             translated_batch = self.translator.translate_batch(
                 input_tokens,
                 batch_type=("examples" if opt.batch_type == "sents" else "tokens"),

@@ -370,37 +370,6 @@ class BeamSearch(BeamSearchBase):
         return fn_map_state, enc_out
 
 
-class BeamSearchLM(BeamSearchBase):
-    """
-    Beam search for language/decoder only models
-    """
-
-    def initialize(self, src, src_len, device=None, target_prefix=None):
-        """Initialize for decoding.
-        Repeat src objects `beam_size` times.
-        """
-        (fn_map_state, _, target_prefix) = self.initialize_tile(
-            None, src_len, target_prefix
-        )
-        if device is None:
-            device = src.device
-
-        super(BeamSearchLM, self).initialize_(
-            None,
-            device=device,
-            target_prefix=target_prefix,
-        )
-
-        return fn_map_state, src
-
-    def advance(self, log_probs, attn):
-        super(BeamSearchLM, self).advance(log_probs, attn)
-
-        # in LM task src_len is associated with currently generated src
-        # and therefore needs to follow the generation
-        self.src_len += 1
-
-
 class GNMTGlobalScorer(object):
     """NMT re-ranking.
 
