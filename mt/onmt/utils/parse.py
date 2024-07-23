@@ -150,31 +150,12 @@ class DataOptsCheckerMixin(object):
                 pretrained embeddings."
 
     @classmethod
-    def _validate_language_model_compatibilities_opts(cls, opt):
-        if opt.model_task != ModelTask.LANGUAGE_MODEL:
-            return
-
-        logger.info("encoder is not used for LM task")
-
-        assert opt.share_vocab and (
-            opt.tgt_vocab is None
-        ), "vocab must be shared for LM task"
-
-        assert (
-            opt.decoder_type == "transformer"
-        ), "Only transformer decoder is supported for LM task"
-
-    @classmethod
     def validate_prepare_opts(cls, opt):
         """Validate all options relate to prepare (data/transform/vocab)."""
         cls._validate_data(opt)
         cls._get_all_transform(opt)
         cls._validate_transforms_opts(opt)
         cls._validate_vocab_opts(opt)
-
-    @classmethod
-    def validate_model_opts(cls, opt):
-        cls._validate_language_model_compatibilities_opts(opt)
 
 
 class ArgumentParser(cfargparse.ArgumentParser, DataOptsCheckerMixin):
