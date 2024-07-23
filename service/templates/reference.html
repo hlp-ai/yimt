@@ -19,7 +19,7 @@
         var file_type  
         window.onload = function()
         {
-            set_setting();
+            document.getElementById("settings").addEventListener("click", display_setting_func);
 
             END_POINT = "http://127.0.0.1:5555";
             var server = window.localStorage.getItem("server");
@@ -45,7 +45,20 @@
 </head>
 
 <body>
-    <div class="url_setting_block" id="url_setting_block"></div>
+    <div class="settings_mask" id="settings_mask"></div>
+    <div class="settings_block" id="settings_block">
+        <label id="setting_title">翻译设置</label>
+        <div id="translation_setting_block1">
+            <label id="server_label">服务器：</label>
+            <input type="text" class="server_url" id="server_url">
+        </div>
+        <div id="translation_setting_block2">
+            <label id="api_key_label">API KEY：</label>
+            <input type="text" class="api_key" id="api_key" placeholder="api_key">
+        </div>
+        <input type="button" class="url_setting_hide" value="关闭" onclick="close_setting_func()">
+        <input type="button" class="url_setting_reset" id="url_setting_reset" value="设置" onclick="reset_setting_func()">
+    </div>
 
     <div class="header_nav">
         <div class="nav_container">
