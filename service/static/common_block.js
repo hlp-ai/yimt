@@ -1,43 +1,4 @@
 
-function set_footer() {
-    document.getElementById("fanyi__footer").innerHTML = `
-        <div class="bottom__nav" style="display: block;">
-            <a target="_blank" class="nav2" href="/">服务条款</a><span class="c_fnl">|</span><a target="_blank" class="nav2" href="/">关于YIMT</a><span class="c_fnl">|</span><a target="_blank" class="nav2" href="/">联系我们</a>
-            <p>Copyright 2021-2024 by Liu Xiaofeng（刘小峰）</p>
-        </div>
-    `
-}
-
-function set_products() {
-    document.getElementById("product2_area").innerHTML = `
-        <div class="product2_area">
-                <div class="product21_area">
-                    <a href="/usage" target="_blank">
-                        <div class="product21_image">
-
-                        </div>
-                        <div class="product2_head">
-                            翻译插件
-                        </div>
-                        <div class="product2_text">
-                            简单好用的插件，支持Edge、Chrome等各类浏览器使用。
-                        </div>
-                    </a>
-                </div>
-                <div class="product22_area">
-                    <div class="product22_image">
-
-                    </div>
-                    <div class="product2_head">
-                        翻译APP
-                    </div>
-                    <div class="product2_text">
-                        高效便携的手机翻译APP，支持各类安卓手机，功能强大。
-                    </div>
-                </div>
-        </div>
-    `
-}
 
 function set_setting(){
     document.getElementById("url_setting_block").innerHTML = `
