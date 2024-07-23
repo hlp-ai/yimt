@@ -33,20 +33,7 @@ def build_translator(opt, device_id=0, report_score=True, logger=None, out_file=
 
     scorer = onmt.translate.GNMTGlobalScorer.from_opt(opt)
 
-    if model_opt.model_task == ModelTask.LANGUAGE_MODEL:
-        translator = GeneratorLM.from_opt(
-            model,
-            vocabs,
-            opt,
-            model_opt,
-            global_scorer=scorer,
-            out_file=out_file,
-            report_align=opt.report_align,
-            report_score=report_score,
-            logger=logger,
-        )
-    else:
-        translator = Translator.from_opt(
+    translator = Translator.from_opt(
             model,
             vocabs,
             opt,

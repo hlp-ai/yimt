@@ -70,18 +70,6 @@ def numericalize(vocabs, example):
             numeric["tgt"]["tgt_ids"] = vocabs["tgt"](
                 [decoder_start_token] + tgt_text + [DefaultTokens.EOS]
             )
-
-    elif vocabs["data_task"] == ModelTask.LANGUAGE_MODEL:
-        src_text = example["src"]["src"].split(" ")
-        if decoder_start_token != "":
-            src_text = [decoder_start_token] + src_text
-        numeric["src"]["src_ids"] = vocabs["src"](src_text)
-        if example["tgt"] is not None:
-            numeric["tgt"]["tgt_ids"] = []
-            tgt_text = example["tgt"]["tgt"].split(" ")
-            numeric["tgt"]["tgt_ids"] = vocabs["tgt"](tgt_text + [DefaultTokens.EOS])
-            if decoder_start_token == "":
-                numeric["tgt"]["tgt_ids"] = numeric["tgt"]["tgt_ids"][1:]
     else:
         raise ValueError(f"Something went wrong with task {vocabs['data_task']}")
 
