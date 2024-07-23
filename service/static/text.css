@@ -8,12 +8,25 @@ body {
     color: #460a0a;
     background-color: #fff;
     min-width: 1060px;
-
     text-align: center;
-
 }
 
-.fanyi__nav__logo {
+.header_nav {
+    position: relative;
+    height: 72px;
+    box-shadow: 0 0 3px 0 rgba(0,0,0,.2);
+    min-width: 960px;
+    margin-bottom: 38px
+}
+
+.nav_container {
+    position: relative;
+    margin: 0 auto;
+    min-width: 960px;
+    max-width: 1510px;
+}
+
+.nav_logo {
     display: block;
     position:absolute;
     left: 28px;
@@ -22,29 +35,21 @@ body {
     background: url(../static/img/nav.jpg) 50% 50% no-repeat
 }
 
-.fanyi__nav__container {
-    position: relative;
-    margin: 0 auto;
-    min-width: 960px;
-    max-width: 1510px;
-}
-
-.fanyi__nav {
-    position: relative;
-    height: 72px;
-    box-shadow: 0 0 3px 0 rgba(0,0,0,.2);
-    min-width: 960px;
-    margin-bottom: 38px
-}
-
-.nav_left{
+.nav_urls{
     position:absolute;
     height: 72px;
     vertical-align: middle;
     padding-top: 30px;
     right: 58px;
+    font-size: 14px;
 }
 
+.nav_urls a{
+    text-decoration:none;
+    color: #999;
+    margin-left: 22px;
+    cursor: pointer;
+}
 
 .url_setting_block{
     display: block;
@@ -543,15 +548,6 @@ body {
     white-space:pre;
     margin-left: 11px;
     margin-right: 11px;
-}
-
-.nav{
-    font-size: 14px;
-    text-decoration:none;
-    color: #999;
-    white-space:pre;
-    margin-left: 22px;
-    cursor: pointer;
 }
 
 .input__original_delete{
