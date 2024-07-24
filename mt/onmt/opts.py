@@ -1,7 +1,6 @@
 """ Implementation of all available options """
 
 from onmt.transforms import AVAILABLE_TRANSFORMS
-from onmt.constants import ModelTask
 from onmt.modules.position_ffn import ACTIVATION_FUNCTIONS
 from onmt.modules.position_ffn import ActivationFunction
 from onmt.constants import DefaultTokens
@@ -838,45 +837,6 @@ def _add_train_general_opts(parser):
         help="Keep X checkpoints (negative: keep all)",
     )
 
-    # LoRa
-    group.add(
-        "--lora_layers",
-        "-lora_layers",
-        default=[],
-        nargs="+",
-        type=str,
-        help="list of layers to be replaced by LoRa layers."
-        " ex: ['linear_values', 'linear_query'] "
-        " cf paper §4.2 https://arxiv.org/abs/2106.09685",
-    )
-    group.add(
-        "--lora_embedding",
-        "-lora_embedding",
-        action="store_true",
-        help="replace embeddings with LoRa Embeddings see §5.1",
-    )
-    group.add(
-        "--lora_rank",
-        "-lora_rank",
-        type=int,
-        default=2,
-        help="r=2 successfully tested with NLLB-200 3.3B",
-    )
-    group.add(
-        "--lora_alpha",
-        "-lora_alpha",
-        type=int,
-        default=1,
-        help="§4.1 https://arxiv.org/abs/2106.09685",
-    )
-    group.add(
-        "--lora_dropout",
-        "-lora_dropout",
-        type=float,
-        default=0.0,
-        help="rule of thumb: same value as in main model",
-    )
-
     _add_reproducibility_opts(parser)
 
     # Init options
@@ -1221,57 +1181,12 @@ def _add_train_general_opts(parser):
     _add_logging_opts(parser, is_train=True)
 
 
-def _add_quant_opts(parser):
-    group = parser.add_argument_group("Quant options")
-    group.add(
-        "--quant_layers",
-        "-quant_layers",
-        default=[],
-        nargs="+",
-        type=str,
-        help="list of layers to be compressed in 4/8bit.",
-    )
-
-    group.add(
-        "--quant_type",
-        "-quant_type",
-        default="",
-        choices=[
-            "",
-            "bnb_8bit",
-            "bnb_FP4",
-            "bnb_NF4",
-            "awq_gemm",
-            "awq_gemv",
-        ],
-        type=str,
-        help="Type of compression.",
-    )
-    group.add(
-        "--w_bit",
-        "-w_bit",
-        type=int,
-        default=4,
-        choices=[4],
-        help="W_bit quantization.",
-    )
-    group.add(
-        "--group_size",
-        "-group_size",
-        default=128,
-        choices=[128],
-        type=int,
-        help="group size quantization.",
-    )
-
-
 def train_opts(parser):
     """All options used in train."""
     data_prepare_opts(parser)
     distributed_opts(parser)
     model_opts(parser)
     _add_train_general_opts(parser)
-    _add_quant_opts(parser)
 
 
 def _add_decoding_opts(parser):
@@ -1545,5 +1460,3 @@ def translate_opts(parser):
 
     # Adding options related to Transforms
     _add_transform_opts(parser)
-
-    _add_quant_opts(parser)

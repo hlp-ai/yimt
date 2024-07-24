@@ -1,7 +1,7 @@
 """Module that contain iterator used for dynamic data."""
 import torch
 from itertools import cycle
-from onmt.constants import CorpusTask, ModelTask
+from onmt.constants import CorpusTask
 from onmt.inputters.text_corpus import get_corpora, build_corpora_iters
 from onmt.inputters.text_utils import (
     text_sort_key,

@@ -15,7 +15,6 @@ from onmt.translate.beam_search import BeamSearch
 from onmt.translate.greedy_search import GreedySearch
 from onmt.utils.misc import tile, set_random_seed, report_matrix
 from onmt.utils.alignment import extract_alignment, build_align_pharaoh
-from onmt.constants import ModelTask
 from onmt.transforms import TransformPipe
 
 

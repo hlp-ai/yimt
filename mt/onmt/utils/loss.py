@@ -4,10 +4,8 @@ This includes: LossComputeBase and the standard NMTLossCompute, and
 """
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import onmt
-from onmt.constants import ModelTask, DefaultTokens
-from onmt.model_builder import load_test_model
+from onmt.constants import  DefaultTokens
 
 try:
     import ctranslate2

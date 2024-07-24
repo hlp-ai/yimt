@@ -1,5 +1,5 @@
 import json
-from onmt.constants import CorpusTask, DefaultTokens, ModelTask
+from onmt.constants import CorpusTask, DefaultTokens
 from onmt.inputters.dynamic_iterator import build_dynamic_dataset_iter
 from onmt.utils.distributed import ErrorHandler, spawned_infer
 from onmt.utils.logging import init_logger

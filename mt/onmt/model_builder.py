@@ -15,12 +15,7 @@ from onmt.utils.misc import use_gpu
 from onmt.utils.logging import logger
 from onmt.utils.parse import ArgumentParser
 from onmt.models.model_saver import load_checkpoint
-from onmt.constants import DefaultTokens, ModelTask
-from onmt.modules.lora import (
-    replace_lora_linear,
-    replace_lora_embedding,
-    mark_only_lora_as_trainable,
-)
+from onmt.constants import DefaultTokens
 
 
 def build_embeddings(opt, vocabs, for_encoder=True):
@@ -82,27 +77,6 @@ def load_test_model(opt, device_id=0, model_path=None):
     checkpoint = load_checkpoint(model_path)
 
     model_opt = ArgumentParser.ckpt_model_opts(checkpoint["opt"])
-
-    if hasattr(model_opt, "quant_type") and model_opt.quant_type in [
-        "awq_gemm",
-        "awq_gemv",
-    ]:  # if the loaded model is a awq quantized one, inference config cannot overwrite this
-        if (
-            hasattr(opt, "quant_type")
-            and opt.quant_type != ""
-            and opt.quant_type != model_opt.quant_type
-        ):
-            raise ValueError(
-                "Model is a awq quantized model, cannot overwrite with another quant method"
-            )
-
-    elif hasattr(opt, "quant_type") and opt.quant_type not in [
-        "awq_gemm",
-        "awq_gemv",
-    ]:  # we still want to be able to load fp16/32 models with bnb 4bit to minimize ram footprint
-        model_opt.quant_layers = opt.quant_layers
-        model_opt.quant_type = opt.quant_type
-        model_opt.lora_layers = []
 
     if opt.world_size > 1 and opt.parallel_mode == "tensor_parallel":
         model_opt.world_size = opt.world_size
@@ -282,74 +256,6 @@ def build_base_model(model_opt, vocabs):
 
     # Build Model
     model = build_task_specific_model(model_opt, vocabs)
-
-    nonlora_to_quant = [
-        layer
-        for layer in getattr(model_opt, "quant_layers", [])
-        if layer not in getattr(model_opt, "lora_layers", [])
-    ]
-
-    if hasattr(model_opt, "quant_layers") and len(nonlora_to_quant) > 0:
-        if model_opt.quant_type in ["bnb_8bit", "bnb_FP4", "bnb_NF4"]:
-            logger.info(
-                "%s compression of layer %s" % (model_opt.quant_type, nonlora_to_quant)
-            )
-            try:
-                from onmt.modules.bnb_linear import replace_bnb_linear
-            except ImportError:
-                raise ImportError("Install bitsandbytes to use 4/8bit compression")
-            model = replace_bnb_linear(
-                model, module_to_convert=nonlora_to_quant, q_type=model_opt.quant_type
-            )
-        elif model_opt.quant_type in ["awq_gemm", "awq_gemv"]:
-            logger.info(
-                "%s compression of layer %s" % (model_opt.quant_type, nonlora_to_quant)
-            )
-            try:
-                from onmt.modules.awq_linear import replace_awq_linear
-            except ImportError:
-                raise ImportError("Install AutoAWQ to use awq quantized model")
-            model = replace_awq_linear(
-                model,
-                module_to_convert=nonlora_to_quant,
-                w_bit=model_opt.w_bit,
-                group_size=model_opt.group_size,
-                q_type=model_opt.quant_type,
-            )
-        else:
-            logger.info("compression type %s not supported." % model_opt.quant_type)
-
-    mark_lora = False
-    if hasattr(model_opt, "lora_layers") and len(model_opt.lora_layers) > 0:
-        if model_opt.freeze_encoder or model_opt.freeze_decoder:
-            raise ValueError("Cannot use LoRa with Enc/Dec-oder freezing")
-        for layer in model_opt.lora_layers:
-            if hasattr(model_opt, "quant_layers") and layer in model_opt.quant_layers:
-                quant_type = model_opt.quant_type
-            else:
-                quant_type = None
-            logger.info("Adding LoRa layers for %s quant %s" % (layer, quant_type))
-            model = replace_lora_linear(
-                model,
-                r=model_opt.lora_rank,
-                lora_alpha=model_opt.lora_alpha,
-                lora_dropout=model_opt.lora_dropout,
-                layer=layer,
-                quant_type=quant_type,
-                use_ckpting=model_opt.use_ckpting,
-            )
-        mark_lora = True
-    if hasattr(model_opt, "lora_embedding") and model_opt.lora_embedding:
-        if model_opt.freeze_encoder or model_opt.freeze_decoder:
-            raise ValueError("Cannot use LoRa with Enc/Dec-oder freezing")
-        logger.info("Adding LoRa Embeddings")
-        model = replace_lora_embedding(
-            model, r=model_opt.lora_rank, lora_alpha=model_opt.lora_alpha
-        )
-        mark_lora = True
-
-    if mark_lora:
-        mark_only_lora_as_trainable(model, bias="lora_only")
 
     # Build Generator.
     generator = skip_init(

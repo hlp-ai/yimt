@@ -4,7 +4,6 @@ import re
 from collections import deque
 from onmt.utils.logging import logger
 from onmt.inputters.inputter import vocabs_to_dict
-from onmt.modules.lora import lora_state_dict
 
 
 def build_model_saver(model_opt, opt, model, vocabs, optim, device_id):
@@ -172,20 +171,11 @@ class ModelSaver(ModelSaverBase):
     """Simple model saver to filesystem"""
 
     def _save(self, step, model):
-        if (
-            hasattr(self.model_opt, "lora_layers")
-            and len(self.model_opt.lora_layers) > 0
-        ) or (
-            hasattr(self.model_opt, "lora_embedding") and self.model_opt.lora_embedding
-        ):
-            model_state_dict = lora_state_dict(model, bias="lora_only")
-            generator_state_dict = None
-        else:
-            model_state_dict = model.state_dict()
-            model_state_dict = {
-                k: v for k, v in model_state_dict.items() if "generator" not in k
-            }
-            generator_state_dict = model.generator.state_dict()
+        model_state_dict = model.state_dict()
+        model_state_dict = {
+            k: v for k, v in model_state_dict.items() if "generator" not in k
+        }
+        generator_state_dict = model.generator.state_dict()
 
         if torch.distributed.is_initialized():
             ws = torch.distributed.get_world_size()
@@ -268,15 +258,8 @@ class ModelSaver(ModelSaverBase):
             from safetensors.torch import save_file
         except ImportError:
             raise ImportError("run: pip install safetensors, to use safetensors")
-        if (
-            hasattr(self.model_opt, "lora_layers")
-            and len(self.model_opt.lora_layers) > 0
-        ) or (
-            hasattr(self.model_opt, "lora_embedding") and self.model_opt.lora_embedding
-        ):
-            model_state_dict = lora_state_dict(model, bias="lora_only")
-        else:
-            model_state_dict = model.state_dict()
+
+        model_state_dict = model.state_dict()
 
         if torch.distributed.is_initialized():
             ws = torch.distributed.get_world_size()
