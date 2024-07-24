@@ -258,7 +258,7 @@ body {
     z-index: 2
 }
 
-.fanyi__operations--machine {
+.start_translate {
     display: inline-block;
     vertical-align: middle;
     margin-left: 16px;
@@ -273,7 +273,7 @@ body {
     cursor:pointer;
 }
 
-.fanyi__operations--machine:hover {
+.start_translate:hover {
     background: #205472
 }
 
