@@ -56,13 +56,6 @@ def main():
     # Required arguments
     parser = ArgumentParser()
     parser.add_argument(
-        "-model_task",
-        help="Model task.",
-        default="seq2seq",
-        type=str,
-        choices=["lm", "seq2seq"],
-    )
-    parser.add_argument(
         "-config", help="Inference config file", required=True, type=str
     )
     parser.add_argument(
@@ -100,7 +93,6 @@ def main():
 
     set_random_seed(opt.seed, use_gpu(opt))
     opt.models = opt.models
-    opt.model_task = args.model_task
 
     # evaluate(
     #     opt,

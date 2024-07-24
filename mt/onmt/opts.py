@@ -459,16 +459,6 @@ def model_opts(parser):
         help="Update source and target existing vocabularies",
     )
 
-    # Model Task Options
-    group = parser.add_argument_group("Model- Task")
-    group.add(
-        "-model_task",
-        "--model_task",
-        default=ModelTask.SEQ2SEQ,
-        choices=[ModelTask.SEQ2SEQ, ModelTask.LANGUAGE_MODEL],
-        help="Type of task for the model either seq2seq or lm",
-    )
-
     # Encoder-Decoder Options
     group = parser.add_argument_group("Model- Encoder-Decoder")
     group.add(

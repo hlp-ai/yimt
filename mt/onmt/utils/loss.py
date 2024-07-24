@@ -59,7 +59,7 @@ class LossCompute(nn.Module):
         padding_idx = vocab[DefaultTokens.PAD]
         unk_idx = vocab[DefaultTokens.UNK]
 
-        tgt_shift_idx = 1 if opt.model_task == ModelTask.SEQ2SEQ else 0
+        tgt_shift_idx = 1 # if opt.model_task == ModelTask.SEQ2SEQ else 0
 
         criterion = nn.CrossEntropyLoss(
             ignore_index=padding_idx,

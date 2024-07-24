@@ -263,24 +263,24 @@ class InferenceEngineCT2(InferenceEngine):
                 if id != self.vocabs["src"].lookup_token(DefaultTokens.PAD)
             ]
             input_tokens.append(_input_tokens)
-        if opt.model_task == ModelTask.SEQ2SEQ:
-            translated_batch = self.translator.translate_batch(
-                input_tokens,
-                batch_type=("examples" if opt.batch_type == "sents" else "tokens"),
-                max_batch_size=opt.batch_size,
-                beam_size=opt.beam_size,
-                num_hypotheses=opt.n_best,
-                max_decoding_length=opt.max_length,
-                return_scores=True,
-                sampling_topk=opt.random_sampling_topk,
-                sampling_topp=opt.random_sampling_topp,
-                sampling_temperature=opt.random_sampling_temp,
-            )
-            preds = [
-                [self.transform.apply_reverse(tokens) for tokens in out.hypotheses]
-                for out in translated_batch
-            ]
-            scores = [out.scores for out in translated_batch]
+
+        translated_batch = self.translator.translate_batch(
+            input_tokens,
+            batch_type=("examples" if opt.batch_type == "sents" else "tokens"),
+            max_batch_size=opt.batch_size,
+            beam_size=opt.beam_size,
+            num_hypotheses=opt.n_best,
+            max_decoding_length=opt.max_length,
+            return_scores=True,
+            sampling_topk=opt.random_sampling_topk,
+            sampling_topp=opt.random_sampling_topp,
+            sampling_temperature=opt.random_sampling_temp,
+        )
+        preds = [
+            [self.transform.apply_reverse(tokens) for tokens in out.hypotheses]
+            for out in translated_batch
+        ]
+        scores = [out.scores for out in translated_batch]
 
         return scores, preds
 

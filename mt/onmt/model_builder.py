@@ -216,17 +216,14 @@ def build_task_specific_model(model_opt, vocabs):
             vocabs["src"] == vocabs["tgt"]
         ), "preprocess with -share_vocab if you use share_embeddings"
 
-    if model_opt.model_task == ModelTask.SEQ2SEQ:
-        encoder, src_emb = build_encoder_with_embeddings(model_opt, vocabs)
-        decoder, _ = build_decoder_with_embeddings(
-            model_opt,
-            vocabs,
-            share_embeddings=model_opt.share_embeddings,
-            src_emb=src_emb,
-        )
-        return NMTModel(encoder=encoder, decoder=decoder)
-    else:
-        raise ValueError(f"No model defined for {model_opt.model_task} task")
+    encoder, src_emb = build_encoder_with_embeddings(model_opt, vocabs)
+    decoder, _ = build_decoder_with_embeddings(
+        model_opt,
+        vocabs,
+        share_embeddings=model_opt.share_embeddings,
+        src_emb=src_emb,
+    )
+    return NMTModel(encoder=encoder, decoder=decoder)
 
 
 def use_embeddings_from_checkpoint(vocabs, model, checkpoint):

@@ -215,8 +215,6 @@ class Inference(object):
             report_score (bool) : See :func:`__init__()`.
             logger (logging.Logger or NoneType): See :func:`__init__()`.
         """
-        # TODO: maybe add dynamic part
-        cls.validate_task(model_opt.model_task)
 
         return cls(
             model,
@@ -698,13 +696,6 @@ class Inference(object):
 
 
 class Translator(Inference):
-    @classmethod
-    def validate_task(cls, task):
-        if task != ModelTask.SEQ2SEQ:
-            raise ValueError(
-                f"Translator does not support task {task}."
-                f" Tasks supported: {ModelTask.SEQ2SEQ}"
-            )
 
     def _align_forward(self, batch, predictions):
         """
