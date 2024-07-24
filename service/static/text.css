@@ -196,20 +196,6 @@ body {
     margin-bottom: 18px;
 }
 
-.fanyi__operations--left {
-    float: left;
-    font-size: 0;
-    letter-spacing: 0;
-    left: 0px;
-    position: relative;
-    z-index: 2
-}
-
-.target_select{
-    position: relative;
-    margin-left: 20px;
-}
-
 .source_select{
     display: inline-block;
     vertical-align: middle;
@@ -240,11 +226,7 @@ body {
     cursor:pointer;
 }
 
-.fanyi__operations--left .lang-select:hover .select-text {
-    color: #357aa1
-}
-
-.mid{
+.between_langs{
     display: inline-block;
     vertical-align: middle;
     margin-left: 10px;
