@@ -193,9 +193,8 @@
                             //alert(isImg);
                             var reader = new FileReader();
                             if(isImg >= 0)
-                            {
                                 reader.readAsDataURL(blob);
-                            }
+
                             reader.onload = function(evt)
                             {
                                 var base64_str = evt.target.result;
@@ -203,27 +202,6 @@
                                 document.getElementById("q").value = "";
                                 document.getElementById("paste_img").src = base64_str;
                                 document.getElementById("img_show").style.display='block';
-
-                                /*
-                                source_lang = document.getElementById('source').value;
-                                target_lang = document.getElementById('target').value;
-                                END_POINT = window.localStorage.getItem("server");
-                                API_KEY = window.localStorage.getItem("key");
-                                if(END_POINT=="")
-                                {
-                                    END_POINT = "http://127.0.0.1:5555";
-                                }
-                                var form = new FormData();
-		                        form.append("base64", base64_str);
-		                        form.append("source", source_lang);
-		                        form.append("target", target_lang);
-                                form.append("api_key", API_KEY);
-                                var url = END_POINT + "/translate_image";
-		                        xhr = new XMLHttpRequest();
-		                        xhr.open("post", url, true);
-		                        xhr.onload = uploadComplete;
-		                        xhr.send(form);
-                                */
                             }
                         });
                     </script>
