@@ -61,17 +61,14 @@ def numericalize(vocabs, example):
     decoder_start_token = vocabs["decoder_start_token"]
     numeric = example
     numeric["src"]["src_ids"] = []
-    if vocabs["data_task"] == ModelTask.SEQ2SEQ:
-        src_text = example["src"]["src"].split(" ")
-        numeric["src"]["src_ids"] = vocabs["src"](src_text)
-        if example["tgt"] is not None:
-            numeric["tgt"]["tgt_ids"] = []
-            tgt_text = example["tgt"]["tgt"].split(" ")
-            numeric["tgt"]["tgt_ids"] = vocabs["tgt"](
-                [decoder_start_token] + tgt_text + [DefaultTokens.EOS]
-            )
-    else:
-        raise ValueError(f"Something went wrong with task {vocabs['data_task']}")
+    src_text = example["src"]["src"].split(" ")
+    numeric["src"]["src_ids"] = vocabs["src"](src_text)
+    if example["tgt"] is not None:
+        numeric["tgt"]["tgt_ids"] = []
+        tgt_text = example["tgt"]["tgt"].split(" ")
+        numeric["tgt"]["tgt_ids"] = vocabs["tgt"](
+            [decoder_start_token] + tgt_text + [DefaultTokens.EOS]
+        )
 
     return numeric
 
