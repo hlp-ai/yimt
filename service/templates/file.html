@@ -124,6 +124,8 @@
 			document.getElementById("showProgress").innerHTML = '待翻译文件已上传';
             uploaded = true
             upload_file = res_json.filename;
+
+            request_ad();
 		}
 
 		function translateComplete(evt) {
