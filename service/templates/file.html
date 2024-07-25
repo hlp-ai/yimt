@@ -38,7 +38,7 @@
             document.getElementById("showProgress").innerHTML = "正在上传";
             document.getElementById("showProgress").style.display ="block";
             document.getElementById("progress_line").style.display ="block";
-            document.getElementById("download").style.display = "none";
+            // document.getElementById("download").style.display = "none";
 
 		    var form = new FormData();
 		    form.append("file", fileObj);
@@ -208,9 +208,9 @@
         <progress id="progress_line" class="progress_line" value="0" max="100"> </progress>
         <a id="showProgress" style="display:none;text-align:center; font-size: 19px;color: #357aa1;z-index: 6;">11</a>
 
-        <div style="padding-top:0pt;text-align:center;">
+        <!--<div style="padding-top:0pt;text-align:center;">
             <span id="download" class="download">下载链接link</span>
-        </div>
+        </div>-->
     </div>
 
     <div class="bottom_block">
