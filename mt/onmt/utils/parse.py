@@ -49,15 +49,12 @@ class DataOptsCheckerMixin(object):
             else:
                 opt.data_task = ModelTask.SEQ2SEQ
                 if path_tgt is None:
-                    logger.debug(
-                        "path_tgt is None, it should be set unless the task"
-                        " is language modeling"
-                    )
-                    opt.data_task = ModelTask.LANGUAGE_MODEL
-                    # tgt is src for LM task
-                    corpus["path_tgt"] = path_src
-                    corpora[cname] = corpus
-                    path_tgt = path_src
+                    raise ValueError("path_tgt is None, it should be set")
+                    # opt.data_task = ModelTask.LANGUAGE_MODEL
+                    # # tgt is src for LM task
+                    # corpus["path_tgt"] = path_src
+                    # corpora[cname] = corpus
+                    # path_tgt = path_src
                 if path_src is not None:
                     cls._validate_file(path_src, info=f"{cname}/path_src")
                 if path_txt is not None:
