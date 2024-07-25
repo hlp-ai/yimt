@@ -41,7 +41,8 @@ async function request_ad(){
 
      ad_url = document.getElementById("ad_url");
      ad_url.style.visibility='visible';
-     ad_url.href = url;
+     //ad_url.href = url;
+     ad_url.href = "/click_ad?ad_id=" + ad_id + "&platform=web" + "&url=" + url;
 
      const base64String = content;
      ad_img_div = document.getElementById("ad_area");

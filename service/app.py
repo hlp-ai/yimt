@@ -6,7 +6,7 @@ import uuid
 from functools import wraps
 from html import unescape
 
-from flask import (Flask, abort, jsonify, render_template, request, send_file, url_for, g)
+from flask import (Flask, abort, jsonify, render_template, request, send_file, redirect, url_for, g)
 from scipy.io.wavfile import write
 from werkzeug.utils import secure_filename
 
@@ -684,6 +684,20 @@ def create_app(args):
             'url': ad_url
         }
         return jsonify(resp)
+
+    @app.get("/click_ad")
+    # @access_check
+    def click_ad():
+        args = request.args
+        ad_id = args["ad_id"]
+        platform = args["platform"]
+        url = args["url"]
+
+        log_service.info("/click_ad: " + ad_id + ", " + url)
+
+        addb.log_ad(platform, ad_id, get_remote_address(), action="C")
+
+        return redirect(url)
 
     #####################################################################
     #
