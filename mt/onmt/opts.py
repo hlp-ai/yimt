@@ -1279,7 +1279,7 @@ def _add_decoding_opts(parser):
         "--max_length_ratio",
         "-max_length_ratio",
         type=float,
-        default=1.25,
+        default=0,
         help="Maximum prediction length ratio."
         "for European languages 1.25 is large enough"
         "for target Asian characters need to increase to 2-3"
