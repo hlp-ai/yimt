@@ -73,7 +73,7 @@ def build_vocab(opt, specials):
             tgt_vocab = _pad_vocab_to_multiple(tgt_vocab, opt.vocab_size_multiple)
         vocabs["tgt"] = tgt_vocab
 
-    vocabs["data_task"] = opt.data_task
+    # vocabs["data_task"] = opt.data_task
     vocabs["decoder_start_token"] = opt.decoder_start_token
 
     return vocabs
@@ -117,7 +117,7 @@ def vocabs_to_dict(vocabs):
     vocabs_dict["src"] = vocabs["src"].ids_to_tokens
     vocabs_dict["tgt"] = vocabs["tgt"].ids_to_tokens
 
-    vocabs_dict["data_task"] = vocabs["data_task"]
+    # vocabs_dict["data_task"] = vocabs["data_task"]
     if "decoder_start_token" in vocabs.keys():
         vocabs_dict["decoder_start_token"] = vocabs["decoder_start_token"]
     else:
@@ -131,7 +131,7 @@ def dict_to_vocabs(vocabs_dict):
     into a dict of pyonmttok vocabs objects.
     """
     vocabs = {}
-    vocabs["data_task"] = vocabs_dict["data_task"]
+    # vocabs["data_task"] = vocabs_dict["data_task"]
     if "decoder_start_token" in vocabs_dict.keys():
         vocabs["decoder_start_token"] = vocabs_dict["decoder_start_token"]
     else:
