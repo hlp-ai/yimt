@@ -38,7 +38,6 @@
             document.getElementById("showProgress").innerHTML = "正在上传";
             document.getElementById("showProgress").style.display ="block";
             document.getElementById("progress_line").style.display ="block";
-            // document.getElementById("download").style.display = "none";
 
 		    var form = new FormData();
 		    form.append("file", fileObj);
@@ -193,7 +192,7 @@
     
         <div class="fanyi__input_file">
             <div class="input__original_file">
-                <div style=" display: inline-block;padding-top:12pt;text-align:center; font-size: 14px;color: #818181;">点 击 上 传</div>
+                <div style="display:inline-block; padding-top:12pt; text-align:center; font-size:16px; color:#818181;">点 击 上 传</div>
                 <div class="input_area_file">
                     <div class="image_container">
                         <div class="image">
@@ -201,16 +200,12 @@
                         <input type="file" class="select_file" id="select_file" onchange="uploadFile()">
                     </div> 
                 </div>             
-                <div style=" padding-bottom:10px;text-align:center; font-size: 14px;color: #848484;">支持以下类型文档：txt、pdf、docx、pptx、html/html/xml 等</div>
+                <div style="padding-bottom:10px; text-align:center; font-size:14px; color:#848484;">支持以下类型文档：txt、pdf、docx、pptx、html/html/xml 等</div>
             </div>
        
         </div>
         <progress id="progress_line" class="progress_line" value="0" max="100"> </progress>
         <a id="showProgress" style="display:none;text-align:center; font-size: 19px;color: #357aa1;z-index: 6;">11</a>
-
-        <!--<div style="padding-top:0pt;text-align:center;">
-            <span id="download" class="download">下载链接link</span>
-        </div>-->
     </div>
 
     <div class="bottom_block">
