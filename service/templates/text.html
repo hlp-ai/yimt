@@ -170,13 +170,13 @@
                         }
                         function getc_num()
                         {
-                            document.getElementById("c1").innerHTML=document.getElementById("q").value.length;
+                            document.getElementById("count").innerHTML=document.getElementById("q").value.length;
                         }
                     </script>
 
                     <a id="inputDelete" class="input__original_delete"></a>
                     <div id="words_count" class="words_count" style="visibility: hidden;">
-                        <span id="c1"></span>/1000
+                        <span id="count"></span>/1000
                     </div>
                     <script>
                         function clear_func()
@@ -207,11 +207,12 @@
                         });
                     </script>
                 </div>
+                <!--
                 <div class="img_show" id="img_show">
                     <img class="paste_img" id="paste_img" src="">
                 </div>
                 <div class="fanyi__operations--image--font" >翻译图片</div>
-                <input type="file" id="select_image" class="fanyi__operations--image" onchange="uploadImage()">
+                <input type="file" id="select_image" class="fanyi__operations--image" onchange="uploadImage()">-->
                 <!--<input type="button" value="翻译文档" class="fanyi__operations--file" onclick="window.location.href='/file'">-->
             </div>
 

@@ -535,7 +535,6 @@ body {
 }
 
 .input__original_delete{
-   
     position: absolute;
     width: 18px;
     height: 18px;
@@ -552,10 +551,10 @@ body {
 
 .words_count{
     position: absolute;
-    width: 18px;
+    width: 54px;
     height: 18px;
-    bottom: 18px;
-    right: 38px;
+    bottom: 2px;
+    right: 18px;
     color: #999
 }
 
@@ -573,7 +572,7 @@ body {
     position: absolute;
     width: 18px;
     height: 18px;
-    bottom: 18px;
+    bottom: 6px;
     left: 18px;
     visibility: hidden;
     cursor:pointer;
