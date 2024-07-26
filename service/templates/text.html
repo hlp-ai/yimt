@@ -194,13 +194,21 @@
                 <div class="fanyi__input__bg">
                     <textarea id="translation" name="translation" rows="25" cols="50" class="input__target__area"></textarea>
                     <a id="target_copy" class="target_copy"></a>
+                    <div id="post_edit" class="post_edit"><input type="checkbox" id="check_edit" checked onchange="post_edit_click()" />允许编辑</div>
                 </div>
                 <script>
                     document.getElementById("target_copy").addEventListener("click", copy_func);
+
                     function copy_func()
                     { 
                         translation.select();
                         document.execCommand("Copy");
+                    }
+
+                    function post_edit_click()
+                    {
+                        let checked = document.getElementById("check_edit").checked;
+                        document.getElementById("translation").readOnly=!checked;
                     }
                     
                 </script>
