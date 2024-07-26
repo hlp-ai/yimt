@@ -24,16 +24,17 @@
             request_ad();
         }
 
-        var is_finished = true;
+        var is_translated = false;
         var uploaded = false;
         var upload_file = "";
         var xhr;
        
 		function uploadFile() {
-		    var fileObj = document.getElementById("select_file").files[0];
             var files = document.getElementById("select_file").files;
             if(files.length==0)
                 return;
+
+            var fileObj = files[0];
 
             document.getElementById("showProgress").innerHTML = "正在上传";
             document.getElementById("showProgress").style.display ="block";
@@ -41,12 +42,11 @@
 
 		    var form = new FormData();
 		    form.append("file", fileObj);
-
             form.append("api_key", API_KEY);
 
 		    var url = END_POINT + "/upload_file";
 		    xhr = new XMLHttpRequest();
-            is_finished = false;
+            is_translated = false;
 
             xhr.upload.addEventListener("progress", function(evt){
                 if (evt.lengthComputable) {
@@ -65,14 +65,28 @@
               }, false);
 
 		    xhr.open("post", url, true);
-		    xhr.onload = uploadComplete;
+		    xhr.onload = uploadComplete;  // 上传结束处理事件
 		    xhr.send(form);
+		}
+
+		function uploadComplete(evt) {
+			res_json = JSON.parse(evt.target.responseText);
+			if(res_json.error){
+			    alert(res_json.error);
+			    return;
+			}
+
+			document.getElementById("showProgress").innerHTML = '待翻译文件已上传';
+            uploaded = true;
+            upload_file = res_json.filename;
+
+            request_ad();  // 刷新广告
 		}
 
 		async function translateFile() {
 		    if(uploaded==false || upload_file=="") {
-		      alert("文件未上传，请先上传文件");
-		      return;
+		        alert("文件未上传，请先上传文件");
+		        return;
 		    }
 
             source_lang = document.getElementById('source').value;
@@ -86,55 +100,39 @@
 
 		    var url = END_POINT + "/translate_file2";
 		    xhr = new XMLHttpRequest();
-            is_finished = false;
 
 		    xhr.open("post", url, true);
-		    xhr.onload = translateComplete;
+		    xhr.onload = translateComplete;  // 服务器翻译结束处理事件
 		    xhr.send(form);
 
-            setInterval("translate_progress()", 2000);  //每2秒发送查看进度
+            setInterval("translate_progress()", 2000);  // 每2秒发送查看进度
 		}
 
         function translate_progress(){
-            if(is_finished == false)
+            if(is_translated == false)
             {
                 var url = END_POINT + "/translate_file_progress";
                 var form = new FormData();
 		        form.append("file", upload_file);
                 xhr = new XMLHttpRequest();
                 xhr.onload = function(){
-                    if(is_finished == false)
-                    {
+                    if(is_translated == false)
                         document.getElementById("showProgress").innerHTML = '正在翻译：'+ this.responseText;
-                    }
                 }
                 xhr.open("POST",url);
                 xhr.send(form);
             }
         }
 
-		function uploadComplete(evt) {
-			res_json = JSON.parse(evt.target.responseText);
-			if(res_json.error){
-			    alert(res_json.error);
-			    return;
-			}
-
-			document.getElementById("showProgress").innerHTML = '待翻译文件已上传';
-            uploaded = true
-            upload_file = res_json.filename;
-
-            request_ad();
-		}
-
 		function translateComplete(evt) {
+		    is_finished = true;
+
 			res_json = JSON.parse(evt.target.responseText);
 			if(res_json.error){
 			    alert(res_json.error);
 			    return;
 			}
 
-            is_finished = true
             var file_path = res_json.filepath;
             var translated_file_path = res_json.translated_file_path;
             var file_type = res_json.file_type;
@@ -146,7 +144,7 @@
             queryParams.append("file_type", file_type);
 
             var url = "{{ url_for('reference') }}?" + queryParams.toString();
-            window.location.href = url;
+            window.location.href = url;  // 跳转到翻译对照页面
 		}
 
 	</script>
