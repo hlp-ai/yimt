@@ -186,34 +186,8 @@
                             getc_num();
                         }
                         document.getElementById("inputDelete").addEventListener("click", clear_func);
-
-                        document.getElementById("q").addEventListener('paste',function(e){
-                            var data = e.clipboardData||window.clipboardData;
-                            var blob = data.items[0].getAsFile();
-                            var isImg = (blob&&1)||-1;
-                            //alert(isImg);
-                            var reader = new FileReader();
-                            if(isImg >= 0)
-                                reader.readAsDataURL(blob);
-
-                            reader.onload = function(evt)
-                            {
-                                var base64_str = evt.target.result;
-                                console.log(base64_str);
-                                document.getElementById("q").value = "";
-                                document.getElementById("paste_img").src = base64_str;
-                                document.getElementById("img_show").style.display='block';
-                            }
-                        });
                     </script>
                 </div>
-                <!--
-                <div class="img_show" id="img_show">
-                    <img class="paste_img" id="paste_img" src="">
-                </div>
-                <div class="fanyi__operations--image--font" >翻译图片</div>
-                <input type="file" id="select_image" class="fanyi__operations--image" onchange="uploadImage()">-->
-                <!--<input type="button" value="翻译文档" class="fanyi__operations--file" onclick="window.location.href='/file'">-->
             </div>
 
             <div class="input__target">
