@@ -121,7 +121,7 @@ def translate_ml_auto(in_fn, source_lang="auto", target_lang="zh", translation_f
     if callbacker:
         callbacker.set_tag(in_fn)
 
-    translations = translator.translate_list(to_translated_txt, callbacker=callbacker)
+    translations = translator.translate_list(to_translated_txt, sl=source_lang, tl=target_lang, callbacker=callbacker)
 
     for e, t in zip(to_translated_elements, translations):
         e.replaceWith(t)
