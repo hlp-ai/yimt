@@ -65,3 +65,27 @@ def detect_lang(text):
     if all([c.isascii() for c in text]):
         return "en"
     return langid.classify(text)[0]
+
+
+def is_valid_url(url):
+    from urllib.parse import urlparse
+
+    try:
+        result = urlparse(url)
+        return True
+    except ValueError:
+        return False
+
+
+def get_page(url):
+    import requests
+
+    r = requests.get(url)
+
+    if r.status_code != 200:
+        return None
+
+    if not r.headers["Content-Type"].startswith("text"):
+        return None
+
+    return r.text

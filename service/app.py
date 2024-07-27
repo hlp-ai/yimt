@@ -21,7 +21,7 @@ from service.mt import translator_factory
 from service.ocr import TextRecognizers
 from service.split_text import may_combine_paragraph
 from service.tts import AudioGenerators
-from service.utils import get_logger, path_traversal_check, SuspiciousFileOperation, detect_lang
+from service.utils import get_logger, path_traversal_check, SuspiciousFileOperation, detect_lang, is_valid_url, get_page
 
 log_service = get_logger(log_filename="service.log", name="service")
 
@@ -326,6 +326,24 @@ def create_app(args):
             'translatedText': translation
         }
         return jsonify(resp)
+
+    def _translate_page(page, source_lang, target_lang):
+        try:
+            filepath = os.path.join(get_upload_dir(), str(random.randint(0, 10000))+".html")
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write(page)
+
+            translated_file_path = translate_doc(filepath, source_lang, target_lang, callbacker=translate_progress)
+            translated_filename = os.path.basename(translated_file_path)
+
+            translatedFileUrl = url_for('download_file', filename=translated_filename, _external=True)
+
+            redirect("/reference?filepath={}&translated_file_path={}&translatedFileUrl={}&file_type={}".format(filepath,
+                                                                                                               translated_file_path,
+                                                                                                               translatedFileUrl,
+                                                                                                               "html"))
+        except Exception as e:
+            abort(500, description=e)
 
     @app.post("/ocr")
     # @access_check
