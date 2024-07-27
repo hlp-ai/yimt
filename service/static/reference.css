@@ -6,23 +6,39 @@
     margin-bottom: 12px
 }
 
-.original_title,.target_title{
+.original_title{
+    position: absolute;
+    left: 44%;
+
     font-size: 14px;
     text-decoration:none;
-    
+
     font-weight: bold;
     color: #357aa1;
     vertical-align: bottom;
 }
 
-.original_title{
-    position: absolute;
-    left: 0px;
-}
-
 .target_title{
     position: absolute;
-    left: 51%;
+    left: 52%;
+
+    font-size: 14px;
+    text-decoration:none;
+
+    font-weight: bold;
+    color: #357aa1;
+    vertical-align: bottom;
+}
+
+.download_link{
+    font-size: 14px;
+    text-decoration:none;
+    position: absolute;
+    left: 58%;
+    font-weight: bold;
+    color: #357aa1;
+    vertical-align: bottom;
+
 }
 
 .file_view_original,.file_view_target{
@@ -57,17 +73,6 @@
 .download_area{
     height: 35px;
     text-align: center;
-}
-
-.download_link{
-    font-size: 14px;
-    text-decoration:none;
-    position: absolute;
-    right: 0px;
-    font-weight: bold;
-    color: #357aa1;
-    vertical-align: bottom;
-
 }
 
 .ref_fanyi__operations {
