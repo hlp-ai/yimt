@@ -127,8 +127,6 @@ def handle_headers_and_footers(doc, new_doc):
             new_footer._element.append(new_element)
 
 
-
-
 def scan_doc(doc, new_doc):
     if isinstance(doc, Document):
         parent_elm = doc.element.body
@@ -175,14 +173,8 @@ def scan_doc(doc, new_doc):
     return runs
 
 
-def translate_docx_auto(in_fn, source_lang="auto", target_lang="zh", translation_file=None, callbacker=None):
-    paths = os.path.splitext(in_fn)
-    doc_type = paths[1]
-    docx_fn = in_fn
-    if doc_type == ".doc":
-        docx_fn = paths[0] + ".docx"
-        print("Converting doc type into docx type...")
-        doc_to_docx(in_fn, docx_fn)
+def translate_docx_auto(docx_fn, source_lang="auto", target_lang="zh", translation_file=None, callbacker=None):
+    paths = os.path.splitext(docx_fn)
 
     if translation_file is None:
         translated_fn = paths[0] + "-translated.docx"
@@ -200,9 +192,6 @@ def translate_docx_auto(in_fn, source_lang="auto", target_lang="zh", translation
 
     if translator is None:
         raise ValueError("给定语言不支持: {}".format(source_lang+"-"+target_lang))
-
-    if callbacker:
-        callbacker.set_tag(docx_fn)
         
     runs = [r for r in runs if len(r.text.strip()) > 0]
     txt_list = [r.text for r in runs]

@@ -118,9 +118,6 @@ def translate_ml_auto(in_fn, source_lang="auto", target_lang="zh", translation_f
     if translator is None:
         raise ValueError("给定语言不支持: {}".format(source_lang+"-"+target_lang))
 
-    if callbacker:
-        callbacker.set_tag(in_fn)
-
     translations = translator.translate_list(to_translated_txt, sl=source_lang, tl=target_lang, callbacker=callbacker)
 
     for e, t in zip(to_translated_elements, translations):

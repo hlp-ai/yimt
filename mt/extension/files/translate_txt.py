@@ -23,9 +23,6 @@ def translate_txt_auto(txt_fn, source_lang="auto", target_lang="zh", translation
     if translator is None:
         raise ValueError("给定语言不支持: {}".format(source_lang+"-"+target_lang))
 
-    if callbacker:
-        callbacker.set_tag(txt_fn)
-
     translation = translator.translate_paragraph(txt, source_lang, target_lang, callbacker)
 
     out_f = open(translated_txt_fn, "w", encoding="utf-8")

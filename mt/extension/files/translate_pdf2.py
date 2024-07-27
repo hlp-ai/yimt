@@ -325,9 +325,6 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
             if translator is None:
                 raise ValueError("给定语言不支持: {}".format(source_lang + "-" + target_lang))
 
-            if callbacker:
-                callbacker.set_tag(pdf_fn)
-
         translations = translator.translate_list(to_translate_texts, source_lang, target_lang)
         for i in range(len(to_translate_blocks)):
             x, y, w, h, t = to_translate_blocks[i]

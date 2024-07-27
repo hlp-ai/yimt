@@ -40,9 +40,6 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
             if translator is None:
                 raise ValueError("给定语言不支持: {}".format(source_lang + "-" + target_lang))
 
-            if callbacker:
-                callbacker.set_tag(pdf_fn)
-
         shape = outpage.new_shape()
 
         for c in candidates:

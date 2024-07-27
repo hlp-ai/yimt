@@ -11,14 +11,8 @@ from extension.files.translate_txt import translate_txt_auto
 
 class Progress:
 
-    def __init__(self):
-        self._tag = None
-
     def report(self, total, done, fid=None):
         pass
-
-    def set_tag(self, tag):
-        self._tag = tag
 
 
 class TranslationProgress(Progress):
@@ -26,7 +20,7 @@ class TranslationProgress(Progress):
         self.info_dict = {}
 
     def report(self, total, done, fid=None):
-        if fid is None and self._tag is None:
+        if fid is None:
             return
         progress_info = "{}/{}".format(done, total)
         print(fid, progress_info)
@@ -44,36 +38,8 @@ class TranslationProgress(Progress):
         return ""
 
 
-class SpecificProgress(TranslationProgress):
-
-    def __init__(self, progress):
-        self._progress = progress
-
-    def report(self, total, done, fid=None):
-        if fid is None:
-            if self._tag is None:
-                return
-            else:
-                fid = self._tag
-
-        progress_info = "{}/{}".format(done, total)
-        print(fid, progress_info)
-
-        self._progress.info_dict[fid] = progress_info
-
-    def set_info(self, info, fid):
-        self._progress.info_dict[fid] = info
-
-    def get_info(self, fid=None):
-        for f, p in self._progress.info_dict.items():
-            if f == fid or f.endswith(fid):
-                return p
-
-        return ""
-
-
 def support(file_type):
-    return file_type in [".txt", ".pdf", ".html", ".htm", ".xhtml", ".xml", ".sgml", ".docx", ".doc", ".pptx", ".xlsx"]
+    return file_type in [".txt", ".pdf", ".html", ".htm", ".xhtml", ".xml", ".sgml", ".docx", ".pptx", ".xlsx"]
 
 
 def get_type(fn):
@@ -82,9 +48,6 @@ def get_type(fn):
 
 def translate_doc(src_fn, source_lang="auto", target_lang="zh", translation_file=None, callbacker=None):
     file_type = get_type(src_fn)
-
-    if file_type != ".pdf":
-        callbacker = SpecificProgress(callbacker)
 
     if file_type == ".txt":
         return translate_txt_auto(src_fn, source_lang, target_lang, translation_file, callbacker=callbacker)

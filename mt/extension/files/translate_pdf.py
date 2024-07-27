@@ -231,15 +231,18 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
 
         page_h = float(input_df.pages[0].mediabox.height)
 
-        if translator is None:
-            translator = translator_factory.get_translator(source_lang, target_lang)
-
         blocks = pages[i]
         for c in blocks:
             text = c["text"]
             text = text.replace("-\n", "").replace("\n", " ").strip()
             if len(text) == 0:
                 continue
+
+            if translator is None:
+                if source_lang == "auto":
+                    source_lang = detect_lang(text)  # TODO: 语言检测更安全些
+
+                translator = translator_factory.get_translator(source_lang, target_lang)
 
             toks = text.split()
             avg_len = sum([len(t) for t in toks]) / len(toks)
