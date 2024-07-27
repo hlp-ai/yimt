@@ -91,6 +91,13 @@
 
             source_lang = document.getElementById('source').value;
             target_lang = document.getElementById('target').value;
+
+            if(isUrl(qstr)) {
+                window.location.href = "/translate_page?q=" + qstr + "&source=" + source_lang + "&target=" + target_lang;
+                return;
+            }
+
+
             const res = await fetch(END_POINT + "/translate", {
                 method: "POST",
                 body: JSON.stringify({q: qstr, source: source_lang, target: target_lang, api_key:API_KEY, format: "text"}),

@@ -88,4 +88,4 @@ def get_page(url):
     if not r.headers["Content-Type"].startswith("text"):
         return None
 
-    return r.text
+    return r.content.decode(r.encoding)

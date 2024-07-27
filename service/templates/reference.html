@@ -31,6 +31,11 @@
             translated_file_url = queryParams.get("translated_file_url");
             file_type = queryParams.get("file_type");
 
+            console.log(file_path);
+            console.log(translated_file_path);
+            console.log(translated_file_url);
+            console.log(file_type);
+
             var randomNumber = Math.floor(Math.random() * 1000000);
             document.getElementById("document-container").setAttribute("src", END_POINT + "/request_source" + '?timestamp=' + randomNumber + '&file_path=' + encodeURIComponent(file_path)+ '&file_type=' + file_type);
             document.getElementById("document-container2").setAttribute("src", END_POINT+"/request_target"+ '?timestamp=' + randomNumber + '&translated_file_path=' + encodeURIComponent(translated_file_path)+ '&file_type=' + file_type);
@@ -63,7 +68,7 @@
         <div class="nav_container">
             <a href="/" class="nav_logo"></a>
             <div class="nav_urls">
-                <a target="_blank" href="/file">文档翻译</a><a target="_blank" href="/api_usage">翻译API</a><a target="_blank" href="/">登录</a><a target="_blank" id="settings">设置</a>
+                <a target="_blank" href="/">文本翻译</a><a target="_blank" href="/file">文档翻译</a><a target="_blank" href="/api_usage">翻译API</a><a target="_blank" href="/">登录</a><a target="_blank" id="settings">设置</a>
             </div>
         </div>
 

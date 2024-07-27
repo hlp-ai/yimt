@@ -5,6 +5,7 @@ import tempfile
 import uuid
 from functools import wraps
 from html import unescape
+from urllib.parse import quote
 
 from flask import (Flask, abort, jsonify, render_template, request, send_file, redirect, url_for, g)
 from scipy.io.wavfile import write
@@ -328,8 +329,15 @@ def create_app(args):
         }
         return jsonify(resp)
 
-    def _translate_page(page, source_lang, target_lang):
+    @app.route("/translate_page")
+    def translate_page():
+        q = request.values.get("q")
+        source_lang = request.values.get("source")
+        target_lang = request.values.get("target")
+        text_format = request.values.get("format")
+        api_key = request.values.get("api_key")
         try:
+            page = get_page(q)
             filepath = os.path.join(get_upload_dir(), str(random.randint(0, 10000))+".html")
             with open(filepath, "w", encoding="utf-8") as f:
                 f.write(page)
@@ -339,9 +347,9 @@ def create_app(args):
 
             translatedFileUrl = url_for('download_file', filename=translated_filename, _external=True)
 
-            redirect("/reference?filepath={}&translated_file_path={}&translatedFileUrl={}&file_type={}".format(filepath,
-                                                                                                               translated_file_path,
-                                                                                                               translatedFileUrl,
+            return redirect("/reference?file_path={}&translated_file_path={}&translated_file_url={}&file_type={}".format(quote(filepath),
+                                                                                                               quote(translated_file_path),
+                                                                                                               quote(translatedFileUrl),
                                                                                                                "html"))
         except Exception as e:
             abort(500, description=e)
