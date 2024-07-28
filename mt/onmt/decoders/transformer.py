@@ -11,7 +11,6 @@ from onmt.modules.position_ffn import PositionwiseFeedForward
 from onmt.modules.position_ffn import ActivationFunction
 from onmt.modules.moe import MoE
 from onmt.utils.misc import sequence_mask
-from onmt.modules.rmsnorm import RMSNorm
 
 
 class TransformerDecoderLayerBase(nn.Module):
@@ -131,12 +130,8 @@ class TransformerDecoderLayerBase(nn.Module):
                 use_ckpting=use_ckpting,
                 parallel_gpu=parallel_gpu,
             )
-        if layer_norm == "standard":
-            self.layer_norm_1 = nn.LayerNorm(d_model, eps=norm_eps)
-        elif layer_norm == "rms":
-            self.layer_norm_1 = RMSNorm(d_model, eps=norm_eps)
-        else:
-            raise ValueError(f"{layer_norm} layer norm type is not supported")
+
+        self.layer_norm_1 = nn.LayerNorm(d_model, eps=norm_eps)
 
         self.dropout = nn.Dropout(dropout)
         self.dropout_p = dropout
@@ -305,12 +300,7 @@ class TransformerDecoderLayer(TransformerDecoderLayerBase):
             use_ckpting=use_ckpting,
             parallel_gpu=parallel_gpu,
         )
-        if layer_norm == "standard":
-            self.layer_norm_2 = nn.LayerNorm(d_model, eps=norm_eps)
-        elif layer_norm == "rms":
-            self.layer_norm_2 = RMSNorm(d_model, eps=norm_eps)
-        else:
-            raise ValueError(f"{layer_norm} layer norm type is not supported")
+        self.layer_norm_2 = nn.LayerNorm(d_model, eps=norm_eps)
 
     def update_dropout(self, dropout, attention_dropout):
         super(TransformerDecoderLayer, self).update_dropout(dropout, attention_dropout)
@@ -391,12 +381,7 @@ class TransformerDecoderBase(DecoderBase):
         # previously, there was a GlobalAttention module here for copy
         # attention. But it was never actually used -- the "copy" attention
         # just reuses the context attention.
-        if layer_norm == "standard":
-            self.layer_norm = nn.LayerNorm(d_model, eps=norm_eps)
-        elif layer_norm == "rms":
-            self.layer_norm = RMSNorm(d_model, eps=norm_eps)
-        else:
-            raise ValueError(f"{layer_norm} layer norm type is not supported")
+        self.layer_norm = nn.LayerNorm(d_model, eps=norm_eps)
 
         self.alignment_layer = alignment_layer
 

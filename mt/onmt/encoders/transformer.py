@@ -10,11 +10,6 @@ from onmt.modules.position_ffn import PositionwiseFeedForward
 from onmt.modules.position_ffn import ActivationFunction
 from onmt.utils.misc import sequence_mask
 
-try:
-    from apex.normalization import FusedRMSNorm as RMSNorm
-except ImportError:
-    from onmt.modules.rmsnorm import RMSNorm
-
 
 class TransformerEncoderLayer(nn.Module):
     """
@@ -92,12 +87,7 @@ class TransformerEncoderLayer(nn.Module):
             use_ckpting=use_ckpting,
             parallel_gpu=parallel_gpu,
         )
-        if layer_norm == "standard":
-            self.layer_norm = nn.LayerNorm(d_model, eps=norm_eps)
-        elif layer_norm == "rms":
-            self.layer_norm = RMSNorm(d_model, eps=norm_eps)
-        else:
-            raise ValueError(f"{layer_norm} layer norm type is not supported")
+        self.layer_norm = nn.LayerNorm(d_model, eps=norm_eps)
         self.dropout_p = dropout
         self.dropout = nn.Dropout(dropout)
 
@@ -202,12 +192,7 @@ class TransformerEncoder(EncoderBase):
                 for i in range(num_layers)
             ]
         )
-        if layer_norm == "standard":
-            self.layer_norm = nn.LayerNorm(d_model, eps=norm_eps)
-        elif layer_norm == "rms":
-            self.layer_norm = RMSNorm(d_model, eps=norm_eps)
-        else:
-            raise ValueError(f"{layer_norm} layer norm type is not supported")
+        self.layer_norm = nn.LayerNorm(d_model, eps=norm_eps)
 
     @classmethod
     def from_opt(cls, opt, embeddings):

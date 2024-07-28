@@ -545,10 +545,10 @@ def model_opts(parser):
         "-layer_norm",
         type=str,
         default="standard",
-        choices=["standard", "rms"],
+        choices=["standard"],
         help="The type of layer"
         " normalization in the transformer architecture. Choices are"
-        " standard or rms. Default to standard",
+        " standard . Default to standard",
     )
     group.add(
         "--norm_eps", "-norm_eps", type=float, default=1e-6, help="Layer norm epsilon"

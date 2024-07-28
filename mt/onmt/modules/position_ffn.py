@@ -3,7 +3,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.checkpoint import checkpoint
-from onmt.modules.rmsnorm import RMSNorm
 from torch.nn.utils import skip_init
 from torch.distributed import all_reduce
 
@@ -64,10 +63,7 @@ class PositionwiseFeedForward(nn.Module):
             out_features=d_model,
             bias=add_ffnbias,
         )
-        if layer_norm == "standard":
-            self.layer_norm = nn.LayerNorm(d_model, eps=norm_eps)
-        elif layer_norm == "rms":
-            self.layer_norm = RMSNorm(d_model, eps=norm_eps)
+        self.layer_norm = nn.LayerNorm(d_model, eps=norm_eps)
 
         self.dropout_p = dropout
         self.dropout_1 = nn.Dropout(dropout)
