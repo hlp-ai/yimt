@@ -39,7 +39,7 @@ class TranslationProgress(Progress):
 
 
 def support(file_type):
-    return file_type in [".txt", ".pdf", ".html", ".htm", ".xhtml", ".xml", ".sgml", ".docx", ".pptx", ".xlsx"]
+    return file_type in [".txt", ".pdf", ".html", ".htm", ".xhtml", ".xml", ".sgml", ".docx", ".pptx"]
 
 
 def get_type(fn):
@@ -53,7 +53,7 @@ def translate_doc(src_fn, source_lang="auto", target_lang="zh", translation_file
         return translate_txt_auto(src_fn, source_lang, target_lang, translation_file, callbacker=callbacker)
     elif file_type == ".pdf":
         return translate_pdf_auto(src_fn, source_lang, target_lang, translation_file, callbacker=callbacker)
-    elif file_type == ".docx" or file_type == ".doc":
+    elif file_type == ".docx":
         return translate_docx_auto(src_fn, source_lang, target_lang, translation_file, callbacker=callbacker)
     elif file_type in [".html", ".htm", ".xhtml", ".xml"]:
         return translate_ml_auto(src_fn, source_lang, target_lang, translation_file, callbacker=callbacker)
