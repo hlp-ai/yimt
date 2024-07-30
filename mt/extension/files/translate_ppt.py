@@ -19,13 +19,15 @@ def scan_doc(ppt, new_ppt):
                 text_frame = shape.text_frame
                 for k, (paragraph, new_paragraph) in enumerate(zip(text_frame.paragraphs, new_shape.text_frame.paragraphs)):
                     # print("\tParagraph{}".format(k + 1), paragraph.text)
-                    runs.append(new_paragraph)
+                    if len(new_paragraph.text.strip()) > 0:
+                        runs.append(new_paragraph)
             elif shape.has_table:  # 对表格
                 table = shape.table
                 new_table = new_shape.table
                 for row, new_row in zip(table.rows, new_table.rows):
                     for cell, new_cell in zip(row.cells, new_row.cells):
-                        runs.append(new_cell.text_frame)  # 翻译表格中文本
+                        if len(new_cell.text_frame.text.strip()) > 0:
+                            runs.append(new_cell.text_frame)  # 翻译表格中文本
     return runs
 
 
