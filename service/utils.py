@@ -67,16 +67,6 @@ def detect_lang(text):
     return langid.classify(text)[0]
 
 
-def is_valid_url(url):
-    from urllib.parse import urlparse
-
-    try:
-        result = urlparse(url)
-        return True
-    except ValueError:
-        return False
-
-
 def get_page(url):
     import requests
 

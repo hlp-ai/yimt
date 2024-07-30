@@ -23,7 +23,7 @@ from service.mt import translator_factory
 from service.ocr import TextRecognizers
 from service.split_text import may_combine_paragraph
 from service.tts import AudioGenerators
-from service.utils import get_logger, path_traversal_check, SuspiciousFileOperation, detect_lang, is_valid_url, get_page
+from service.utils import get_logger, path_traversal_check, SuspiciousFileOperation, detect_lang, get_page
 
 log_service = get_logger(log_filename="service.log", name="service")
 
