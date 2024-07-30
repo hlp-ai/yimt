@@ -30,16 +30,14 @@
         <script type="text/javascript" src="../static/plugin/xlsx/xlsx.core.min.js"></script>
         <script>
             var file_type = "";
-            var END_POINT;
+            var END_POINT = "http://127.0.0.1:5555";
             var file_path = decodeURIComponent("{{ file_path }}");
 
             window.onload = function()
             {
-                END_POINT = "http://127.0.0.1:5555";
                 var server = window.localStorage.getItem("server");
-                if(!!server){
+                if(!!server)
                     END_POINT = server;
-                }
 
                 show_file();
             }
@@ -121,7 +119,7 @@
             {
                 $("#preview-media").pptxToHtml({ 
                     pptxFileUrl: END_POINT+"/pptx"+'?file_path=' + encodeURIComponent(file_path),
-                    slidesScale: "50%", 
+                    slidesScale: "40%",
                     slideMode: false, 
                     keyBoardShortCut: false 
                 });
@@ -211,27 +209,27 @@
         </script>
 
         <style type="text/css">
-                table {
-                    border-collapse: collapse;
-                }
-                th, td {
-                    border: solid 1px #6D6D6D;
-                    padding: 5px 10px;
-                }
-                .mt-sm {margin-top: 8px;}
-                body {
-                    background: #f4f4f4;
-                    padding: 0;
-                    margin: 0;
-                }
-                .container {
-                    width: 1024px;
-                    margin: 0 auto;
-                    background: #fff;
-                    padding: 20px;
-                    min-height: 100vh;
-                }
-            </style>           
+            table {
+                border-collapse: collapse;
+            }
+            th, td {
+                border: solid 1px #6D6D6D;
+                padding: 5px 10px;
+            }
+            .mt-sm {margin-top: 8px;}
+            body {
+                background: #f4f4f4;
+                padding: 0;
+                margin: 0;
+            }
+            .container {
+                width: 1024px;
+                margin: 0 auto;
+                background: #fff;
+                padding: 20px;
+                min-height: 100vh;
+            }
+        </style>
         
     </body>
 </html>

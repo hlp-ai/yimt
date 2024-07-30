@@ -13,14 +13,13 @@
         
     <script>
         var file_type = "";
-        var END_POINT
-        var translated_file_path  
-        var file_type  
+        var END_POINT = "http://127.0.0.1:5555";
+        var translated_file_path = "";
+        var file_type = "";
         window.onload = function()
         {
             document.getElementById("settings").addEventListener("click", display_setting_func);
 
-            END_POINT = "http://127.0.0.1:5555";
             var server = window.localStorage.getItem("server");
             if(!!server)
                 END_POINT = server;
@@ -36,11 +35,9 @@
             console.log(translated_file_url);
             console.log(file_type);
 
-            var randomNumber = Math.floor(Math.random() * 1000000);
-            document.getElementById("document-container").setAttribute("src", END_POINT + "/request_source" + '?timestamp=' + randomNumber + '&file_path=' + encodeURIComponent(file_path)+ '&file_type=' + file_type);
-            document.getElementById("document-container2").setAttribute("src", END_POINT+"/request_target"+ '?timestamp=' + randomNumber + '&translated_file_path=' + encodeURIComponent(translated_file_path)+ '&file_type=' + file_type);
+            document.getElementById("document-container").setAttribute("src", END_POINT + "/request_source" + '?file_path=' + encodeURIComponent(file_path)+ '&file_type=' + file_type);
+            document.getElementById("document-container2").setAttribute("src", END_POINT+"/request_target"+ '?translated_file_path=' + encodeURIComponent(translated_file_path)+ '&file_type=' + file_type);
             document.getElementById('download_link').innerHTML = "<a href=" + translated_file_url + ">下载翻译文件</a>";
-            // request_ad();
         }
 
 	</script>

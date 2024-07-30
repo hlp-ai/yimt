@@ -10,24 +10,22 @@ from service.utils import detect_lang
 
 
 def scan_doc(ppt, new_ppt):
-    """Get text to be translated"""
-    runs = []
-    for i, (slide, new_slide) in enumerate(zip(ppt.slides, new_ppt.slides)):
+    runs = []  # 待翻译对象
+    for i, (slide, new_slide) in enumerate(zip(ppt.slides, new_ppt.slides)):  # 对每一页
         # print("Slide{}".format(i + 1), slide.slide_layout)
-        for j, (shape, new_shape) in enumerate(zip(slide.shapes, new_slide.shapes)):
+        for j, (shape, new_shape) in enumerate(zip(slide.shapes, new_slide.shapes)):  # 对每一对象
             # print("Shape{}".format(j + 1), shape)
-            if shape.has_text_frame:
+            if shape.has_text_frame:  # 有文本内容
                 text_frame = shape.text_frame
-                for k, (paragraph, new_paragraph) in enumerate(
-                        zip(text_frame.paragraphs, new_shape.text_frame.paragraphs)):
+                for k, (paragraph, new_paragraph) in enumerate(zip(text_frame.paragraphs, new_shape.text_frame.paragraphs)):
                     # print("\tParagraph{}".format(k + 1), paragraph.text)
                     runs.append(new_paragraph)
-            elif shape.has_table:
+            elif shape.has_table:  # 对表格
                 table = shape.table
                 new_table = new_shape.table
                 for row, new_row in zip(table.rows, new_table.rows):
                     for cell, new_cell in zip(row.cells, new_row.cells):
-                        runs.append(new_cell.text_frame)
+                        runs.append(new_cell.text_frame)  # 翻译表格中文本
     return runs
 
 
@@ -41,8 +39,8 @@ def translate_ppt_auto(in_fn, source_lang="auto", target_lang="zh", translation_
         translated_fn = translation_file
 
     doc = Presentation(docx_fn)
-    translated_doc = Presentation(docx_fn)
-    runs = scan_doc(doc, translated_doc)  # get text paragraphs
+    translated_doc = Presentation(docx_fn)  # 原样拷贝源文档
+    runs = scan_doc(doc, translated_doc)  # 提取源文档中可以翻译的文本对象
 
     if source_lang == "auto":
         source_lang = detect_lang(runs[0].text)
@@ -55,7 +53,7 @@ def translate_ppt_auto(in_fn, source_lang="auto", target_lang="zh", translation_
     txt_list = [r.text for r in runs]
     result_list = translator.translate_list(txt_list, sl=source_lang, tl=target_lang, callbacker=callbacker)  # translate
     for i in range(len(runs)):
-        runs[i].text = result_list[i]
+        runs[i].text = result_list[i]  # 替换源文本为翻译文本，其他不变（位置样式和非文本内容）
 
     translated_doc.save(translated_fn)
 

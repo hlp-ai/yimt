@@ -768,7 +768,7 @@ def create_app(args):
     def request_source():
         file_type = request.args.get('file_type')
         file_path = request.args.get('file_path')
-        if file_type == 'docx' or file_type == 'pptx' or file_type == 'xlsx':
+        if file_type == 'docx' or file_type == 'pptx' or file_type == 'xlsx':  # office文件
             file_path_str = url_for('static', filename=file_path)
             file_path_str = file_path_str.replace('/static/', '/')
             file_path_str = file_path_str.lstrip('/')
@@ -780,7 +780,7 @@ def create_app(args):
     def request_target():
         file_type = request.args.get('file_type')
         file_path = request.args.get('translated_file_path')
-        if file_type == 'docx' or file_type == 'pptx' or file_type == 'xlsx':
+        if file_type == 'docx' or file_type == 'pptx' or file_type == 'xlsx':  # office文件
             file_path_str = url_for('static', filename=file_path)
             file_path_str = file_path_str.replace('/static/', '/')
             file_path_str = file_path_str.lstrip('/')
