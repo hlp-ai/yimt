@@ -20,13 +20,13 @@ from service.mt import translator_factory
 from service.utils import detect_lang
 
 
-def doc_to_docx(doc_fn, docx_fn):
-    from win32com import client as wc
-    word = wc.Dispatch('Word.Application')
-    doc = word.Documents.Open(doc_fn)
-    doc.SaveAs(docx_fn, 12, False, "", True, "", False, False, False, False)
-    doc.Close()
-    word.Quit()
+# def doc_to_docx(doc_fn, docx_fn=None):
+#     from win32com import client as wc
+#     word = wc.Dispatch('Word.Application')
+#     doc = word.Documents.Open(doc_fn)
+#     doc.SaveAs(docx_fn, 12, False, "", True, "", False, False, False, False)
+#     doc.Close()
+#     word.Quit()
 
 
 def is_pic(paragraph: Paragraph):
