@@ -62,6 +62,8 @@ def translate_docx_auto(docx_fn, source_lang="auto", target_lang="zh", translati
         raise ValueError("给定语言不支持: {}".format(source_lang+"-"+target_lang))
 
     txt_list = [r.text for r in runs]
+    for t in txt_list:
+        print(t)
     result_list = translator.translate_list(txt_list, sl=source_lang, tl=target_lang, callbacker=callbacker)
     for i in range(len(runs)):
         runs[i].text = result_list[i]

@@ -17,6 +17,10 @@ def is_empty(s):
     return False
 
 
+def is_special_symbol(s):
+    return s in ["th", "rd", "nd", "st"]
+
+
 url_pattern = re.compile(r"(https?|ftp|file)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]", re.IGNORECASE)
 email_pattern = re.compile(r'^mailto:[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', re.IGNORECASE)
 
@@ -36,6 +40,12 @@ def should_translate(txt):
         return False
 
     txt = txt.strip()
+
+    if len(txt) == 1:
+        return False
+
+    if is_special_symbol(txt):
+        return False
 
     if is_number(txt):
         return False
