@@ -185,11 +185,11 @@ class ArgumentParser(cfargparse.ArgumentParser, DataOptsCheckerMixin):
             model_opt.src_word_vec_size = model_opt.word_vec_size
             model_opt.tgt_word_vec_size = model_opt.word_vec_size
 
-        # Backward compatibility with "fix_word_vecs_*" opts
-        if hasattr(model_opt, "fix_word_vecs_enc"):
-            model_opt.freeze_word_vecs_enc = model_opt.fix_word_vecs_enc
-        if hasattr(model_opt, "fix_word_vecs_dec"):
-            model_opt.freeze_word_vecs_dec = model_opt.fix_word_vecs_dec
+        # # Backward compatibility with "fix_word_vecs_*" opts
+        # if hasattr(model_opt, "fix_word_vecs_enc"):
+        #     model_opt.freeze_word_vecs_enc = model_opt.fix_word_vecs_enc
+        # if hasattr(model_opt, "fix_word_vecs_dec"):
+        #     model_opt.freeze_word_vecs_dec = model_opt.fix_word_vecs_dec
 
         if model_opt.layers > 0:
             model_opt.enc_layers = model_opt.layers
@@ -198,8 +198,6 @@ class ArgumentParser(cfargparse.ArgumentParser, DataOptsCheckerMixin):
         if model_opt.hidden_size > 0:
             model_opt.enc_hid_size = model_opt.hidden_size
             model_opt.dec_hid_size = model_opt.hidden_size
-
-        model_opt.brnn = model_opt.encoder_type == "brnn"
 
         if model_opt.alignment_layer is None:
             model_opt.alignment_layer = -2
