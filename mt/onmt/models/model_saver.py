@@ -188,37 +188,37 @@ class ModelSaver(ModelSaverBase):
             torch.distributed.all_gather_object(full_model, model_state_dict)
             fm_sd = {}
             for key in full_model[0].keys():
-                if key.split(".")[-1] == "lora_A":
-                    if key.split(".")[-2] in [
-                        "linear_keys",
-                        "linear_values",
-                        "linear_query",
-                        "w_1",
-                        "w_3",
-                    ]:
-                        fm_sd[key] = (
-                            sum([full_model[i][key].cpu() for i in range(ws)]) / ws
-                        )
-                    elif key.split(".")[-2] in ["final_linear", "w_2"]:
-                        fm_sd[key] = torch.cat(
-                            [full_model[i][key].cpu() for i in range(ws)], 1
-                        )
-                elif key.split(".")[-1] == "lora_B":
-                    if key.split(".")[-2] in [
-                        "linear_keys",
-                        "linear_values",
-                        "linear_query",
-                        "w_1",
-                        "w_3",
-                    ]:
-                        fm_sd[key] = torch.cat(
-                            [full_model[i][key].cpu() for i in range(ws)], 0
-                        )
-                    elif key.split(".")[-2] in ["final_linear", "w_2"]:
-                        fm_sd[key] = (
-                            sum([full_model[i][key].cpu() for i in range(ws)]) / ws
-                        )
-                elif key.split(".")[-1] in [
+                # if key.split(".")[-1] == "lora_A":
+                #     if key.split(".")[-2] in [
+                #         "linear_keys",
+                #         "linear_values",
+                #         "linear_query",
+                #         "w_1",
+                #         "w_3",
+                #     ]:
+                #         fm_sd[key] = (
+                #             sum([full_model[i][key].cpu() for i in range(ws)]) / ws
+                #         )
+                #     elif key.split(".")[-2] in ["final_linear", "w_2"]:
+                #         fm_sd[key] = torch.cat(
+                #             [full_model[i][key].cpu() for i in range(ws)], 1
+                #         )
+                # elif key.split(".")[-1] == "lora_B":
+                #     if key.split(".")[-2] in [
+                #         "linear_keys",
+                #         "linear_values",
+                #         "linear_query",
+                #         "w_1",
+                #         "w_3",
+                #     ]:
+                #         fm_sd[key] = torch.cat(
+                #             [full_model[i][key].cpu() for i in range(ws)], 0
+                #         )
+                #     elif key.split(".")[-2] in ["final_linear", "w_2"]:
+                #         fm_sd[key] = (
+                #             sum([full_model[i][key].cpu() for i in range(ws)]) / ws
+                #         )
+                if key.split(".")[-1] in [
                     "linear_keys",
                     "linear_values",
                     "linear_query",
@@ -272,37 +272,37 @@ class ModelSaver(ModelSaverBase):
             torch.distributed.all_gather_object(full_model, model_state_dict)
             fm_sd = {}
             for key in full_model[0].keys():
-                if key.split(".")[-1] == "lora_A":
-                    if key.split(".")[-2] in [
-                        "linear_keys",
-                        "linear_values",
-                        "linear_query",
-                        "w_1",
-                        "w_3",
-                    ]:
-                        fm_sd[key] = (
-                            sum([full_model[i][key].cpu() for i in range(ws)]) / ws
-                        )
-                    elif key.split(".")[-2] in ["final_linear", "w_2"]:
-                        fm_sd[key] = torch.cat(
-                            [full_model[i][key].cpu() for i in range(ws)], 1
-                        )
-                elif key.split(".")[-1] == "lora_B":
-                    if key.split(".")[-2] in [
-                        "linear_keys",
-                        "linear_values",
-                        "linear_query",
-                        "w_1",
-                        "w_3",
-                    ]:
-                        fm_sd[key] = torch.cat(
-                            [full_model[i][key].cpu() for i in range(ws)], 0
-                        )
-                    elif key.split(".")[-2] in ["final_linear", "w_2"]:
-                        fm_sd[key] = (
-                            sum([full_model[i][key].cpu() for i in range(ws)]) / ws
-                        )
-                elif key.split(".")[-1] in [
+                # if key.split(".")[-1] == "lora_A":
+                #     if key.split(".")[-2] in [
+                #         "linear_keys",
+                #         "linear_values",
+                #         "linear_query",
+                #         "w_1",
+                #         "w_3",
+                #     ]:
+                #         fm_sd[key] = (
+                #             sum([full_model[i][key].cpu() for i in range(ws)]) / ws
+                #         )
+                #     elif key.split(".")[-2] in ["final_linear", "w_2"]:
+                #         fm_sd[key] = torch.cat(
+                #             [full_model[i][key].cpu() for i in range(ws)], 1
+                #         )
+                # elif key.split(".")[-1] == "lora_B":
+                #     if key.split(".")[-2] in [
+                #         "linear_keys",
+                #         "linear_values",
+                #         "linear_query",
+                #         "w_1",
+                #         "w_3",
+                #     ]:
+                #         fm_sd[key] = torch.cat(
+                #             [full_model[i][key].cpu() for i in range(ws)], 0
+                #         )
+                #     elif key.split(".")[-2] in ["final_linear", "w_2"]:
+                #         fm_sd[key] = (
+                #             sum([full_model[i][key].cpu() for i in range(ws)]) / ws
+                #         )
+                if key.split(".")[-1] in [
                     "linear_keys",
                     "linear_values",
                     "linear_query",
