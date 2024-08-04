@@ -9,7 +9,6 @@ from torch.distributions import Categorical
 
 from .audio import CHUNK_LENGTH
 from .tokenizer import Tokenizer, get_tokenizer
-# from .utils import compression_ratio
 
 if TYPE_CHECKING:
     from .model import Whisper
@@ -32,16 +31,12 @@ def detect_language(
         list of dictionaries containing the probability distribution over all languages.
     """
     if tokenizer is None:
-        tokenizer = get_tokenizer(
-            model.is_multilingual, num_languages=model.num_languages
-        )
+        tokenizer = get_tokenizer(model.is_multilingual, num_languages=model.num_languages)
     if (
         tokenizer.language is None
         or tokenizer.language_token not in tokenizer.sot_sequence
     ):
-        raise ValueError(
-            "This model doesn't have language tokens so it can't perform lang id"
-        )
+        raise ValueError("This model doesn't have language tokens so it can't perform lang id")
 
     single = mel.ndim == 2
     if single:

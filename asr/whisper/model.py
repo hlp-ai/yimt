@@ -1,5 +1,3 @@
-import base64
-import gzip
 from dataclasses import dataclass
 from typing import Dict, Iterable, Optional
 
