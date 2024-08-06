@@ -257,14 +257,16 @@ class Inference(object):
     def _gold_score(
         self, batch, enc_out, src_len, batch_size, src
     ):
-        if "tgt" in batch.keys() and not self.tgt_file_prefix:
-            gs, glp = self._score_target(
-                batch, enc_out, src_len
-            )
-            self.model.decoder.init_state(src, enc_out)
-        else:
-            gs = [0] * batch_size
-            glp = None
+        # if "tgt" in batch.keys() and not self.tgt_file_prefix:
+        #     gs, glp = self._score_target(
+        #         batch, enc_out, src_len
+        #     )
+        #     self.model.decoder.init_state(src, enc_out)
+        # else:
+        #     gs = [0] * batch_size
+        #     glp = None
+        gs = [0] * batch_size
+        glp = None
         return gs, glp
 
     def _translate(
@@ -540,38 +542,6 @@ class Inference(object):
 
         return all_scores, all_predictions
 
-    # def _score(self, infer_iter):
-    #     self.with_scores = True
-    #     score_res = []
-    #     processed_bucket = {}
-    #     prev_bucket_idx = 0
-    #     for batch, bucket_idx in infer_iter:
-    #         if bucket_idx != prev_bucket_idx:
-    #             prev_bucket_idx += 1
-    #             score_res += [item for _, item in sorted(processed_bucket.items())]
-    #             processed_bucket = {}
-    #         batch_data = self.translate_batch(batch, attn_debug=False, scoring=True)
-    #         batch_gold_scores = batch_data["gold_score"].cpu().numpy().tolist()
-    #         batch_tgt_lengths = batch["tgtlen"].cpu().numpy().tolist()
-    #         batch_inds_in_bucket = batch["ind_in_bucket"]
-    #         if self.return_gold_log_probs:
-    #             batch_gold_log_probs = (
-    #                 batch_data["gold_log_probs"].cpu().numpy().tolist()
-    #             )
-    #         else:
-    #             batch_gold_log_probs = [
-    #                 None for i, _ in enumerate(batch_inds_in_bucket)
-    #             ]
-    #         for i, ind in enumerate(batch_inds_in_bucket):
-    #             processed_bucket[ind] = [
-    #                 batch_gold_scores[i],
-    #                 batch_gold_log_probs[i],
-    #                 batch_tgt_lengths[i],
-    #             ]
-    #     if processed_bucket:
-    #         score_res += [item for _, item in sorted(processed_bucket.items())]
-    #     return score_res
-
     def _align_pad_prediction(self, predictions, bos, pad):
         """
         Padding predictions in batch and add BOS.
@@ -662,8 +632,8 @@ class Inference(object):
         """Translate a batch of sentences."""
         raise NotImplementedError
 
-    def _score_target(self, batch, enc_out, src_len):
-        raise NotImplementedError
+    # def _score_target(self, batch, enc_out, src_len):
+    #     raise NotImplementedError
 
     def report_results(
         self,
@@ -902,19 +872,19 @@ class Translator(Inference):
             decode_strategy,
         )
 
-    def _score_target(self, batch, enc_out, src_len):
-        tgt = batch["tgt"]
-        tgt_in = tgt[:, :-1, :]
-
-        log_probs, attn = self._decode_and_generate(
-            tgt_in,
-            enc_out,
-            batch,
-            src_len=src_len,
-        )
-
-        log_probs[:, :, self._tgt_pad_idx] = 0
-        gold = tgt[:, 1:, :]
-        gold_scores = log_probs.gather(2, gold)
-        gold_scores = gold_scores.sum(dim=1).view(-1)
-        return gold_scores, None
+    # def _score_target(self, batch, enc_out, src_len):
+    #     tgt = batch["tgt"]
+    #     tgt_in = tgt[:, :-1, :]
+    #
+    #     log_probs, attn = self._decode_and_generate(
+    #         tgt_in,
+    #         enc_out,
+    #         batch,
+    #         src_len=src_len,
+    #     )
+    #
+    #     log_probs[:, :, self._tgt_pad_idx] = 0
+    #     gold = tgt[:, 1:, :]
+    #     gold_scores = log_probs.gather(2, gold)
+    #     gold_scores = gold_scores.sum(dim=1).view(-1)
+    #     return gold_scores, None
