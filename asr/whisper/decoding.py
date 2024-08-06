@@ -7,7 +7,6 @@ import torch.nn.functional as F
 from torch import Tensor
 from torch.distributions import Categorical
 
-from .audio import CHUNK_LENGTH
 from .tokenizer import Tokenizer, get_tokenizer
 
 if TYPE_CHECKING:
@@ -102,8 +101,7 @@ class DecodingOptions:
     suppress_blank: bool = True  # this will suppress blank outputs
 
     # timestamp sampling options
-    without_timestamps: bool = False  # use <|notimestamps|> to sample text tokens only
-    max_initial_timestamp: Optional[float] = 1.0
+    without_timestamps: bool = True  # use <|notimestamps|> to sample text tokens only
 
     # implementation details
     fp16: bool = True  # use fp16 for most of the calculation
@@ -433,73 +431,6 @@ class SuppressTokens(LogitFilter):
         logits[:, self.suppress_tokens] = -np.inf
 
 
-class ApplyTimestampRules(LogitFilter):
-    def __init__(
-        self,
-        tokenizer: Tokenizer,
-        sample_begin: int,
-        max_initial_timestamp_index: Optional[int],
-    ):
-        self.tokenizer = tokenizer
-        self.sample_begin = sample_begin
-        self.max_initial_timestamp_index = max_initial_timestamp_index
-
-    def apply(self, logits: Tensor, tokens: Tensor):
-        # suppress <|notimestamps|> which is handled by without_timestamps
-        if self.tokenizer.no_timestamps is not None:
-            logits[:, self.tokenizer.no_timestamps] = -np.inf
-
-        # timestamps have to appear in pairs, except directly before EOT; mask logits accordingly
-        for k in range(tokens.shape[0]):
-            sampled_tokens = tokens[k, self.sample_begin :]
-            seq = [t for t in sampled_tokens.tolist()]
-            last_was_timestamp = (
-                len(seq) >= 1 and seq[-1] >= self.tokenizer.timestamp_begin
-            )
-            penultimate_was_timestamp = (
-                len(seq) < 2 or seq[-2] >= self.tokenizer.timestamp_begin
-            )
-
-            if last_was_timestamp:
-                if penultimate_was_timestamp:  # has to be non-timestamp
-                    logits[k, self.tokenizer.timestamp_begin :] = -np.inf
-                else:  # cannot be normal text tokens
-                    logits[k, : self.tokenizer.eot] = -np.inf
-
-            timestamps = sampled_tokens[
-                sampled_tokens.ge(self.tokenizer.timestamp_begin)
-            ]
-            if timestamps.numel() > 0:
-                # timestamps shouldn't decrease; forbid timestamp tokens smaller than the last
-                # also force each segment to have a nonzero length, to prevent infinite looping
-                if last_was_timestamp and not penultimate_was_timestamp:
-                    timestamp_last = timestamps[-1]
-                else:
-                    timestamp_last = timestamps[-1] + 1
-                logits[k, self.tokenizer.timestamp_begin : timestamp_last] = -np.inf
-
-        if tokens.shape[1] == self.sample_begin:
-            # suppress generating non-timestamp tokens at the beginning
-            logits[:, : self.tokenizer.timestamp_begin] = -np.inf
-
-            # apply the `max_initial_timestamp` option
-            if self.max_initial_timestamp_index is not None:
-                last_allowed = (
-                    self.tokenizer.timestamp_begin + self.max_initial_timestamp_index
-                )
-                logits[:, last_allowed + 1 :] = -np.inf
-
-        # if sum of probability over timestamps is above any other token, sample timestamp
-        logprobs = F.log_softmax(logits.float(), dim=-1)
-        for k in range(tokens.shape[0]):
-            timestamp_logprob = logprobs[k, self.tokenizer.timestamp_begin :].logsumexp(
-                dim=-1
-            )
-            max_text_token_logprob = logprobs[k, : self.tokenizer.timestamp_begin].max()
-            if timestamp_logprob > max_text_token_logprob:
-                logits[k, : self.tokenizer.timestamp_begin] = -np.inf
-
-
 class DecodingTask:
     inference: Inference
     sequence_ranker: SequenceRanker
@@ -551,18 +482,6 @@ class DecodingTask:
             self.logit_filters.append(SuppressBlank(self.tokenizer, self.sample_begin))
         if self.options.suppress_tokens:
             self.logit_filters.append(SuppressTokens(self._get_suppress_tokens()))
-        if not options.without_timestamps:
-            precision = CHUNK_LENGTH / model.dims.n_audio_ctx  # usually 0.02 seconds
-            max_initial_timestamp_index = None
-            if options.max_initial_timestamp:
-                max_initial_timestamp_index = round(
-                    self.options.max_initial_timestamp / precision
-                )
-            self.logit_filters.append(
-                ApplyTimestampRules(
-                    tokenizer, self.sample_begin, max_initial_timestamp_index
-                )
-            )
 
     def _verify_options(self, options: DecodingOptions) -> DecodingOptions:
         if options.beam_size is not None and options.best_of is not None:
