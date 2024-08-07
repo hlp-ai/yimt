@@ -96,7 +96,6 @@ class Inference(object):
         random_sampling_topk=0,
         random_sampling_topp=0.0,
         random_sampling_temp=1.0,
-        # stepwise_penalty=None,
         dump_beam=False,
         block_ngram_repeat=0,
         ignore_when_blocking=frozenset(),
@@ -145,7 +144,6 @@ class Inference(object):
         self.min_length = min_length
         self.ban_unk_token = ban_unk_token
         self.ratio = ratio
-        # self.stepwise_penalty = stepwise_penalty
         self.dump_beam = dump_beam
         self.block_ngram_repeat = block_ngram_repeat
         self.ignore_when_blocking = ignore_when_blocking
@@ -164,9 +162,6 @@ class Inference(object):
         self.gold_align = gold_align
         self.report_score = report_score
         self.logger = logger
-
-        # self.use_filter_pred = False
-        # self._filter_pred = None
 
         # for debugging
         self.beam_trace = self.dump_beam != ""
@@ -257,14 +252,6 @@ class Inference(object):
     def _gold_score(
         self, batch, enc_out, src_len, batch_size, src
     ):
-        # if "tgt" in batch.keys() and not self.tgt_file_prefix:
-        #     gs, glp = self._score_target(
-        #         batch, enc_out, src_len
-        #     )
-        #     self.model.decoder.init_state(src, enc_out)
-        # else:
-        #     gs = [0] * batch_size
-        #     glp = None
         gs = [0] * batch_size
         glp = None
         return gs, glp
@@ -693,11 +680,6 @@ class Translator(Inference):
         # (2) Repeat src objects `n_best` times.
         # We use batch_size x n_best, get ``(batch * n_best, src_len, nfeat)``
         src = tile(src, n_best, dim=0)
-        # if enc_states is not None:
-        #     # Quick fix. Transformers return None as enc_states.
-        #     # enc_states are only used later on to init decoder's state
-        #     # but are never used in Transformer decoder, so we can skip
-        #     enc_states = tile(enc_states, n_best, dim=0)
         if isinstance(enc_out, tuple):
             enc_out = tuple(tile(x, n_best, dim=0) for x in enc_out)
         else:
@@ -871,20 +853,3 @@ class Translator(Inference):
             batch_size,
             decode_strategy,
         )
-
-    # def _score_target(self, batch, enc_out, src_len):
-    #     tgt = batch["tgt"]
-    #     tgt_in = tgt[:, :-1, :]
-    #
-    #     log_probs, attn = self._decode_and_generate(
-    #         tgt_in,
-    #         enc_out,
-    #         batch,
-    #         src_len=src_len,
-    #     )
-    #
-    #     log_probs[:, :, self._tgt_pad_idx] = 0
-    #     gold = tgt[:, 1:, :]
-    #     gold_scores = log_probs.gather(2, gold)
-    #     gold_scores = gold_scores.sum(dim=1).view(-1)
-    #     return gold_scores, None
