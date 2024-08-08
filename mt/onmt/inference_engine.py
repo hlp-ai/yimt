@@ -65,42 +65,6 @@ class InferenceEngine(object):
             "The inference in mulitprocessing with partitioned models is not implemented."
         )
 
-    # def _score(self, infer_iter):
-    #     pass
-    #
-    # def score_file(self):
-    #     """File scoring. Source file must be the opt.src argument"""
-    #     if self.opt.world_size <= 1:
-    #         infer_iter = build_dynamic_dataset_iter(
-    #             self.opt,
-    #             self.transforms_cls,
-    #             self.vocabs,
-    #             task=CorpusTask.INFER,
-    #             device_id=self.device_id,
-    #             tgt=self.opt.src,
-    #         )
-    #         score_results = self._score(infer_iter)
-    #     else:
-    #         score_results = self.score_file_parallel()
-    #     return score_results
-    #
-    # def score_list(self, src):
-    #     """List of strings scoring tgt`"""
-    #     if self.opt.world_size <= 1:
-    #         infer_iter = build_dynamic_dataset_iter(
-    #             self.opt,
-    #             self.transforms_cls,
-    #             self.vocabs,
-    #             task=CorpusTask.INFER,
-    #             src=src,
-    #             tgt=src,
-    #             device_id=self.device_id,
-    #         )
-    #         score_results = self._score(infer_iter)
-    #     else:
-    #         score_results = self.score_list_parallel(src)
-    #     return score_results
-
     def terminate(self):
         pass
 
@@ -160,29 +124,6 @@ class InferenceEnginePY(InferenceEngine):
             infer_iter, infer_iter.transforms, self.opt.attn_debug, self.opt.align_debug
         )
         return scores, preds
-
-    # def _score(self, infer_iter):
-    #     self.translator.with_scores = True
-    #     self.return_gold_log_probs = True
-    #     return self.translator._score(infer_iter)
-    #
-    # def score_list_parallel(self, src):
-    #     assert self.opt.world_size > 1, "World size must be greater than 1."
-    #     for device_id in range(self.opt.world_size):
-    #         self.queue_instruct[device_id].put(("score_list", src))
-    #     score_results = []
-    #     for device_id in range(self.opt.world_size):
-    #         score_results.append(self.queue_result[device_id].get())
-    #     return score_results
-    #
-    # def score_file_parallel(self):
-    #     assert self.opt.world_size > 1, "World size must be greater than 1."
-    #     for device_id in range(self.opt.world_size):
-    #         self.queue_instruct[device_id].put(("score_file", self.opt))
-    #     score_results = []
-    #     for device_id in range(self.opt.world_size):
-    #         score_results.append(self.queue_result[device_id].get())
-    #     return score_results[0]
 
     def infer_file_parallel(self):
         assert self.opt.world_size > 1, "World size must be greater than 1."
@@ -292,8 +233,3 @@ class InferenceEngineCT2(InferenceEngine):
             scores += _scores
             preds += _preds
         return scores, preds
-
-    # def _score(self, infer_iter):
-    #     raise NotImplementedError(
-    #         "The scoring with InferenceEngineCT2 is not implemented."
-    #     )
