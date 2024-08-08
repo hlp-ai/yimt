@@ -2,12 +2,10 @@
 """ Translator Class and builder """
 import torch
 from torch.nn.functional import log_softmax
-from torch.nn.utils.rnn import pad_sequence
 import codecs
 from time import time
 from math import exp
 from itertools import count, zip_longest
-from copy import deepcopy
 import onmt.model_builder
 import onmt.decoders.ensemble
 from onmt.constants import DefaultTokens
