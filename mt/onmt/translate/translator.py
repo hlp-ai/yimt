@@ -300,58 +300,6 @@ class Inference(object):
 
         start_time = time()
 
-        # def _maybe_retranslate(translations, batch):
-        #     """Here we handle the cases of mismatch in number of segments
-        #     between source and target. We re-translate seg by seg."""
-        #     inds, perm = torch.sort(batch["ind_in_bucket"])
-        #     trans_copy = deepcopy(translations)
-        #     inserted_so_far = 0
-        #     for j, trans in enumerate(translations):
-        #         if (trans.src == self._tgt_sep_idx).sum().item() != trans.pred_sents[
-        #             0
-        #         ].count(DefaultTokens.SEP):
-        #             self._log("Mismatch in number of ((newline))")
-        #             # those two should be the same except feat dim
-        #             # batch['src'][perm[j], :, :])
-        #             # trans.src
-        #
-        #             # we rebuild a small batch made of the sub-segments
-        #             # in the long segment.
-        #             idx = (trans.src == self._tgt_sep_idx).nonzero()
-        #             sub_src = []
-        #             start_idx = 0
-        #             for i in range(len(idx)):
-        #                 end_idx = idx[i]
-        #                 sub_src.append(batch["src"][perm[j], start_idx:end_idx, :])
-        #                 start_idx = end_idx + 1
-        #             end_idx = (
-        #                 batch["src"][perm[j], :, 0].ne(self._tgt_pad_idx).sum() - 1
-        #             )
-        #             sub_src.append(batch["src"][perm[j], start_idx:end_idx, :])
-        #             t_sub_src = pad_sequence(
-        #                 sub_src, batch_first=True, padding_value=self._tgt_pad_idx
-        #             )
-        #             t_sub_src_len = t_sub_src[:, :, 0].ne(self._tgt_pad_idx).sum(1)
-        #             t_sub_src_ind = torch.tensor(
-        #                 [i for i in range(len(sub_src))], dtype=torch.int16
-        #             )
-        #             device = batch["src"].device
-        #             t_sub_batch = {
-        #                 "src": t_sub_src.to(device),
-        #                 "srclen": t_sub_src_len.to(device),
-        #                 "ind_in_bucket": t_sub_src_ind.to(device),
-        #             }
-        #             # new sub-batch ready to be translated
-        #             sub_data = self.translate_batch(t_sub_batch, attn_debug)
-        #             sub_trans = xlation_builder.from_batch(sub_data)
-        #
-        #             # we re-insert the sub-batch in the initial translations
-        #             trans_copy[j + inserted_so_far] = sub_trans[0]
-        #             for i in range(1, len(sub_src)):
-        #                 trans_copy.insert(j + i + inserted_so_far, sub_trans[i])
-        #             inserted_so_far += len(sub_src) - 1
-        #     return trans_copy
-
         def _process_bucket(bucket_translations):
             bucket_scores = []
             bucket_predictions = []
@@ -452,12 +400,6 @@ class Inference(object):
             batch_data = self.translate_batch(batch, attn_debug)
 
             translations = xlation_builder.from_batch(batch_data)
-            # if (
-            #     self._tgt_sep_idx != self._tgt_unk_idx
-            #     and (batch["src"] == self._tgt_sep_idx).any().item()
-            # ):
-            #     # For seq2seq when we need to force doc to spit the same number of sents
-            #     translations = _maybe_retranslate(translations, batch)
 
             bucket_translations += translations
 
