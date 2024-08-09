@@ -152,7 +152,7 @@ class DataProcessor:
         records = []
         with open(self.data_file, encoding="utf-8") as f:
             for line in f:
-                audio_path, text = line.strip().split("\t")
+                audio_path, text = line.strip().split("|", maxsplit=1)
                 if self.normalize_unicode:
                     text = unicodedata.normalize("NFKC", text)
 
@@ -213,8 +213,6 @@ class DataProcessor:
 def main():
     args = get_parser().parse_args()
     processor = DataProcessor(
-        audio_dir=args.audio_dir,
-        transcript_dir=args.transcript_dir,
         data_file=args.data_file,
         language=args.language,
         output=args.output,
