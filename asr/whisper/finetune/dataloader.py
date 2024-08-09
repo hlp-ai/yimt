@@ -5,7 +5,7 @@ from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader, Dataset
 from whisper.audio import CHUNK_LENGTH, N_FRAMES, log_mel_spectrogram, pad_or_trim
 from whisper.finetune.create_data import Record, DataProcessor
-from whisper.tokenizer import Tokenizer
+from whisper.tokenizer import Tokenizer, get_tokenizer
 
 
 class AudioDataset(Dataset):
@@ -39,7 +39,7 @@ class AudioDataset(Dataset):
         return prompt_tokens
 
     def _get_special_tokens(
-        self, is_text_empty: bool, language: str, no_timestamps: bool
+        self, is_text_empty: bool, language: str, no_timestamps: bool=True
     ) -> List[int]:
         if is_text_empty:
             special_tokens = [self.tokenizer.sot, self.tokenizer.no_speech]
@@ -166,3 +166,19 @@ def get_dataloader(
         pin_memory=True,
         collate_fn=collate_fn,
     )
+
+
+if __name__ == "__main__":
+    tokenizer = get_tokenizer(multilingual=False, task="transcribe")
+
+    train_json = r"./data.json"
+
+    train_loader = get_dataloader(
+        json=train_json,
+        tokenizer=tokenizer,
+        batch_size=1,
+        shuffle=True,
+    )
+
+    b = next(iter(train_loader))
+    print(b.shape)
