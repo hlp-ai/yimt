@@ -181,4 +181,4 @@ if __name__ == "__main__":
     )
 
     b = next(iter(train_loader))
-    print(b.shape)
+    print(b)

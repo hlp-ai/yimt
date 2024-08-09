@@ -1,5 +1,7 @@
 import argparse
 import json
+import os
+
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
@@ -22,6 +24,12 @@ def get_parser() -> argparse.ArgumentParser:
             "Each line must be in the format of "
             "`<audio_path>\t<transcription>`."
         ),
+    )
+    parser.add_argument(
+        "--audio_dir",
+        type=str,
+        default=None,
+        help="",
     )
     parser.add_argument(
         "--language",
@@ -101,7 +109,6 @@ class DataProcessor:
     def __init__(
         self,
         audio_dir: str = None,
-        transcript_dir: str = None,
         data_file: str = None,
         language: str = "en",
         output: str = "data.json",
@@ -113,7 +120,6 @@ class DataProcessor:
         normalize_unicode: bool = False,
     ) -> None:
         self.audio_dir = audio_dir
-        self.transcript_dir = transcript_dir
         self.data_file = data_file
         self.language = language
         self.output = output
@@ -155,6 +161,9 @@ class DataProcessor:
                 audio_path, text = line.strip().split("|", maxsplit=1)
                 if self.normalize_unicode:
                     text = unicodedata.normalize("NFKC", text)
+
+                if self.audio_dir:
+                    audio_path = os.path.join(self.audio_dir, audio_path)
 
                 tokens = self.tokenizer.encode(text)
                 if len(tokens) > self.max_tokens_length:
@@ -214,6 +223,7 @@ def main():
     args = get_parser().parse_args()
     processor = DataProcessor(
         data_file=args.data_file,
+        audio_dir=args.audio_dir,
         language=args.language,
         output=args.output,
         dump_dir=args.dump_dir,
