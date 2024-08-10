@@ -22,7 +22,9 @@ def collect(markup_str, no_translatable_tags=['style', 'script', 'head', 'meta',
                 continue
 
             t = element.string
-            if len(t.strip()) == 0:
+            # if len(t.strip()) == 0:
+            #     continue
+            if not should_translate(t):
                 continue
 
             to_translated_elements.append(element)
