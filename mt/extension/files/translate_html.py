@@ -3,18 +3,7 @@ import os
 
 from bs4 import BeautifulSoup, Comment, Doctype
 
-
-# def too_short(txt, lang):
-#     if len(txt.strip()) == 0:
-#         return True
-#
-#     if lang == "en" and len(txt.strip().split()) < 3:
-#         return True
-#
-#     if lang == "zh" and len(list(jieba.cut(txt))) < 3:
-#         return True
-#
-#     return False
+from extension.files.utils import should_translate
 from service.mt import translator_factory
 from service.utils import detect_lang
 
@@ -95,16 +84,18 @@ def translate_ml_auto(in_fn, source_lang="auto", target_lang="zh", translation_f
 
     to_translated_elements = []
     to_translated_txt = []
-    for element in body.findAll(text=True):
+    for element in body.findAll(text=True):  # 对所有文本节点
         if not element.parent.name in ['style', 'script', 'head', 'meta', 'link']:
-            if type(element.string) == Comment:
+            if type(element.string) == Comment:  # 不翻译注释
                 continue
 
             if type(element.string) == Doctype:
                 continue
 
             t = element.string
-            if len(t.strip()) == 0:
+            # if len(t.strip()) == 0:
+            #     continue
+            if not should_translate(t):
                 continue
 
             to_translated_elements.append(element)
