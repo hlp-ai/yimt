@@ -55,7 +55,6 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--model",
         required=True,
-        choices=whisper.available_models(),
         help="name of the Whisper model to use",
     )
     parser.add_argument("--train-only-decoder", action="store_true", help="train only the decoder")
