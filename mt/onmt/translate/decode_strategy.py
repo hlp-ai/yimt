@@ -129,9 +129,6 @@ class DecodeStrategy(object):
         elif enc_out is not None:
             enc_out = tile(enc_out, self.beam_size, dim=0)
 
-        # if src_map is not None:
-        #     src_map = tile(src_map, self.beam_size, dim=0)
-
         self.src_len = tile(src_len, self.beam_size)
 
         if target_prefix is not None:
@@ -325,7 +322,6 @@ class DecodeStrategy(object):
         Advance is used to update ``self.alive_seq``, ``self.is_finished``,
         and, when appropriate, ``self.alive_attn``.
         """
-
         raise NotImplementedError()
 
     def update_finished(self):
@@ -334,5 +330,4 @@ class DecodeStrategy(object):
         ``update_finished`` is used to update ``self.predictions``,
         ``self.scores``, and other "output" attributes.
         """
-
         raise NotImplementedError()
