@@ -667,6 +667,7 @@ def create_app(args):
     @app.post("/request_ad")
     # @access_check
     def request_ad():
+        """广告请求展示接口"""
         json = get_json_dict(request)
         log_service.info("/ad: {}".format(json))
 
@@ -678,25 +679,24 @@ def create_app(args):
         if platform not in support_platforms:
             abort(400, description="platform %s is not supported" % platform)
 
+        # 目前，Web端展示广告图片，其他端展示广告文本
         if platform == "web":
             type = "image"
         else:
             type = "text"
 
-        ad = addb.get_ad(type)
+        ad = addb.get_ad(type)  # 随机获取广告
         ad_id = ad[0]
 
         addb.log_ad(platform, ad, get_remote_address());
 
-        # ad_text = "Welcome!\n This is a just test."
         if type == "text":
             content = ad[2]
-        else:
+        else:  # 广告图片以base64编码形式传递
             img_file = ad[2]
             import base64
-            with open(img_file, "rb") as image_file:  # 设置本地图片路径
+            with open(img_file, "rb") as image_file:
                 encoded_image = base64.b64encode(image_file.read())
-            image_file.close()
             content = encoded_image.decode('utf-8')
 
         ad_url = ad[3]
@@ -714,16 +714,16 @@ def create_app(args):
     @app.get("/click_ad")
     # @access_check
     def click_ad():
+        """广告点击接口"""
         args = request.args
         ad_id = args["ad_id"]
         platform = args["platform"]
         url = args["url"]
 
-        log_service.info("/click_ad: " + ad_id + ", " + url)
-
+        log_service.info("/click_ad: " + ad_id + ", " + url + ", " + platform)
         addb.log_ad(platform, ad_id, get_remote_address(), action="C")
 
-        return redirect(url)
+        return redirect(url)  # 重定向到广告URL
 
     #####################################################################
     #
