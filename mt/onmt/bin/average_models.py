@@ -46,7 +46,7 @@ def average_models(model_files, fp32=False):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="检查点评卷程序")
+    parser = argparse.ArgumentParser(description="检查点平均程序")
     parser.add_argument("-model_dir", "-d", required=True, help="模型文件目录")
     parser.add_argument("-output", "-o", required=True, help="输出文件")
     parser.add_argument("-fp32", "-f", action="store_true", help="强制参数为float32")
