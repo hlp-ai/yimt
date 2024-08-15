@@ -76,8 +76,8 @@ def translate_docx_auto(docx_fn, source_lang="auto", target_lang="zh", translati
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser("DOC File Translator")
     arg_parser.add_argument("--to_lang", type=str, default="zh", help="target language")
-    arg_parser.add_argument("--input_file", type=str, required=True, help="file to be translated")
-    arg_parser.add_argument("--output_file", type=str, default=None, help="translation file")
+    arg_parser.add_argument("-i", "--input_file", type=str, required=True, help="file to be translated")
+    arg_parser.add_argument("-o", "--output_file", type=str, default=None, help="translation file")
     args = arg_parser.parse_args()
 
     in_file = args.input_file
