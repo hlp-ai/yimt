@@ -1,11 +1,9 @@
 import os
 import tempfile
-from pprint import pprint
-
 import fitz
-import pymupdf
 
-imgdir = temp_dir = tempfile.mkdtemp()
+
+imgdir = tempfile.mkdtemp()
 
 
 def recoverpix(doc, item):
@@ -51,18 +49,18 @@ def recoverpix(doc, item):
 
 def copy_images(page, outpage, in_pdf):
     images = page.get_images()
-    print(len(images), "images")
-    pprint(images)
+    # print(len(images), "images")
+    # pprint(images)
     for img in images:
         xref = img[0]
         img_rect = page.get_image_rects(xref)
-        print(img_rect)
+        # print(img_rect)
 
         image = recoverpix(in_pdf, img)
         imgdata = image["image"]
 
         imgfile = os.path.join(imgdir, "img%05i.%s" % (xref, image["ext"]))
-        print(imgfile)
+        # print(imgfile)
         with open(imgfile, "wb") as fout:
             fout.write(imgdata)
 

@@ -4,12 +4,11 @@ import io
 import logging
 import os
 import re
-import pymupdf
-from PyPDF2 import PdfReader, PdfWriter, Transformation
+import tempfile
+import random
 
-from pdfminer.pdfdocument import PDFDocument
-from pdfminer.pdfparser import PDFParser
-from pdfminer.pdftypes import resolve1
+import pymupdf
+from PyPDF2 import PdfReader, PdfWriter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -22,18 +21,27 @@ from service.mt import translator_factory
 from service.utils import detect_lang
 
 
+# 关闭pdfminer的部分日志
 logging.getLogger("pdfminer").setLevel(logging.WARNING)
 
 
+# 各语言文本使用字体
 fonts = {
     'zh': 'SimSun',
     'en': 'Arial',
-    # Add more languages and their corresponding fonts here
 }
+
+
+temp_pdf_dir = tempfile.mkdtemp()
+
+
+def get_temp_pdf():
+    rand_id = random.randint(0, 10000)
+    return os.path.join(temp_pdf_dir, "{}.pdf".format(rand_id))
+
 
 pdfmetrics.registerFont(TTFont('SimSun', os.path.join(os.path.dirname(__file__), 'SimSun.ttf')))
 styles = getSampleStyleSheet()
-styles.add(ParagraphStyle(fontName='SimSun', name='Song', fontSize=9, wordWrap='CJK'))
 
 p_chars_lang_independent = re.compile(r"[0123456789+\-*/=~!@$%^()\[\]{}<>\|,\.\?\"]")
 p_en_chars = re.compile(r"[a-zA-Z]+")
@@ -69,10 +77,10 @@ def preprocess_txt(t):
     return t.replace("-\n", "").replace("\n", " ").replace("<", "&lt;").strip()
 
 
-font_dict = {
-    "en": "helv",
-    "zh": "china-ss",
-}
+# font_dict = {
+#     "en": "helv",
+#     "zh": "china-ss",
+# }
 
 
 def span_len(span):
@@ -80,34 +88,52 @@ def span_len(span):
 
 
 def merge_block(block):
-    sizes = []
+    sizes = []  # 各文本段字体大小
     for line in block["lines"]:
         for span in line["spans"]:
             sizes.append(span["size"])
 
-    text = ""
+    text = ""  # 文本块文本
     for line in block["lines"]:
-        line_text = ""
+        line_text = ""  # 行文本
         for span in line["spans"]:
             line_text += span["text"]
         text += line_text + "\n"
 
-    return [{"text":text, "bbox":block["bbox"], "font":font_dict["en"], "size":min(sizes), "dir":(1.0, 0.0)}]
+    return [
+        {"text": text,
+         "bbox": block["bbox"],
+         # "font": font_dict["en"],
+         "size": min(sizes),
+         "dir": (1.0, 0.0)}
+    ]
 
 
 def get_candidate_block(block):
-    if len(block["lines"]) == 1:
+    if len(block["lines"]) == 1:  # 单行文本块
         line = block["lines"][0]
         if len(line["spans"]) == 1:  # 单行单段
             span = line["spans"][0]
-            return [{"text":span["text"], "bbox":span["bbox"], "font":font_dict["en"], "size":span["size"], "dir":line["dir"]}]
+            return [
+                {"text": span["text"],
+                     "bbox": span["bbox"],
+                     # "font": font_dict["en"],   # XXX
+                     "size": span["size"],
+                     "dir": line["dir"]}
+            ]
         else:  # 单行多段
             lens = [span_len(s) for s in line["spans"]]
-            if sum(lens)/len(line["spans"]) < 3:  # 每段很短
-                return [{"text":s["text"], "bbox":s["bbox"], "font":font_dict["en"], "size":s["size"], "dir":(1.0, 0.0)} for s in line["spans"]]
-            else:
+            if sum(lens)/len(line["spans"]) < 3:  # 每段很短，不合并
+                return [
+                    {"text": s["text"],
+                     "bbox": s["bbox"],
+                     # "font": font_dict["en"],
+                     "size": s["size"],
+                     "dir": (1.0, 0.0)} for s in line["spans"]
+                ]
+            else:  # 合并多个段
                 return merge_block(block)
-    else:  # 多行
+    else:  # 多行文本块
         fonts = []
         sizes = []
         lens = []
@@ -117,62 +143,51 @@ def get_candidate_block(block):
                 sizes.append(span["size"])
                 lens.append(span_len(span))
 
-        if sum(lens) / len(lens) < 3:  # 每段很短
+        if sum(lens) / len(lens) < 3:  # 每段很短，不合并
             result = []
             for line in block["lines"]:
-                result.extend([{"text":s["text"], "bbox":s["bbox"], "font":font_dict["en"], "size":s["size"], "dir":(1.0, 0.0)} for s in line["spans"]])
+                result.extend([
+                    {"text": s["text"],
+                     "bbox": s["bbox"],
+                     # "font": font_dict["en"],
+                     "size": s["size"],
+                     "dir": (1.0, 0.0)} for s in line["spans"]
+                ])
             return result
-        else:
+        else:  # 合并多个段
             return merge_block(block)
 
 
-def print_to_canvas(t, x, y, w, h, pdf, ft, tgt_lang="zh"):
-    h = max(24, h)
-    w = max(24, w)
-    frame = Frame(x, y, w, h, showBoundary=0)
-
-    font = fonts.get(tgt_lang, 'SimSun')  # 根据目标语言获取字体，如果没有对应的字体，则使用 'SimSun' 作为默认字体
-    ft = round(ft)  # 将字体大小四舍五入到最接近的整数
-    style_name = font + str(ft)
-    if style_name not in styles:  # 如果样式不存在，则添加新样式
-        styles.add(ParagraphStyle(fontName=font, name=style_name, fontSize=ft, wordWrap='CJK'))  # 使用获取到的字体
-    story = [Paragraph(t, styles[style_name])]
-    story_inframe = KeepInFrame(w, h, story)
-    frame.addFromList([story_inframe], pdf)
-
-
 def print_to_page(block, canvas, page_h, tgt_lang="zh"):
-    t = block["text"].replace("<", "&lt;")
+    t = block["text"].replace("<", "&lt;")  # reportlab需要转义
     x1, y1, x2, y2 = block["bbox"]
     h = y2 - y1
     w = x2 - x1
 
+    # MuPDF和PDF规范坐标系不同，y坐标变换，x坐标不需要
     y1 = page_h - y1
     y2 = page_h - y2
 
     x = x1
-    y = y2 - 12
+    y = y2 - 12  # XXX: 人为减12，变换问题？
 
-    ft = block["size"]
+    font_size = block["size"]
+    # XXX: 人为设置最小高度和宽度
     h = max(24, h)
     w = max(48, w)
     frame = Frame(x, y, w, h, showBoundary=0)
 
-    font = fonts.get(tgt_lang, 'SimSun')  # 根据目标语言获取字体，如果没有对应的字体，则使用 'SimSun' 作为默认字体
-    ft = round(ft)  # 将字体大小四舍五入到最接近的整数
-    style_name = font + str(ft)
+    # 根据目标语言获取字体，如果没有对应的字体，则使用 'SimSun' 作为默认字体
+    font = fonts.get(tgt_lang, 'SimSun')
+    font_size = round(font_size)  # 将字体大小四舍五入到最接近的整数
+
+    # 创建字体样式
+    style_name = font + str(font_size)
     if style_name not in styles:  # 如果样式不存在，则添加新样式
-        styles.add(ParagraphStyle(fontName=font, name=style_name, fontSize=ft, wordWrap='CJK'))  # 使用获取到的字体
+        styles.add(ParagraphStyle(fontName=font, name=style_name, fontSize=font_size, wordWrap='CJK'))  # 使用获取到的字体
     story = [Paragraph(t, styles[style_name])]
-    story_inframe = KeepInFrame(w, h, story)
+    story_inframe = KeepInFrame(w, h, story)  # XXX: 译文容易大小缩减
     frame.addFromList([story_inframe], canvas)
-
-
-def get_pdf_page_count(filename):
-    with open(filename, 'rb') as file:
-        parser = PDFParser(file)
-        document = PDFDocument(parser)
-        return resolve1(document.catalog['Pages'])['Count']
 
 
 def is_translatable(txt, source_lang):
@@ -193,45 +208,49 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
     total_pages = doc.page_count
     outpdf = pymupdf.open()
 
-    pages = []  # 每页文本块
-
-    translator = None
-
     print("复制图形和图像，提取文本信息...")
-
+    text_pages = []  # 每页文本块
     for page in doc:
+        # 生成输出页面
         outpage = outpdf.new_page(width=page.rect.width, height=page.rect.height)
+
+        # 复制形状
         copy_drawings(page, outpage)
+
+        # 复制图形
         copy_images(page, outpage, doc)
 
+        # 页面文本块
         blocks = page.get_text("dict")["blocks"]
         candidates = []
         for block in blocks:
             if block["type"] != 0:  # XXX:为什么这里有图片？
                 continue
 
+            # 获得候选翻译文本块
             cb = get_candidate_block(block)
             candidates.extend(cb)
-        pages.append(candidates)
+        text_pages.append(candidates)
 
-    outpdf.save("temp.pdf")
+    temp_pdf = get_temp_pdf()  # 中间临时pdf文件
+    outpdf.save(temp_pdf)
 
     print("翻译和输出...")
 
-    input_df = PdfReader(open("temp.pdf", "rb"))  # 输入
-    output_pdf = open(translated_fn, "wb")  # 输出
+    translator = None
+    input_df = PdfReader(open(temp_pdf, "rb"))
+    output_pdf = open(translated_fn, "wb")
     output = PdfWriter()
     for i, template_page in enumerate(input_df.pages):  # 循环每一页
-        print("页面{}".format(i+1))
-        packet = io.BytesIO()
-        # 设置中文（如果不这样设置中文，中文会变成黑色的方块）
-        # pdfmetrics.registerFont(TTFont("SimHei", "SimHei.ttf"))  # 步骤1
+        print("页面{}".format(i))
+
+        packet = io.BytesIO()  # 画布写出目的地
         canvas_draw = Canvas(packet,
-                             pagesize=(input_df.pages[0].mediabox.width, input_df.pages[0].mediabox.height))
+                             pagesize=(input_df.pages[i].mediabox.width, input_df.pages[i].mediabox.height))
 
-        page_h = float(input_df.pages[0].mediabox.height)
+        page_h = float(input_df.pages[i].mediabox.height)  # 页面高度，用户坐标转换
 
-        blocks = pages[i]
+        blocks = text_pages[i]
         for c in blocks:
             text = c["text"]
             text = text.replace("-\n", "").replace("\n", " ").strip()
@@ -249,14 +268,18 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
             if avg_len > 3 and len(toks) > 1:
                 c["text"] = translator.translate_paragraph(text, source_lang, target_lang)
 
+            print(text)
             print(c)
 
+            # 写出到画布
             print_to_page(c, canvas_draw, page_h)
 
         canvas_draw.save()
-        template_page.merge_page(PdfReader(packet).pages[0])
 
+        # 合并文本页面
+        template_page.merge_page(PdfReader(packet).pages[0])
         output.add_page(template_page)
+
         output.write(output_pdf)
 
         if callbacker:
@@ -268,10 +291,10 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
 
 
 if __name__ == "__main__":
-    arg_parser = argparse.ArgumentParser("PDF File Translator")
-    arg_parser.add_argument("--to_lang", type=str, default="zh", help="target language")
-    arg_parser.add_argument("--input_file", type=str, required=True, help="file to be translated")
-    arg_parser.add_argument("--output_file", type=str, default=None, help="translation file")
+    arg_parser = argparse.ArgumentParser("PDF文件翻译")
+    arg_parser.add_argument("-tl", "--to_lang", type=str, default="zh", help="目标语言")
+    arg_parser.add_argument("-i", "--input_file", type=str, required=True, help="输入PDF文件路径")
+    arg_parser.add_argument("-o", "--output_file", type=str, default=None, help="翻译结果PDF文件路径")
     args = arg_parser.parse_args()
 
     to_lang = args.to_lang
@@ -280,7 +303,8 @@ if __name__ == "__main__":
 
     callback = None
 
-    translated_fn = translate_pdf_auto(in_file, source_lang="en", target_lang=to_lang, translation_file=out_file, callbacker=callback)
+    translated_fn = translate_pdf_auto(in_file, source_lang="en", target_lang=to_lang,
+                                       translation_file=out_file, callbacker=callback)
 
     import webbrowser
 
