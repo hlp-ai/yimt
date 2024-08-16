@@ -7,9 +7,10 @@ from logging.handlers import RotatingFileHandler
 logger = logging.getLogger("onmt")
 
 
+# 获得控制台和文件日志记录器
 def init_logger(
     log_file=None,
-    log_file_level=logging.NOTSET,
+    log_file_level=logging.NOTSET,  # 缺省父日志级别
     rotate=False,
     log_level=logging.INFO,
 ):
@@ -23,9 +24,7 @@ def init_logger(
 
     if log_file and log_file != "":
         if rotate:
-            file_handler = RotatingFileHandler(
-                log_file, maxBytes=1000000, backupCount=10
-            )
+            file_handler = RotatingFileHandler(log_file, maxBytes=1000000, backupCount=10)
         else:
             file_handler = logging.FileHandler(log_file)
         file_handler.setLevel(log_file_level)

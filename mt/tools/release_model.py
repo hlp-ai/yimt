@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# 发布模型
 from onmt.bin.release_model import main
 
 

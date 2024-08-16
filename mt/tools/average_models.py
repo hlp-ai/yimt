@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# 检查点平均
 from onmt.bin.average_models import main
 
 
