@@ -1,8 +1,6 @@
-# converts a SentencePiece vocabulary to the format expected by dynamic data
-# (essentially converts float expected counts to "fixed precision" int pseudo
-# counts)
+# 将SentencePiece产生的词典转换成训练使用的词典
+import argparse
 import math
-import sys
 
 from onmt.constants import DefaultTokens
 
@@ -20,8 +18,14 @@ def convert(lines):
 
 
 if __name__ == '__main__':
-    sp_vocab_fn = sys.argv[1]  # SP词典路径
-    vocab_fn = sys.argv[2]  # 输出词典路径
+    parser = argparse.ArgumentParser("转换SentencePiece词典")
+    parser.add_argument("-i", "--input", type=str, required=True, help="SentencePiece词典路径")
+    parser.add_argument("-o", "--output", type=str, required=True, help="输出词典路径")
+
+    args = parser.parse_args()
+
+    sp_vocab_fn = args.input  # SP词典路径
+    vocab_fn = args.output  # 输出词典路径
     with open(sp_vocab_fn, encoding="utf-8") as f, open(vocab_fn, "w", encoding="utf-8") as out:
         for c, w in convert(f):
             out.write('{}\t{}\n'.format(c, w))
