@@ -251,8 +251,8 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
         page_h = float(input_df.pages[i].mediabox.height)  # 页面高度，用户坐标转换
 
         blocks = text_pages[i]
-        for c in blocks:
-            text = c["text"]
+        for block in blocks:
+            text = block["text"]
             text = text.replace("-\n", "").replace("\n", " ").strip()
             if len(text) == 0:
                 continue
@@ -266,13 +266,13 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
             toks = text.split()
             avg_len = sum([len(t) for t in toks]) / len(toks)
             if avg_len > 3 and len(toks) > 1:
-                c["text"] = translator.translate_paragraph(text, source_lang, target_lang)
+                block["text"] = translator.translate_paragraph(text, source_lang, target_lang)
 
             print(text)
-            print(c)
+            print(block)
 
             # 写出到画布
-            print_to_page(c, canvas_draw, page_h)
+            print_to_page(block, canvas_draw, page_h)
 
         canvas_draw.save()
 
