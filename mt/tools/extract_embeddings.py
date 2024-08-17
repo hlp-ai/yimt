@@ -1,3 +1,4 @@
+"""从模型提取词嵌入"""
 import argparse
 
 import torch
@@ -8,16 +9,13 @@ from onmt.utils.parse import ArgumentParser
 import onmt.opts
 from onmt.inputters.inputter import dict_to_vocabs
 
-# from onmt.utils.misc import use_gpu
 from onmt.utils.logging import init_logger, logger
 
-parser = argparse.ArgumentParser(description="translate.py")
+parser = argparse.ArgumentParser(description="从模型提取词嵌入")
 
-parser.add_argument("-model", required=True, help="Path to model .pt file")
-parser.add_argument(
-    "-output_dir", default=".", help="""Path to output the embeddings"""
-)
-parser.add_argument("-gpu", type=int, default=-1, help="Device to run on")
+parser.add_argument("-model", required=True, help="模型文件路径")
+parser.add_argument("-output_dir", default=".", help="输出词嵌入文件路径")
+parser.add_argument("-gpu", type=int, default=-1, help="运行设备")
 
 
 def write_embeddings(filename, vocab, embeddings):
@@ -40,16 +38,12 @@ def main():
 
     # Add in default model arguments, possibly added since training.
     checkpoint = load_checkpoint(opt.model)
-    model_opt = checkpoint["opt"]
 
     vocabs = dict_to_vocabs(checkpoint["vocab"])
-    src_vocab = vocabs["src"]  # assumes src is text
+    src_vocab = vocabs["src"]
     tgt_vocab = vocabs["tgt"]
 
     model_opt = checkpoint["opt"]
-    # this patch is no longer needed included in converter
-    # if hasattr(model_opt, 'rnn_size'):
-    #     model_opt.hidden_size = model_opt.rnn_size
     for arg in dummy_opt.__dict__:
         if arg not in model_opt:
             model_opt.__dict__[arg] = dummy_opt.__dict__[arg]
@@ -61,24 +55,19 @@ def main():
     model = onmt.model_builder.build_base_model(model_opt, vocabs)
     model.load_state_dict(checkpoint)
 
-    encoder = model.encoder  # no encoder for LM task
+    encoder = model.encoder
     decoder = model.decoder
 
     encoder_embeddings = encoder.embeddings.word_lut.weight.data.tolist()
     decoder_embeddings = decoder.embeddings.word_lut.weight.data.tolist()
 
-    logger.info("Writing source embeddings")
-    write_embeddings(
-        opt.output_dir + "/src_embeddings.txt", src_vocab, encoder_embeddings
-    )
+    logger.info("写源语言端词嵌入...")
+    write_embeddings(opt.output_dir + "/src_embeddings.txt", src_vocab, encoder_embeddings)
 
-    logger.info("Writing target embeddings")
-    write_embeddings(
-        opt.output_dir + "/tgt_embeddings.txt", tgt_vocab, decoder_embeddings
-    )
+    logger.info("写目标语言端词嵌入...")
+    write_embeddings(opt.output_dir + "/tgt_embeddings.txt", tgt_vocab, decoder_embeddings)
 
-    logger.info("... done.")
-    logger.info("Converting model...")
+    logger.info("... 完成.")
 
 
 if __name__ == "__main__":
