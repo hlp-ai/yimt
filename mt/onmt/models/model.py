@@ -46,10 +46,6 @@ class BaseModel(nn.Module):
         raise NotImplementedError
 
     def _load_param(self, name, module, param_name, param, buf_list, ckpt_t, offset):
-        # if module.__class__.__name__ == "WQLinear_GEMM":
-        #     # ugly patch because in_feat and out_feat are reversed in WQLinear_GEMM
-        #     param.data = param.data.transpose(0, 1)
-        #     ckpt_t = ckpt_t.transpose(0, 1)
         if name.split(".")[-1] in [
             "linear_keys",
             "linear_values",
@@ -62,6 +58,7 @@ class BaseModel(nn.Module):
         else:
             col_slice_start = 0
             col_slice_end = param.data.size(0)
+
         if param.data.dim() == 2:
             if name.split(".")[-1] in ["final_linear", "w_2"]:
                 row_slice_start = param.data.size(1) * offset
@@ -76,6 +73,7 @@ class BaseModel(nn.Module):
                     row_slice_start:row_slice_end,
                 ].size()
             ), "An error in model's partition and checkpoint's slice was detected"
+
             if name + "." + param_name in buf_list:
                 module.register_buffer(
                     param_name,
@@ -84,35 +82,15 @@ class BaseModel(nn.Module):
                     row_slice_start:row_slice_end,
                     ],
                 )
-                # if module.__class__.__name__ == "WQLinear_GEMM":
-                #     module.register_buffer(
-                #         param_name,
-                #         ckpt_t[
-                #             col_slice_start:col_slice_end,
-                #             row_slice_start:row_slice_end,
-                #         ].transpose(0, 1),
-                #     )
-                # else:
-                #     module.register_buffer(
-                #         param_name,
-                #         ckpt_t[
-                #             col_slice_start:col_slice_end,
-                #             row_slice_start:row_slice_end,
-                #         ],
-                #     )
             else:
-                param.data = ckpt_t[
-                    col_slice_start:col_slice_end,
-                    row_slice_start:row_slice_end,
-                ]
+                param.data = ckpt_t[col_slice_start:col_slice_end, row_slice_start:row_slice_end,]
         else:
             assert (
                 param.data.size() == ckpt_t[col_slice_start:col_slice_end].size()
             ), "An error in model's partition and checkpoint's slice was detected"
+
             if name + "." + param_name in buf_list:
-                module.register_buffer(
-                    param_name, ckpt_t[col_slice_start:col_slice_end]
-                )
+                module.register_buffer(param_name, ckpt_t[col_slice_start:col_slice_end])
             else:
                 param.data = ckpt_t[col_slice_start:col_slice_end]
 
@@ -142,9 +120,7 @@ class BaseModel(nn.Module):
         for buf_name, buf in self.named_buffers():
             buf_list.append(buf_name)
         for name, module in self.named_modules():
-            named_buf_and_param = list(module.named_buffers()) + list(
-                module.named_parameters()
-            )
+            named_buf_and_param = list(module.named_buffers()) + list(module.named_parameters())
             for param_name, param in named_buf_and_param:
                 if len(param_name.split(".")) == 1:  # only last key
                     if name + "." + param_name in checkpoint["model"].keys():
