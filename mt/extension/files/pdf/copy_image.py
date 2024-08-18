@@ -3,7 +3,7 @@ import tempfile
 import fitz
 
 
-imgdir = tempfile.mkdtemp()
+tmp_imgdir = tempfile.mkdtemp()
 
 
 def recoverpix(doc, item):
@@ -59,7 +59,7 @@ def copy_images(page, outpage, in_pdf):
         image = recoverpix(in_pdf, img)
         imgdata = image["image"]
 
-        imgfile = os.path.join(imgdir, "img%05i.%s" % (xref, image["ext"]))
+        imgfile = os.path.join(tmp_imgdir, "img%05i.%s" % (xref, image["ext"]))
         # print(imgfile)
         with open(imgfile, "wb") as fout:
             fout.write(imgdata)
