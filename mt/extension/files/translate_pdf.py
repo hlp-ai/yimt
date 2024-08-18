@@ -87,6 +87,7 @@ def span_len(span):
     return len(span["text"].split())
 
 
+# TODO: pymupdf的分段有问题，这里需要分成段落
 def merge_block(block):
     sizes = []  # 各文本段字体大小
     for line in block["lines"]:
@@ -98,10 +99,14 @@ def merge_block(block):
         line_text = ""  # 行文本
         for span in line["spans"]:
             line_text += span["text"]
-        text += line_text + "\n"
+        line_text = line_text.strip()
+        if line_text[-1] == "-":
+            text += line_text[:-1]
+        else:
+            text += line_text + " "
 
     return [
-        {"text": text,
+        {"text": text.strip(),
          "bbox": block["bbox"],
          # "font": font_dict["en"],
          "size": min(sizes),
@@ -252,8 +257,9 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
 
         blocks = text_pages[i]
         for block in blocks:
+            print(block)
             text = block["text"]
-            text = text.replace("-\n", "").replace("\n", " ").strip()
+            # text = text.replace("-\n", "").replace("\n", " ").strip()
             if len(text) == 0:
                 continue
 
@@ -266,9 +272,30 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
             toks = text.split()
             avg_len = sum([len(t) for t in toks]) / len(toks)
             if avg_len > 3 and len(toks) > 1:
-                block["text"] = translator.translate_paragraph(text, source_lang, target_lang)
+                # source_sents, breaks = paragraph_tokenizer(text, source_lang)
+                source_sents = text.splitlines(True)
+                source_sents_tag = []
+                to_translate = []
+                for s in source_sents:
+                    if should_translate_en(s):
+                        source_sents_tag.append((True, s))
+                        to_translate.append(s)
+                    else:
+                        source_sents_tag.append((False, s))
 
-            print(text)
+                translations = translator.translate_list(to_translate, source_lang, target_lang, callbacker)
+                result = ""
+                j = 0
+                for i in range(len(source_sents_tag)):
+                    if source_sents_tag[i][0]:
+                        result += translations[j] + " "
+                        j += 1
+                    else:
+                        result += source_sents_tag[i][1] + " "
+
+                block["text"] = result.strip()
+
+            # print(text)
             print(block)
 
             # 写出到画布
