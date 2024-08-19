@@ -18,6 +18,7 @@ from reportlab.platypus import Paragraph, Frame, KeepInFrame
 from extension.files.pdf.copy_drawings import copy_drawings
 from extension.files.pdf.copy_image import copy_images
 from service.mt import translator_factory
+from service.split_text import paragraph_tokenizer
 from service.utils import detect_lang
 
 
@@ -163,6 +164,99 @@ def get_candidate_block(block):
             return merge_block(block)
 
 
+def block_heigth(b):
+    return b[3] - b[1]
+
+
+def block_width(b):
+    return b[2] - b[0]
+
+
+def in_paragraph(line1, line2):
+    eps = 3.0
+    bbox1 = line1["bbox"]
+    bbox2 = line2["bbox"]
+
+    h1 = block_heigth(bbox1)
+    w1 = block_width(bbox1)
+    x11 = bbox1[0]
+    x12 = bbox1[2]
+
+    h2 = block_heigth(bbox2)
+    w2 = block_width(bbox2)
+    x21 = bbox2[0]
+    x22 = bbox2[2]
+
+    # if abs(h2-h1) < eps and abs(w2-w1) < eps and abs(x21-x11) < eps:
+    #     return True
+
+    # 行高度接近，且左边或右边对齐
+    if abs(h2-h1) < eps and (abs(x21-x11) < eps or abs(x22-x12) <eps):
+        return True
+
+    return False
+
+
+def merge_spans(line):
+    text = ""
+    for span in line["spans"]:
+        text += span["text"] + " "
+
+    return text
+
+
+def create_paragraph(block, start, end):
+    x1, y1, x2, y2 = 999999.0, 999999.0,0.0, 0.0
+    text = ""
+    size = block["lines"][start]["spans"][0]["size"]
+    for i in range(start, end+1):
+        line = block["lines"][i]
+        text_line = merge_spans(line)
+        text += text_line + "\n"
+        x1 = min(line["bbox"][0], x1)
+        y1 = min(line["bbox"][1], y1)
+        x2 = max(line["bbox"][2], x2)
+        y2 = max(line["bbox"][3], y2)
+
+    return {"text": text.strip(),
+            "bbox": (x1, y1, x2, y2),
+            "size": size}
+
+
+def get_paragraphs(block):
+    n_lines = len(block["lines"])
+    if n_lines == 1:  # 单行文本块
+        line = block["lines"][0]
+        bbox = line["bbox"]
+
+        text = ""
+        size = line["spans"][0]["size"]
+        text = merge_spans(line)
+
+        return [{"text": text.strip(),
+                 "bbox": bbox,
+                 "size": size}]
+    else:  # 多行文本块
+        paragraphs = []
+        i = 0
+        start_idx = i
+        while i < n_lines:
+            if i+1 < n_lines:
+                if not in_paragraph(block["lines"][i], block["lines"][i+1]):
+                    # 创建start_idx到i的段落
+                    p = create_paragraph(block, start_idx, i)
+                    paragraphs.append(p)
+                    start_idx = i + 1
+
+            i += 1
+
+        if start_idx <= i:
+            p = create_paragraph(block, start_idx, i-1)
+            paragraphs.append(p)
+
+        return paragraphs
+
+
 def print_to_page(block, canvas, page_h, tgt_lang="zh"):
     t = block["text"].replace("<", "&lt;")  # reportlab需要转义
     x1, y1, x2, y2 = block["bbox"]
@@ -232,9 +326,13 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
             if block["type"] != 0:  # XXX:为什么这里有图片？
                 continue
 
-            # 获得候选翻译文本块
-            cb = get_candidate_block(block)
-            candidates.extend(cb)
+            # # 获得候选翻译文本块
+            # cb = get_candidate_block(block)
+            # candidates.extend(cb)
+
+            paragraphs = get_paragraphs(block)
+            candidates.extend(paragraphs)
+
         text_pages.append(candidates)
 
     temp_pdf = get_temp_pdf()  # 中间临时pdf文件
@@ -259,7 +357,7 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
         for block in blocks:
             print(block)
             text = block["text"]
-            # text = text.replace("-\n", "").replace("\n", " ").strip()
+            text = text.replace("-\n", "").replace("\n", " ").strip()
             if len(text) == 0:
                 continue
 
@@ -272,8 +370,8 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
             toks = text.split()
             avg_len = sum([len(t) for t in toks]) / len(toks)
             if avg_len > 3 and len(toks) > 1:
-                # source_sents, breaks = paragraph_tokenizer(text, source_lang)
-                source_sents = text.splitlines(True)
+                source_sents, breaks = paragraph_tokenizer(text, source_lang)
+                # source_sents = text.splitlines(True)
                 source_sents_tag = []
                 to_translate = []
                 for s in source_sents:
