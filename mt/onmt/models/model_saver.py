@@ -195,13 +195,9 @@ class ModelSaver(ModelSaverBase):
                     "w_1",
                     "w_3",
                 ]:
-                    fm_sd[key] = torch.cat(
-                        [full_model[i][key].cpu() for i in range(ws)], 0
-                    )
+                    fm_sd[key] = torch.cat([full_model[i][key].cpu() for i in range(ws)], 0)
                 elif key.split(".")[-1] in ["final_linear", "w_2"]:
-                    fm_sd[key] = torch.cat(
-                        [full_model[i][key].cpu() for i in range(ws)], 1
-                    )
+                    fm_sd[key] = torch.cat([full_model[i][key].cpu() for i in range(ws)], 1)
                 else:
                     fm_sd[key] = full_model[0][key]
             model_state_dict = fm_sd
@@ -249,13 +245,9 @@ class ModelSaver(ModelSaverBase):
                     "w_1",
                     "w_3",
                 ]:
-                    fm_sd[key] = torch.cat(
-                        [full_model[i][key].cpu() for i in range(ws)], 0
-                    )
+                    fm_sd[key] = torch.cat([full_model[i][key].cpu() for i in range(ws)], 0)
                 elif key.split(".")[-1] in ["final_linear", "w_2"]:
-                    fm_sd[key] = torch.cat(
-                        [full_model[i][key].cpu() for i in range(ws)], 1
-                    )
+                    fm_sd[key] = torch.cat([full_model[i][key].cpu() for i in range(ws)], 1)
                 else:
                     fm_sd[key] = full_model[0][key]
             model_state_dict = fm_sd

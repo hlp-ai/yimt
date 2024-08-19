@@ -116,18 +116,18 @@ class BaseModel(nn.Module):
         # so we load the weights  module by module and transfer them to GPU for quantization
         if device == torch.device("cpu"):
             offset = 0
+
         buf_list = []
         for buf_name, buf in self.named_buffers():
             buf_list.append(buf_name)
+
         for name, module in self.named_modules():
             named_buf_and_param = list(module.named_buffers()) + list(module.named_parameters())
             for param_name, param in named_buf_and_param:
                 if len(param_name.split(".")) == 1:  # only last key
                     if name + "." + param_name in checkpoint["model"].keys():
                         ckpt_t = checkpoint["model"][name + "." + param_name]
-                        self._load_param(
-                            name, module, param_name, param, buf_list, ckpt_t, offset
-                        )
+                        self._load_param(name, module, param_name, param, buf_list, ckpt_t, offset)
                         del checkpoint["model"][name + "." + param_name]
                     elif (
                         "generator" in checkpoint.keys()
@@ -135,15 +135,12 @@ class BaseModel(nn.Module):
                         and checkpoint["generator"] is not None
                         and param_name in checkpoint["generator"].keys()
                     ):
-                        keyname = (
-                            name + "." + param_name if "linear" in name else param_name
-                        )
+                        keyname = (name + "." + param_name if "linear" in name else param_name)
                         param.data = checkpoint["generator"][keyname]
                         del checkpoint["generator"][keyname]
                     elif strict and "lora" not in param_name:
-                        raise ValueError(
-                            "Missing key in checkpoint: %s" % name + "." + param_name
-                        )
+                        raise ValueError("Missing key in checkpoint: %s" % name + "." + param_name)
+
                     if precision != torch.int8:
                         module.to(precision)
                     module.to(device)
@@ -156,6 +153,7 @@ class BaseModel(nn.Module):
                     "Extra keys in model state_dict do not match the model config %s"
                     % checkpoint["model"].keys()
                 )
+
         if checkpoint["generator"]:
             for key in checkpoint["generator"].keys():
                 if key not in buf_list:
@@ -250,17 +248,14 @@ class NMTModel(BaseModel):
         Then the output of encoder ``enc_out`` is forwarded to the
         decoder along with the target excluding the last token.
         The decoder state is initiliazed with:
-        * enc_final_hs in the case of RNNs
-        * enc_out + enc_final_hs in the case of CNNs
         * src in the case of Transformer"""
-
         dec_in = tgt[:, :-1, :]
         enc_out, src_len = self.encoder(src, src_len)
+
         if not bptt:
             self.decoder.init_state(src, enc_out)
-        dec_out, attns = self.decoder(
-            dec_in, enc_out, src_len=src_len, with_align=with_align
-        )
+
+        dec_out, attns = self.decoder(dec_in, enc_out, src_len=src_len, with_align=with_align)
         return dec_out, attns
 
     def update_dropout(self, dropout, attention_dropout):
