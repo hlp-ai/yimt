@@ -218,9 +218,7 @@ def use_embeddings_from_checkpoint(vocabs, model, checkpoint):
                 old_i = ckp_vocabs[side].lookup_token(tok)
                 model_dict[emb_name][i] = checkpoint["model"][emb_name][old_i]
                 if side == "tgt":
-                    generator_dict["weight"][i] = checkpoint["generator"]["weight"][
-                        old_i
-                    ]
+                    generator_dict["weight"][i] = checkpoint["generator"]["weight"][old_i]
                     generator_dict["bias"][i] = checkpoint["generator"]["bias"][old_i]
             else:
                 # Just for debugging purposes
@@ -293,13 +291,9 @@ def build_model(model_opt, opt, vocabs, checkpoint, device_id):
             raise ValueError("You need either param_init != 0 OR init_glorot True")
 
         if hasattr(model, "encoder") and hasattr(model.encoder, "embeddings"):
-            model.encoder.embeddings.load_pretrained_vectors(
-                model_opt.pre_word_vecs_enc
-            )
+            model.encoder.embeddings.load_pretrained_vectors(model_opt.pre_word_vecs_enc)
         if hasattr(model.decoder, "embeddings"):
-            model.decoder.embeddings.load_pretrained_vectors(
-                model_opt.pre_word_vecs_dec
-            )
+            model.decoder.embeddings.load_pretrained_vectors(model_opt.pre_word_vecs_dec)
 
     # ONLY for legacy fusedam with amp pytorch requires NOT to half the model
     if (
@@ -333,9 +327,7 @@ def build_model(model_opt, opt, vocabs, checkpoint, device_id):
                 use_embeddings_from_checkpoint(vocabs, model, checkpoint)
                 # after this checkpoint contains no embeddings
             else:
-                raise ValueError(
-                    "Update Vocab is not compatible with safetensors mode (yet"
-                )
+                raise ValueError("Update Vocab is not compatible with safetensors mode")
 
         # when using LoRa or updating the vocab (no more embeddings in ckpt)
         # => strict=False when loading state_dict
