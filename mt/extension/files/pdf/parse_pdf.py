@@ -24,6 +24,64 @@ def flags_decomposer(flags):
     return ", ".join(l)
 
 
+def simplify_float(n):
+    f = float("{:.2f}".format(n))
+    return f
+
+
+def simplify_floats(ns):
+    return [simplify_float(n) for n in ns]
+
+
+def dump_span(span):
+    text = span["text"]
+    size = simplify_float(span["size"])
+    font = span["font"]
+    bbox = simplify_floats(span["bbox"])
+    origin = simplify_floats(span["origin"])
+    flags = flags_decomposer(span["flags"])
+    color = span["color"]
+    ascender = simplify_float(span["ascender"])
+    descender = simplify_float(span["descender"])
+
+    return f"\t\t\t<span bbox='{bbox}' origin='{origin}' size='{size}' color='{color}' font='{font}' style='{flags}' ascender='{ascender}' descender='{descender}'>{text}</span>"
+
+
+def dump_line(line):
+    bbox = simplify_floats(line["bbox"])
+    dir = line["dir"]
+
+    spans = [dump_span(s) for s in line["spans"]]
+    spans = "\n".join(spans)
+
+    return f"\t\t<line bbox='{bbox}' dir='{dir}'>\n{spans}\n\t\t</line>"
+
+
+def dump_block(block):
+    bbox = simplify_floats(block["bbox"])
+    type = block["type"]
+    number = block["number"]
+
+    lines = [dump_line(line) for line in block["lines"]]
+    lines = "\n".join(lines)
+
+    return f"\t<block bbox='{bbox}' type='{type}' number='{number}'>\n{lines}\n\t</block>"
+
+
+def dump_page(page):
+    blocks = page.get_text("dict")["blocks"]
+    blocks = [dump_block(block) for block in blocks]
+    blocks = "\n".join(blocks)
+
+    mediabox = (simplify_float(page.mediabox.x0), simplify_float(page.mediabox.y0),
+                simplify_float(page.mediabox.x1), simplify_float(page.mediabox.y1))
+
+    rect = (simplify_float(page.rect.x0), simplify_float(page.rect.y0),
+                simplify_float(page.rect.x1), simplify_float(page.rect.y1))
+
+    return f"<page mediabox='{mediabox}' rect='{rect}' rotation='{page.rotation}' number='{page.number}'>\n{blocks}\n</page>"
+
+
 def parse_page(page):
     print(page.mediabox)
     print(page.rect)
@@ -96,7 +154,8 @@ def parse_pdf(fn):
 
     print()
 
-    parse_page(doc[0])
+    # parse_page(doc[0])
+    print(dump_page(doc[0]))
 
     # parse_shape(doc[0])
 

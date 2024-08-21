@@ -8,7 +8,7 @@ def copy_text(page, outpage):
     # read page text as a dictionary, suppressing extra spaces in CJK fonts
     blocks = page.get_text("dict")["blocks"]
     # print(len(blocks), "blocks")
-    # pprint(blocks)
+    pprint(blocks)
     for i, b in enumerate(blocks):  # iterate through the text blocks
         # print("****block {}****".format(i+1))
         if b["type"] != 0:  # XXX:为什么这里有图片？
