@@ -66,24 +66,19 @@ class BaseModel(nn.Module):
             else:
                 row_slice_start = 0
                 row_slice_end = param.data.size(1)
+
             assert (
                 param.data.size()
-                == ckpt_t[
-                    col_slice_start:col_slice_end,
-                    row_slice_start:row_slice_end,
-                ].size()
+                == ckpt_t[col_slice_start:col_slice_end, row_slice_start:row_slice_end].size()
             ), "An error in model's partition and checkpoint's slice was detected"
 
             if name + "." + param_name in buf_list:
                 module.register_buffer(
                     param_name,
-                    ckpt_t[
-                    col_slice_start:col_slice_end,
-                    row_slice_start:row_slice_end,
-                    ],
+                    ckpt_t[col_slice_start:col_slice_end, row_slice_start:row_slice_end]
                 )
             else:
-                param.data = ckpt_t[col_slice_start:col_slice_end, row_slice_start:row_slice_end,]
+                param.data = ckpt_t[col_slice_start:col_slice_end, row_slice_start:row_slice_end]
         else:
             assert (
                 param.data.size() == ckpt_t[col_slice_start:col_slice_end].size()
@@ -145,9 +140,7 @@ class BaseModel(nn.Module):
                         module.to(precision)
                     module.to(device)
 
-        for key in checkpoint[
-            "model"
-        ].keys():  # if some keys are left in checkpoint after deletion
+        for key in checkpoint["model"].keys():  # if some keys are left in checkpoint after deletion
             if key not in buf_list:
                 raise ValueError(
                     "Extra keys in model state_dict do not match the model config %s"
@@ -201,19 +194,14 @@ class BaseModel(nn.Module):
         for buf_name, buf in self.named_buffers():
             buf_list.append(buf_name)
         for name, module in self.named_modules():
-            named_buf_and_param = list(module.named_buffers()) + list(
-                module.named_parameters()
-            )
+            named_buf_and_param = list(module.named_buffers()) + list(module.named_parameters())
             for param_name, param in named_buf_and_param:
                 if len(param_name.split(".")) == 1:  # only last key
                     if name + "." + param_name in keys_shard.keys():
-
                         ckpt_t = f[keys_shard[name + "." + param_name]].get_tensor(
                             name + "." + param_name
                         )
-                        self._load_param(
-                            name, module, param_name, param, buf_list, ckpt_t, offset
-                        )
+                        self._load_param(name, module, param_name, param, buf_list, ckpt_t, offset)
                         keyfound[name + "." + param_name] = True
                     elif strict and "lora" not in param_name:
                         raise ValueError(
@@ -221,6 +209,7 @@ class BaseModel(nn.Module):
                             + "."
                             + param_name
                         )
+
                     if precision == torch.int8:
                         torch.quantization.quantize_dynamic(module, inplace=True)
                     else:

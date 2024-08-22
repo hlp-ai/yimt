@@ -55,15 +55,11 @@ class InferenceEngine(object):
 
     def infer_file_parallel(self):
         """File inference in mulitprocessing with partitioned models."""
-        raise NotImplementedError(
-            "The inference in mulitprocessing with partitioned models is not implemented."
-        )
+        raise NotImplementedError("The inference in mulitprocessing with partitioned models is not implemented.")
 
     def infer_list_parallel(self, src):
         """The inference in mulitprocessing with partitioned models."""
-        raise NotImplementedError(
-            "The inference in mulitprocessing with partitioned models is not implemented."
-        )
+        raise NotImplementedError("The inference in mulitprocessing with partitioned models is not implemented.")
 
     def terminate(self):
         pass
@@ -113,9 +109,7 @@ class InferenceEnginePY(InferenceEngine):
                 self.error_handler.add_child(self.procs[device_id].pid)
         else:
             self.device_id = opt.gpu
-            self.translator = build_translator(
-                opt, self.device_id, logger=self.logger, report_score=True
-            )
+            self.translator = build_translator(opt, self.device_id, logger=self.logger, report_score=True)
             self.transforms_cls = get_transforms_cls(opt._all_transform)
             self.vocabs = self.translator.vocabs
 
