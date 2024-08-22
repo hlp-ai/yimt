@@ -1,4 +1,4 @@
-"""TXT file translation"""
+"""txt纯文本文件翻译"""
 import os
 import argparse
 
@@ -33,14 +33,14 @@ def translate_txt_auto(txt_fn, source_lang="auto", target_lang="zh", translation
 
 
 if __name__ == "__main__":
-    arg_parser = argparse.ArgumentParser("TXT File Translator")
-    arg_parser.add_argument("--to_lang", type=str, default="zh", help="target language")
-    arg_parser.add_argument("--input_file", type=str, required=True, help="file to be translated")
-    arg_parser.add_argument("--output_file", type=str, default=None, help="translation file")
+    arg_parser = argparse.ArgumentParser("纯文本文档翻译")
+    arg_parser.add_argument("-tl", "--to_lang", type=str, default="zh", help="目标语言")
+    arg_parser.add_argument("-i", "--input", type=str, required=True, help="待翻译文本文件")
+    arg_parser.add_argument("-o", "--output", type=str, default=None, help="译文文件")
     args = arg_parser.parse_args()
 
-    in_file = args.input_file
-    out_file = args.output_file
+    in_file = args.input
+    out_file = args.output
     to_lang = args.to_lang
 
     callback = None
