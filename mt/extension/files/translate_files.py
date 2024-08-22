@@ -23,12 +23,14 @@ class TranslationProgress(Progress):
         if fid is None:
             return
         progress_info = "{}/{}".format(done, total)
-        print(fid, progress_info)
-
         self.info_dict[fid] = progress_info
+
+        print(fid, progress_info)
 
     def set_info(self, info, fid):
         self.info_dict[fid] = info
+
+        print(fid, info)
 
     def get_info(self, fid=None):
         for f, p in self.info_dict.items():
