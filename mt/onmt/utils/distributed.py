@@ -189,10 +189,8 @@ def spawned_infer(opt, device_id, error_queue, queue_instruct, queue_result):
     try:
         gpu_rank = multi_init(opt, device_id)
         if gpu_rank != opt.gpu_ranks[device_id]:
-            raise AssertionError(
-                "An error occurred in \
-                  Distributed initialization"
-            )
+            raise AssertionError("An error occurred in Distributed initialization")
+
         torch.cuda.set_device(device_id)
         init_logger(opt.log_file)
         translator = build_translator(opt, device_id, logger=logger, report_score=True)

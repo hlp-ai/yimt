@@ -27,9 +27,7 @@ class TranslationBuilder(object):
         if phrase_table != "" and os.path.exists(phrase_table):
             with open(phrase_table) as phrase_table_fd:
                 for line in phrase_table_fd:
-                    phrase_src, phrase_trg = line.rstrip("\n").split(
-                        DefaultTokens.PHRASE_TABLE_SEPARATOR
-                    )
+                    phrase_src, phrase_trg = line.rstrip("\n").split(DefaultTokens.PHRASE_TABLE_SEPARATOR)
                     self.phrase_table_dict[phrase_src] = phrase_trg
 
     def _build_target_tokens(self, src, srclen, pred, attn, voc, dyn_voc):
@@ -53,7 +51,7 @@ class TranslationBuilder(object):
                     tokens[i] = src_tok
                     if self.phrase_table_dict:
                         if src_tok in self.phrase_table_dict:
-                            tokens[i] = self.phrase_table_dict[src_tok]
+                            tokens[i] = self.phrase_table_dict[src_tok]  # TODO: 子词查词组表？
         return tokens
 
     def from_batch(self, translation_batch):
@@ -62,9 +60,9 @@ class TranslationBuilder(object):
             dyn_voc_batch = batch["src_ex_vocab"]
         else:
             dyn_voc_batch = None
-        assert len(translation_batch["gold_score"]) == len(
-            translation_batch["predictions"]
-        )
+
+        assert len(translation_batch["gold_score"]) == len(translation_batch["predictions"])
+
         batch_size = len(batch["srclen"])
 
         preds, pred_score, attn, align, gold_score, ind = (
