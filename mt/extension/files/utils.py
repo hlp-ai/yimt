@@ -1,6 +1,37 @@
 import re
 
 
+class Progress:
+
+    def report(self, total, done, fid=None):
+        pass
+
+
+class TranslationProgress(Progress):
+    def __init__(self):
+        self.info_dict = {}
+
+    def report(self, total, done, fid=None):
+        if fid is None:
+            return
+        progress_info = "{}/{}".format(done, total)
+        self.info_dict[fid] = progress_info
+
+        print("[Progress]", fid, progress_info)
+
+    def set_info(self, info, fid):
+        self.info_dict[fid] = info
+
+        print("[Progress]", fid, info)
+
+    def get_info(self, fid=None):
+        for f, p in self.info_dict.items():
+            if f == fid or f.endswith(fid):
+                return p
+
+        return ""
+
+
 def is_number(s):
     try:
         float(s)  # 尝试将字符串转换为浮点数

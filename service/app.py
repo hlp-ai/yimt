@@ -11,9 +11,10 @@ from flask import (Flask, abort, jsonify, render_template, request, send_file, r
 from scipy.io.wavfile import write
 from werkzeug.utils import secure_filename
 
-from extension.files.translate_files import translate_doc, support, TranslationProgress
+from extension.files.translate_files import translate_doc, support
 from extension.files.translate_html import translate_tag_list
 from extension.files.translate_tag import translate_html
+from extension.files.utils import TranslationProgress
 from service import remove_translated_files
 from service.ad_db import get_addb
 from service.api_keys import APIKeyDB

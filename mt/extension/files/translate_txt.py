@@ -2,6 +2,7 @@
 import os
 import argparse
 
+from extension.files.utils import TranslationProgress
 from service.mt import translator_factory
 from service.utils import detect_lang
 
@@ -13,6 +14,9 @@ def translate_txt_auto(txt_fn, source_lang="auto", target_lang="zh", translation
     else:
         translated_txt_fn = translation_file
 
+    if callbacker:
+        callbacker.set_info("读取源文档...", txt_fn)
+
     txt = open(txt_fn, encoding="utf-8").read()  # TODO: 大文本文件一次读入有问题
 
     if source_lang == "auto":
@@ -23,7 +27,10 @@ def translate_txt_auto(txt_fn, source_lang="auto", target_lang="zh", translation
     if translator is None:
         raise ValueError("给定语言不支持: {}".format(source_lang+"-"+target_lang))
 
-    translation = translator.translate_paragraph(txt, source_lang, target_lang, callbacker)
+    translation = translator.translate_paragraph(txt, source_lang, target_lang, callbacker, txt_fn)
+
+    if callbacker:
+        callbacker.set_info("翻译完成，写出翻译结果", txt_fn)
 
     out_f = open(translated_txt_fn, "w", encoding="utf-8")
     out_f.write(translation)
@@ -43,7 +50,7 @@ if __name__ == "__main__":
     out_file = args.output
     to_lang = args.to_lang
 
-    callback = None
+    callback = TranslationProgress()
 
     translated_txt_fn = translate_txt_auto(in_file, target_lang=to_lang, translation_file=out_file, callbacker=callback)
 

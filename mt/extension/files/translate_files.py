@@ -9,37 +9,6 @@ from extension.files.translate_ppt import translate_ppt_auto
 from extension.files.translate_txt import translate_txt_auto
 
 
-class Progress:
-
-    def report(self, total, done, fid=None):
-        pass
-
-
-class TranslationProgress(Progress):
-    def __init__(self):
-        self.info_dict = {}
-
-    def report(self, total, done, fid=None):
-        if fid is None:
-            return
-        progress_info = "{}/{}".format(done, total)
-        self.info_dict[fid] = progress_info
-
-        print(fid, progress_info)
-
-    def set_info(self, info, fid):
-        self.info_dict[fid] = info
-
-        print(fid, info)
-
-    def get_info(self, fid=None):
-        for f, p in self.info_dict.items():
-            if f == fid or f.endswith(fid):
-                return p
-
-        return ""
-
-
 def support(file_type):
     return file_type in [".txt", ".pdf", ".html", ".htm", ".xhtml", ".xml", ".sgml", ".docx", ".pptx"]
 

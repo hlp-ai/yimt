@@ -37,7 +37,7 @@ class Translator:
         self.batch_size = batch_size  # 句子数
         self.tm_saver = get_tm_saver()
 
-    def translate_list(self, texts, sl, tl, callbacker=None):
+    def translate_list(self, texts, sl, tl, callbacker=None, fn=None):
         results = []
         total = len(texts)
         done = 0
@@ -61,8 +61,8 @@ class Translator:
             results.extend(translations)
             done += len(to_translate)
 
-            if callbacker:
-                callbacker.report(total, done)
+            if callbacker and fn:
+                callbacker.report(total, done, fn)
 
         self.tm_saver.flush()
 
@@ -71,7 +71,7 @@ class Translator:
     def _preprocess(self, texts, sl, tl):
         return texts;
 
-    def translate_paragraph(self, texts, sl, tl, callbacker=None):
+    def translate_paragraph(self, texts, sl, tl, callbacker=None, fn=None):
         """Translate text paragraphs
 
         the text will be segmented into paragraphs, and then paragraph segmented into sentences.
@@ -83,9 +83,12 @@ class Translator:
         Returns:
              translated text with paragraphs
         """
+        if callbacker and fn:
+            callbacker.set_info("文本分段...", fn)
+
         source_sents, breaks = paragraph_tokenizer(texts, sl)
 
-        translations = self.translate_list(source_sents, sl, tl, callbacker)
+        translations = self.translate_list(source_sents, sl, tl, callbacker, fn)
 
         translation = paragraph_detokenizer(translations, breaks)
 
