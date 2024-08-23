@@ -109,7 +109,7 @@ class InferenceEnginePY(InferenceEngine):
                 self.error_handler.add_child(self.procs[device_id].pid)
         else:
             self.device_id = opt.gpu
-            self.translator = build_translator(opt, self.device_id, logger=self.logger, report_score=True)
+            self.translator = build_translator(opt, self.device_id, logger=self.logger, report_score=False)
             self.transforms_cls = get_transforms_cls(opt._all_transform)
             self.vocabs = self.translator.vocabs
 
