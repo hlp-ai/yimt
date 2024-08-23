@@ -19,6 +19,9 @@ class Translator:
         self.conf_file = conf_params["model_or_config_dir"]
         self.lang_pairs = conf_params["directions"]
 
+        if "batch_size" in conf_params:
+            batch_size = conf_params["batch_size"]
+
         self._init(self.conf_file, batch_size);
 
     def _init(self, conf_file, batch_size=32):
@@ -47,7 +50,7 @@ class Translator:
             to_translate = self._preprocess(to_translate, sl, tl)
 
             with mutex:
-                scores, preds = self.engine.infer_list(to_translate)
+                scores, preds = self.engine.infer_list(to_translate)  # 若batch_type为tokens, 自动分批
 
             translations = [p[0] for p in preds]
 
