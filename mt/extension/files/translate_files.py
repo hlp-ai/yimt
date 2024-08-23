@@ -17,6 +17,10 @@ def get_type(fn):
     return os.path.splitext(fn)[1]
 
 
+# 标签文档类型
+TAG_FILES = [".html", ".htm", ".xhtml", ".xml", ".sgml"]
+
+
 def translate_doc(src_fn, source_lang="auto", target_lang="zh", translation_file=None, callbacker=None):
     file_type = get_type(src_fn)
 
@@ -26,7 +30,7 @@ def translate_doc(src_fn, source_lang="auto", target_lang="zh", translation_file
         return translate_pdf_auto(src_fn, source_lang, target_lang, translation_file, callbacker=callbacker)
     elif file_type == ".docx":
         return translate_docx_auto(src_fn, source_lang, target_lang, translation_file, callbacker=callbacker)
-    elif file_type in [".html", ".htm", ".xhtml", ".xml"]:
+    elif file_type in TAG_FILES:
         return translate_ml_auto(src_fn, source_lang, target_lang, translation_file, callbacker=callbacker)
     elif file_type == ".pptx":
         return translate_ppt_auto(src_fn, source_lang, target_lang, translation_file, callbacker=callbacker)

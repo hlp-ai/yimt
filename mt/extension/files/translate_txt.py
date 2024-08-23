@@ -42,7 +42,7 @@ def translate_txt_auto(txt_fn, source_lang="auto", target_lang="zh", translation
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser("纯文本文档翻译")
     arg_parser.add_argument("-tl", "--to_lang", type=str, default="zh", help="目标语言")
-    arg_parser.add_argument("-i", "--input", type=str, required=True, help="待翻译文本文件")
+    arg_parser.add_argument("-i", "--input", type=str, required=True, help="待翻译文件")
     arg_parser.add_argument("-o", "--output", type=str, default=None, help="译文文件")
     args = arg_parser.parse_args()
 

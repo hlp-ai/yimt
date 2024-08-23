@@ -315,7 +315,7 @@ def create_app(args):
         if translator is None:
             abort(400, description="Language pair %s is not supported" % lang_pair)
 
-        if text_format == "html":
+        if text_format == "html":  # TODO: 没有调用，可以删除？
             translation = str(translate_html(translator, src))
         else:
             src = may_combine_paragraph(src)
@@ -331,22 +331,27 @@ def create_app(args):
 
     @app.route("/translate_page")
     def translate_page():
-        q = request.values.get("q")
+        q = request.values.get("q")  # URL
         source_lang = request.values.get("source")
         target_lang = request.values.get("target")
         text_format = request.values.get("format")
         api_key = request.values.get("api_key")
         try:
+            # 获得URL对应的页面
             page = get_page(q)
+
+            # 保存页面到临时文件
             filepath = os.path.join(get_upload_dir(), str(random.randint(0, 10000))+".html")
             with open(filepath, "w", encoding="utf-8") as f:
                 f.write(page)
 
+            # 翻译页面
             translated_file_path = translate_doc(filepath, source_lang, target_lang, callbacker=translate_progress)
-            translated_filename = os.path.basename(translated_file_path)
 
+            translated_filename = os.path.basename(translated_file_path)
             translatedFileUrl = url_for('download_file', filename=translated_filename, _external=True)
 
+            # 重定向到对照
             return redirect("/reference?file_path={}&translated_file_path={}&translated_file_url={}&file_type={}".format(quote(filepath),
                                                                                                                quote(translated_file_path),
                                                                                                                quote(translatedFileUrl),

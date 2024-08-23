@@ -3,7 +3,7 @@ import os
 
 from bs4 import BeautifulSoup, Comment, Doctype
 
-from extension.files.utils import should_translate
+from extension.files.utils import should_translate, TranslationProgress
 from service.mt import translator_factory
 from service.utils import detect_lang
 
@@ -75,15 +75,17 @@ def translate_ml_auto(in_fn, source_lang="auto", target_lang="zh", translation_f
     else:
         translated_fn = translation_file
 
-    in_fn = in_fn.lower()
+    if callbacker:
+        callbacker.set_info("读取源文档...", in_fn)
+
+    in_fn_lower = in_fn.lower()
     html_txt = open(in_fn, encoding="utf-8").read()
-    if in_fn.endswith(".html") or in_fn.endswith(".xhtml") or in_fn.endswith(".htm"):
+    if in_fn_lower.endswith(".html") or in_fn_lower.endswith(".xhtml") or in_fn_lower.endswith(".htm"):
         soup = BeautifulSoup(html_txt, "html.parser")
-    elif in_fn.endswith(".xml") or in_fn.endswith(".sgml"):
+    elif in_fn_lower.endswith(".xml") or in_fn_lower.endswith(".sgml"):
         soup = BeautifulSoup(html_txt, "xml")
 
     body = soup
-
     to_translated_elements = []
     to_translated_txt = []
     for element in body.findAll(text=True):  # 对所有文本节点
@@ -91,12 +93,10 @@ def translate_ml_auto(in_fn, source_lang="auto", target_lang="zh", translation_f
             if type(element.string) == Comment:  # 不翻译注释
                 continue
 
-            if type(element.string) == Doctype:
+            if type(element.string) == Doctype: # 不翻译文档类型节点
                 continue
 
             t = element.string
-            # if len(t.strip()) == 0:
-            #     continue
             if not should_translate(t):
                 continue
 
@@ -111,10 +111,15 @@ def translate_ml_auto(in_fn, source_lang="auto", target_lang="zh", translation_f
     if translator is None:
         raise ValueError("给定语言不支持: {}".format(source_lang+"-"+target_lang))
 
-    translations = translator.translate_list(to_translated_txt, sl=source_lang, tl=target_lang, callbacker=callbacker)
+    translations = translator.translate_list(to_translated_txt, sl=source_lang, tl=target_lang,
+                                             callbacker=callbacker,
+                                             fn=in_fn)
 
     for e, t in zip(to_translated_elements, translations):
         e.replaceWith(t)
+
+    if callbacker:
+        callbacker.set_info("翻译完成，写出翻译结果", in_fn)
 
     out_f = open(translated_fn, "w", encoding="utf-8")
     out_f.write(soup.prettify())
@@ -124,17 +129,20 @@ def translate_ml_auto(in_fn, source_lang="auto", target_lang="zh", translation_f
 
 
 if __name__ == "__main__":
-    arg_parser = argparse.ArgumentParser("HTML/XML File Translator")
-    arg_parser.add_argument("--to_lang", type=str, default="zh", help="target language")
-    arg_parser.add_argument("--input_file", type=str, required=True, help="file to be translated")
-    arg_parser.add_argument("--output_file", type=str, default=None, help="translation file")
+    arg_parser = argparse.ArgumentParser("标记语言文件翻译")
+    arg_parser.add_argument("-tl", "--to_lang", type=str, default="zh", help="目标语言")
+    arg_parser.add_argument("-i", "--input", type=str, required=True, help="待翻译文件")
+    arg_parser.add_argument("-o", "--output", type=str, default=None, help="译文文件")
     args = arg_parser.parse_args()
 
+    in_file = args.input
+    out_file = args.output
     to_lang = args.to_lang
-    in_file = args.input_file
-    out_file = args.output_file
 
-    translated_fn = translate_ml_auto(in_file, target_lang=to_lang, translation_file=out_file)
+    callback = TranslationProgress()
+
+    translated_fn = translate_ml_auto(in_file, target_lang=to_lang, translation_file=out_file,
+                                      callbacker=callback)
 
     import webbrowser
 
