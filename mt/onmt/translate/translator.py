@@ -111,7 +111,7 @@ class Inference(object):
         logger=None,
         seed=-1,
         with_score=False,
-        return_gold_log_probs=False,
+        # return_gold_log_probs=False,
     ):
         self.model = model
         self.vocabs = vocabs
@@ -120,15 +120,13 @@ class Inference(object):
         self._tgt_pad_idx = vocabs["tgt"].lookup_token(DefaultTokens.PAD)
         self._tgt_bos_idx = vocabs["tgt"].lookup_token(DefaultTokens.BOS)
         self._tgt_unk_idx = vocabs["tgt"].lookup_token(DefaultTokens.UNK)
-        self._tgt_sep_idx = vocabs["tgt"].lookup_token(DefaultTokens.SEP)
+        # self._tgt_sep_idx = vocabs["tgt"].lookup_token(DefaultTokens.SEP)
         self._tgt_start_with = vocabs["tgt"].lookup_token(vocabs["decoder_start_token"])
         self._tgt_vocab_len = len(self._tgt_vocab)
 
         self._gpu = gpu
         self._use_cuda = gpu > -1
-        self._dev = (
-            torch.device("cuda", self._gpu) if self._use_cuda else torch.device("cpu")
-        )
+        self._dev = (torch.device("cuda", self._gpu) if self._use_cuda else torch.device("cpu"))
 
         self.n_best = n_best
         self.max_length = max_length
@@ -175,7 +173,7 @@ class Inference(object):
         set_random_seed(seed, self._use_cuda)
         self.with_score = with_score
 
-        self.return_gold_log_probs = return_gold_log_probs
+        # self.return_gold_log_probs = return_gold_log_probs
 
     @classmethod
     def from_opt(
@@ -247,9 +245,7 @@ class Inference(object):
         else:
             print(msg)
 
-    def _gold_score(
-        self, batch, enc_out, src_len, batch_size, src
-    ):
+    def _gold_score(self, batch, enc_out, src_len, batch_size, src):
         gs = [0] * batch_size
         glp = None
         return gs, glp
@@ -306,9 +302,7 @@ class Inference(object):
             bucket_gold_score = 0
             bucket_gold_words = 0
             voc_src = self.vocabs["src"].ids_to_tokens
-            bucket_translations = sorted(
-                bucket_translations, key=lambda x: x.ind_in_bucket
-            )
+            bucket_translations = sorted(bucket_translations, key=lambda x: x.ind_in_bucket)
             for trans in bucket_translations:
                 bucket_scores += [trans.pred_scores[: self.n_best]]
                 bucket_score += trans.pred_scores[0]
@@ -317,18 +311,14 @@ class Inference(object):
                     bucket_gold_score += trans.gold_score
                     bucket_gold_words += len(trans.gold_sent) + 1
 
-                n_best_preds = [
-                    " ".join(pred) for pred in trans.pred_sents[: self.n_best]
-                ]
+                n_best_preds = [" ".join(pred) for pred in trans.pred_sents[: self.n_best]]
 
                 if self.report_align:
                     align_pharaohs = [
                         build_align_pharaoh(align)
                         for align in trans.word_aligns[: self.n_best]
                     ]
-                    n_best_preds_align = [
-                        " ".join(align[0]) for align in align_pharaohs
-                    ]
+                    n_best_preds_align = [" ".join(align[0]) for align in align_pharaohs]
                     n_best_preds = [
                         pred + DefaultTokens.ALIGNMENT_SEPARATOR + align
                         for pred, align in zip(n_best_preds, n_best_preds_align)
@@ -340,9 +330,7 @@ class Inference(object):
                 bucket_predictions += [n_best_preds]
 
                 if self.with_score:
-                    n_best_scores = [
-                        score.item() for score in trans.pred_scores[: self.n_best]
-                    ]
+                    n_best_scores = [score.item() for score in trans.pred_scores[: self.n_best]]
                     out_all = [
                         pred + "\t" + str(score)
                         for (pred, score) in zip(n_best_preds, n_best_scores)
@@ -362,9 +350,7 @@ class Inference(object):
                     preds = trans.pred_sents[0]
                     preds.append(DefaultTokens.EOS)
                     attns = trans.attns[0].tolist()
-                    srcs = [
-                        voc_src[tok] for tok in trans.src[: trans.srclen].tolist()
-                    ]
+                    srcs = [voc_src[tok] for tok in trans.src[: trans.srclen].tolist()]
 
                     output = report_matrix(srcs, preds, attns)
                     self._log(output)
@@ -375,9 +361,7 @@ class Inference(object):
                     else:
                         tgts = trans.pred_sents[0]
                     align = trans.word_aligns[0].tolist()
-                    srcs = [
-                        voc_src[tok] for tok in trans.src[: trans.srclen].tolist()
-                    ]
+                    srcs = [voc_src[tok] for tok in trans.src[: trans.srclen].tolist()]
 
                     output = report_matrix(srcs, tgts, align)
                     self._log(output)
@@ -535,7 +519,6 @@ class Inference(object):
         # and [batch, src_len, hidden] as enc_out
         # in case of inference tgt_len = 1, batch = beam times batch_size
         # in case of Gold Scoring tgt_len = actual length, batch = 1 batch
-
         dec_out, dec_attn = self.model.decoder(
             decoder_in,
             enc_out,
@@ -543,6 +526,7 @@ class Inference(object):
             step=step,
             return_attn=return_attn,
         )
+
         # Generator forward.
         if "std" in dec_attn:
             attn = dec_attn["std"]
@@ -583,9 +567,7 @@ class Inference(object):
         results["predictions"] = decode_strategy.predictions
         results["attention"] = decode_strategy.attention
         if self.report_align:
-            results["alignment"] = self._align_forward(
-                batch, decode_strategy.predictions
-            )
+            results["alignment"] = self._align_forward(batch, decode_strategy.predictions)
         else:
             results["alignment"] = [[] for _ in range(batch_size)]
         return results
