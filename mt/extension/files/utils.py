@@ -519,7 +519,19 @@ def is_lang_code(s):
     return s.lower() in lang_codes
 
 
-def should_translate(txt):
+en_letter = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+en_letter_set = set([c for c in en_letter])
+
+
+def has_no_en_letter(s):
+    for c in s:
+        if c in en_letter_set:
+            return False
+
+    return True
+
+
+def should_translate(txt, lang="en"):
     if is_empty(txt):
         return False
 
@@ -541,6 +553,9 @@ def should_translate(txt):
         return False
 
     if is_lang_code(txt):
+        return False
+
+    if lang == "en" and has_no_en_letter(txt):
         return False
 
     return True
