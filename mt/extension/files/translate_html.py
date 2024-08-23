@@ -8,7 +8,7 @@ from service.mt import translator_factory
 from service.utils import detect_lang
 
 
-def collect(markup_str, no_translatable_tags=['style', 'script', 'head', 'meta', 'link']):
+def collect_tag(markup_str, no_translatable_tags=['style', 'script', 'head', 'meta', 'link']):
     """收集标记中所有可以翻译的元素和文本"""
     markup = BeautifulSoup(markup_str, "html.parser")
     to_translated_elements = []
@@ -22,8 +22,6 @@ def collect(markup_str, no_translatable_tags=['style', 'script', 'head', 'meta',
                 continue
 
             t = element.string
-            # if len(t.strip()) == 0:
-            #     continue
             if not should_translate(t):
                 continue
 
@@ -39,7 +37,7 @@ def translate_tag_list(markup_strs, source_lang="auto", target_lang="zh", callba
     to_translated_strs = []
     to_translated_list = []
     for s in markup_strs:
-        m, es, ts = collect(s)
+        m, es, ts = collect_tag(s)
         markups.append(m)
         to_translated_tags.append(es)
         to_translated_strs.append(ts)
