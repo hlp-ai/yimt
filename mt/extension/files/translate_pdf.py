@@ -200,9 +200,9 @@ def in_paragraph(line1, line2):
 def merge_spans(line):
     text = ""
     for span in line["spans"]:
-        text += span["text"].strip() + " "
+        text += span["text"]
 
-    return text.strip()
+    return text
 
 
 def create_paragraph(block, start, end):
