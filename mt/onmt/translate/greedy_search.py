@@ -161,26 +161,19 @@ class GreedySearch(DecodeStrategy):
         self.beam_size = beam_size
         self.n_best = n_best
 
-    def initialize(
-        self, enc_out, src_len, device=None, target_prefix=None
-    ):
+    def initialize(self, enc_out, src_len, device=None, target_prefix=None):
         """Initialize for decoding."""
-        (fn_map_state, enc_out, target_prefix) = self.initialize_tile(
-            enc_out, src_len, target_prefix
-        )
+        (fn_map_state, enc_out, target_prefix) = self.initialize_tile(enc_out, src_len, target_prefix)
+
         if device is None:
             device = self.get_device_from_enc_out(enc_out)
 
         super(GreedySearch, self).initialize(device, target_prefix)
-        self.select_indices = torch.arange(
-            self.batch_size * self.beam_size, dtype=torch.long, device=device
-        )
-        self.original_batch_idx = fn_map_state(
-            torch.arange(self.batch_size, dtype=torch.long, device=device), dim=0
-        )
-        self.beams_scores = torch.zeros(
-            (self.batch_size * self.beam_size, 1), dtype=torch.float, device=device
-        )
+
+        self.select_indices = torch.arange(self.batch_size * self.beam_size, dtype=torch.long, device=device)
+        self.original_batch_idx = fn_map_state(torch.arange(self.batch_size, dtype=torch.long, device=device), dim=0)
+        self.beams_scores = torch.zeros((self.batch_size * self.beam_size, 1), dtype=torch.float, device=device)
+
         return fn_map_state, enc_out
 
     @property
@@ -249,12 +242,9 @@ class GreedySearch(DecodeStrategy):
         """Finalize scores and predictions."""
         # shape: (sum(~ self.is_finished), 1)
         step = len(self)
-        non_finished_batch = [
-            b for b, fin in enumerate(self.is_finished_list) if not fin[0]
-        ]
-        length_penalty = self.global_scorer.length_penalty(
-            step, alpha=self.global_scorer.alpha
-        )
+        non_finished_batch = [b for b, fin in enumerate(self.is_finished_list) if not fin[0]]
+        length_penalty = self.global_scorer.length_penalty(step, alpha=self.global_scorer.alpha)
+
         for b in [i for i, fin in enumerate(self.is_finished_list) if fin[0]]:
             b_orig = self.original_batch_idx[b]
             score = self.beams_scores[b, 0] / length_penalty
@@ -269,20 +259,18 @@ class GreedySearch(DecodeStrategy):
                 else []
             )
             self.hypotheses[b_orig].append((score, pred, attention))
+
         self.done = len(non_finished_batch) == 0
         if self.done:
             for b in range(self.batch_size):
-                best_hyp = sorted(self.hypotheses[b], key=lambda x: x[0], reverse=True)[
-                    : self.n_best
-                ]
+                best_hyp = sorted(self.hypotheses[b], key=lambda x: x[0], reverse=True)[:self.n_best]
                 for score, pred, attn in best_hyp:
                     self.scores[b].append(score)
                     self.predictions[b].append(pred)
                     self.attention[b].append(attn)
             return
-        self.select_indices = torch.tensor(
-            non_finished_batch, device=self.alive_seq.device
-        )
+
+        self.select_indices = torch.tensor(non_finished_batch, device=self.alive_seq.device)
         self.alive_seq = self.alive_seq[self.select_indices]
         self.beams_scores = self.beams_scores[self.select_indices]
         self.src_len = self.src_len[self.select_indices]

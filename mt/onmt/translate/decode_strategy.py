@@ -141,9 +141,9 @@ class DecodeStrategy(object):
 
         `initialize` should be called before all actions.
         used to prepare necessary ingredients for decode."""
-
         if device is None:
             device = torch.device("cpu")
+
         # Here we set the decoder to start with self.start (BOS or EOS)
         self.alive_seq = torch.full(
             [self.batch_size * self.parallel_paths, 1],
@@ -164,6 +164,7 @@ class DecodeStrategy(object):
             assert (
                 batch_size == self.batch_size * self.parallel_paths
             ), "forced target_prefix should've extend to same number of path!"
+
             target_prefix_words = target_prefix[:, :, 0]  # no features
             target_prefix = target_prefix_words[:, 1:]  # remove bos
 

@@ -532,6 +532,7 @@ class Inference(object):
             attn = dec_attn["std"]
         else:
             attn = None
+
         scores = self.model.generator(dec_out.squeeze(1))
         log_probs = log_softmax(scores, dim=-1)  # we keep float16 if FP16
         # returns [(batch_size x beam_size) , vocab ] when 1 step
@@ -628,11 +629,10 @@ class Translator(Inference):
     def translate_batch(self, batch, attn_debug):
         """Translate a batch of sentences."""
         if self.max_length_ratio > 0:
-            max_length = int(
-                min(self.max_length, batch["src"].size(1) * self.max_length_ratio + 5)
-            )
+            max_length = int(min(self.max_length, batch["src"].size(1) * self.max_length_ratio + 5))
         else:
             max_length = self.max_length
+
         with torch.no_grad():
             if self.sample_from_topk != 0 or self.sample_from_topp != 0:
                 decode_strategy = GreedySearch(
@@ -677,6 +677,7 @@ class Translator(Inference):
                     ratio=self.ratio,
                     ban_unk_token=self.ban_unk_token,
                 )
+
             return self._translate_batch_with_strategy(batch, decode_strategy)
 
     def _run_encoder(self, batch):
@@ -726,9 +727,7 @@ class Translator(Inference):
 
         # (2) prep decode_strategy. Possibly repeat src objects.
         target_prefix = batch["tgt"] if self.tgt_file_prefix else None
-        (fn_map_state, enc_out) = decode_strategy.initialize(
-            enc_out, src_len, target_prefix=target_prefix
-        )
+        (fn_map_state, enc_out) = decode_strategy.initialize(enc_out, src_len, target_prefix=target_prefix)
 
         if fn_map_state is not None:
             self.model.decoder.map_state(fn_map_state)
@@ -748,9 +747,8 @@ class Translator(Inference):
             )
 
             decode_strategy.advance(log_probs, attn)
-            any_finished = any(
-                [any(sublist) for sublist in decode_strategy.is_finished_list]
-            )
+
+            any_finished = any([any(sublist) for sublist in decode_strategy.is_finished_list])
             if any_finished:
                 decode_strategy.update_finished()
                 if decode_strategy.done:
