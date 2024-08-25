@@ -159,16 +159,16 @@ class Inference(object):
         self.report_score = report_score
         self.logger = logger
 
-        # for debugging
-        self.beam_trace = self.dump_beam != ""
-        self.beam_accum = None
-        if self.beam_trace:
-            self.beam_accum = {
-                "predicted_ids": [],
-                "beam_parent_ids": [],
-                "scores": [],
-                "log_probs": [],
-            }
+        # # for debugging
+        # self.beam_trace = self.dump_beam != ""
+        # self.beam_accum = None
+        # if self.beam_trace:
+        #     self.beam_accum = {
+        #         "predicted_ids": [],
+        #         "beam_parent_ids": [],
+        #         "scores": [],
+        #         "log_probs": [],
+        #     }
 
         set_random_seed(seed, self._use_cuda)
         self.with_score = with_score
@@ -443,13 +443,13 @@ class Inference(object):
             )
             self._log("Tokens per second: %.1f" % (pred_words_total / total_time))
 
-        if self.dump_beam:
-            import json
-
-            json.dump(
-                self.translator.beam_accum,
-                codecs.open(self.dump_beam, "w", "utf-8"),
-            )
+        # if self.dump_beam:
+        #     import json
+        #
+        #     json.dump(
+        #         self.translator.beam_accum,
+        #         codecs.open(self.dump_beam, "w", "utf-8"),
+        #     )
 
         return all_scores, all_predictions
 
