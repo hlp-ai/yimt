@@ -151,13 +151,8 @@ class DecodeStrategy(object):
             dtype=torch.long,
             device=device,
         )
-        # not 100% necessary to define those
-        # self.is_finished = torch.zeros(
-        #    [self.batch_size, self.parallel_paths], dtype=torch.bool
-        # )
-        self.is_finished_list = [
-            [False for _ in range(self.parallel_paths)] for _ in range(self.batch_size)
-        ]
+
+        self.is_finished_list = [[False for _ in range(self.parallel_paths)] for _ in range(self.batch_size)]
 
         if target_prefix is not None:
             batch_size, seq_len, n_feats = target_prefix.size()
@@ -174,6 +169,7 @@ class DecodeStrategy(object):
             self.min_length += min(prefix_non_pad) - 1
 
         self.target_prefix = target_prefix  # NOTE: forced prefix words
+
         return None
 
     def __len__(self):
