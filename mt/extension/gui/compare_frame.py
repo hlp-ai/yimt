@@ -44,31 +44,31 @@ def create_translate_file(parent):
         for line in lines:
             print(line.strip())
 
-        tk.messagebox.showinfo(title="Info", message="done")
+        tk.messagebox.showinfo(title="Info", message="翻译完成")
 
     button_start = tk.Button(parent, text="开始翻译", command=go)
     button_start.grid(padx=3, pady=10, row=5, column=1)
 
 
 def create_sarcebleu_trans(parent):
-    tk.Label(parent, text="Reference File").grid(row=0, column=0, padx=10, pady=5, sticky="e")
+    tk.Label(parent, text="参考翻译文件").grid(row=0, column=0, padx=10, pady=5, sticky="e")
     entry_ref = tk.Entry(parent, width=50)
     entry_ref.grid(row=0, column=1, padx=10, pady=5)
     tk.Button(parent, text="...", command=partial(ask_open_file, entry=entry_ref)).grid(row=0, column=2,
                                                                                           padx=10, pady=5)
 
-    tk.Label(parent, text="Hyp File").grid(row=1, column=0, padx=10, pady=5, sticky="e")
+    tk.Label(parent, text="系统翻译文件").grid(row=1, column=0, padx=10, pady=5, sticky="e")
     entry_sys = tk.Entry(parent, width=50)
     entry_sys.grid(row=1, column=1, padx=10, pady=5)
     tk.Button(parent, text="...", command=partial(ask_open_file, entry=entry_sys)).grid(row=1, column=2, padx=10,
                                                                                           pady=5)
 
-    tk.Label(parent, text="Language Pair").grid(row=2, column=0, padx=10, pady=5, sticky="e")
+    tk.Label(parent, text="语言对").grid(row=2, column=0, padx=10, pady=5, sticky="e")
     entry_lang = tk.Entry(parent, width=50)
     entry_lang.grid(row=2, column=1, padx=10, pady=5)
     entry_lang.insert(0, "en-zh")
 
-    tk.Label(parent, text="Additional Metrics").grid(row=3, column=0, padx=10, pady=5, sticky="e")
+    tk.Label(parent, text="额外指标").grid(row=3, column=0, padx=10, pady=5, sticky="e")
     var_ter = IntVar()
     check_ter = Checkbutton(parent, text="TER", variable=var_ter, onvalue=1, offvalue=0)
     check_ter.grid(row=3, column=1, padx=10, pady=5)
@@ -82,7 +82,7 @@ def create_sarcebleu_trans(parent):
         sys_path = entry_sys.get().strip()
 
         if len(ref_path) == 0 or len(sys_path) == 0:
-            tk.messagebox.showwarning(title="Info", message="Some parameter empty.")
+            tk.messagebox.showwarning(title="Info", message="语料文件路径为空.")
             return
 
         cal_cmd = "sacrebleu {} -i {} -l {} -f text"
@@ -97,7 +97,7 @@ def create_sarcebleu_trans(parent):
         for line in lines:
             print(line.strip())
 
-        tk.messagebox.showinfo(title="Info", message="done")
+        tk.messagebox.showinfo(title="Info", message="计算完成")
 
-    button_start = tk.Button(parent, text="Calculate Metric", command=go)
+    button_start = tk.Button(parent, text="计算评价指标", command=go)
     button_start.grid(padx=5, pady=10, row=5, column=1)

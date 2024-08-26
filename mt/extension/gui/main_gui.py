@@ -19,7 +19,7 @@ def on_menu(frame):
 
 if __name__ == "__main__":
     win_main = tk.Tk()
-    win_main.title("MT Pipeline")
+    win_main.title("YiMT GUI")
     win_main.geometry("800x700")
 
     ##########################################################
@@ -67,26 +67,26 @@ if __name__ == "__main__":
     mainmenu = Menu(win_main)
 
     corpus_menu = Menu(mainmenu, tearoff=False)
-    corpus_menu.add_command(label="TSV2Mono",command=partial(on_menu, tsv2mono_frame))
-    corpus_menu.add_command(label="Mono2TSV",command=partial(on_menu,mono2tsv_frame))
+    corpus_menu.add_command(label="双语到单语",command=partial(on_menu, tsv2mono_frame))
+    corpus_menu.add_command(label="单语到双语",command=partial(on_menu,mono2tsv_frame))
     corpus_menu.add_separator()
-    corpus_menu.add_command(label="Sample", command=partial(on_menu, sample_frame))
+    corpus_menu.add_command(label="采样", command=partial(on_menu, sample_frame))
     corpus_menu.add_separator()
-    corpus_menu.add_command(label="Exit", command=win_main.quit)
+    corpus_menu.add_command(label="退出", command=win_main.quit)
 
-    mainmenu.add_cascade(label="Corpus", menu=corpus_menu)
+    mainmenu.add_cascade(label="语料", menu=corpus_menu)
 
     train_menu = Menu(mainmenu, tearoff=False)
-    train_menu.add_command(label="Train SP", command=partial(on_menu, sp_train_frame))
-    train_menu.add_command(label="Tokenize with SP", command=partial(on_menu, sp_tokenize_frame))
+    train_menu.add_command(label="训练SP分词模型", command=partial(on_menu, sp_train_frame))
+    train_menu.add_command(label="基于SP模型切分", command=partial(on_menu, sp_tokenize_frame))
 
-    mainmenu.add_cascade(label="Train", menu=train_menu)
+    mainmenu.add_cascade(label="训练", menu=train_menu)
 
     app_menu = Menu(mainmenu, tearoff=False)
     app_menu.add_command(label="翻译文件", command=partial(on_menu, trans_file_frame))
-    app_menu.add_command(label="Calculate Bleu", command=partial(on_menu, bleu_frame))
+    app_menu.add_command(label="计算BLEU", command=partial(on_menu, bleu_frame))
 
-    mainmenu.add_cascade(label="Application", menu=app_menu)
+    mainmenu.add_cascade(label="应用", menu=app_menu)
 
     win_main.config(menu=mainmenu)
 
