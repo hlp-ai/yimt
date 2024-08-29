@@ -1,9 +1,27 @@
-import whisper
 import torch
+import onnxruntime as ort
+import numpy as np
+
+import whisper
 
 model = whisper.load_model(r"D:\kidden\github\yimt\pretrained\asr\whisper\tiny.en.pt")
 model.cpu()
 model.eval()
 mels = torch.randn(1, 80, 3000)
 tokens = torch.randint(0, 51865, (1, 448))
-torch.onnx.export(model, (mels, tokens), 'tiny.en.onnx', verbose=True)
+torch.onnx.export(model, (mels, tokens), 'tiny.en.onnx')
+
+# 加载模型
+sess = ort.InferenceSession('tiny.en.onnx')
+
+# 创建输入数据
+mels = np.random.randn(1, 80, 3000).astype(np.float32)
+tokens = np.random.randint(0, 51865, (1, 448)).astype(np.int64)
+
+# 进行推理
+input_name_1 = sess.get_inputs()[0].name
+input_name_2 = sess.get_inputs()[1].name
+result = sess.run(None, {input_name_1: mels, input_name_2: tokens})
+
+# 输出结果
+print(result[0].shape)
