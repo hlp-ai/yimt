@@ -239,11 +239,9 @@ class Whisper(nn.Module):
         return self.encoder(mel)
 
     def logits(self, tokens: torch.Tensor, audio_features: torch.Tensor):
-        return self.decoder(tokens, audio_features)
+        return self.decoder(tokens, audio_features)  # audio_features是编码器的输出
 
-    def forward(
-        self, mel: torch.Tensor, tokens: torch.Tensor
-    ) -> Dict[str, torch.Tensor]:
+    def forward(self, mel: torch.Tensor, tokens: torch.Tensor):
         return self.decoder(tokens, self.encoder(mel))
 
     @property

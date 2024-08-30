@@ -60,13 +60,9 @@ def load_model(
     if os.path.isfile(name):
         checkpoint_file = open(name, "rb").read() if in_memory else name
     else:
-        raise RuntimeError(
-            f"Model {name} not found; available models = {available_models()}"
-        )
+        raise RuntimeError(f"Model {name} not found; available models = {available_models()}")
 
-    with (
-        io.BytesIO(checkpoint_file) if in_memory else open(checkpoint_file, "rb")
-    ) as fp:
+    with io.BytesIO(checkpoint_file) if in_memory else open(checkpoint_file, "rb") as fp:
         checkpoint = torch.load(fp, map_location=device)
     del checkpoint_file
 
