@@ -95,8 +95,8 @@ class Inference(object):
         random_sampling_topp=0.0,
         random_sampling_temp=1.0,
         dump_beam=False,
-        block_ngram_repeat=0,
-        ignore_when_blocking=frozenset(),
+        # block_ngram_repeat=0,
+        # ignore_when_blocking=frozenset(),
         replace_unk=False,
         ban_unk_token=False,
         tgt_file_prefix=False,
@@ -141,9 +141,9 @@ class Inference(object):
         self.ban_unk_token = ban_unk_token
         self.ratio = ratio
         self.dump_beam = dump_beam
-        self.block_ngram_repeat = block_ngram_repeat
-        self.ignore_when_blocking = ignore_when_blocking
-        self._exclusion_idxs = {self._tgt_vocab[t] for t in self.ignore_when_blocking}
+        # self.block_ngram_repeat = block_ngram_repeat
+        # self.ignore_when_blocking = ignore_when_blocking
+        # self._exclusion_idxs = {self._tgt_vocab[t] for t in self.ignore_when_blocking}
         self.replace_unk = replace_unk
         if self.replace_unk and not self.model.decoder.attentional:
             raise ValueError("replace_unk requires an attentional decoder.")
@@ -221,8 +221,8 @@ class Inference(object):
             random_sampling_temp=opt.random_sampling_temp,
             # stepwise_penalty=opt.stepwise_penalty,
             dump_beam=opt.dump_beam,
-            block_ngram_repeat=opt.block_ngram_repeat,
-            ignore_when_blocking=set(opt.ignore_when_blocking),
+            # block_ngram_repeat=opt.block_ngram_repeat,
+            # ignore_when_blocking=set(opt.ignore_when_blocking),
             replace_unk=opt.replace_unk,
             ban_unk_token=opt.ban_unk_token,
             tgt_file_prefix=opt.tgt_file_prefix,
@@ -646,8 +646,8 @@ class Translator(Inference):
                     global_scorer=self.global_scorer,
                     min_length=self.min_length,
                     max_length=max_length,
-                    block_ngram_repeat=self.block_ngram_repeat,
-                    exclusion_tokens=self._exclusion_idxs,
+                    # block_ngram_repeat=self.block_ngram_repeat,
+                    # exclusion_tokens=self._exclusion_idxs,
                     return_attention=attn_debug or self.replace_unk,
                     sampling_temp=self.random_sampling_temp,
                     keep_topk=self.sample_from_topk,
@@ -671,8 +671,8 @@ class Translator(Inference):
                     min_length=self.min_length,
                     max_length=max_length,
                     return_attention=attn_debug or self.replace_unk,
-                    block_ngram_repeat=self.block_ngram_repeat,
-                    exclusion_tokens=self._exclusion_idxs,
+                    # block_ngram_repeat=self.block_ngram_repeat,
+                    # exclusion_tokens=self._exclusion_idxs,
                     # stepwise_penalty=self.stepwise_penalty,
                     ratio=self.ratio,
                     ban_unk_token=self.ban_unk_token,

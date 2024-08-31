@@ -75,8 +75,8 @@ class DecodeStrategy(object):
         parallel_paths,
         global_scorer,
         min_length,
-        block_ngram_repeat,
-        exclusion_tokens,
+        # block_ngram_repeat,
+        # exclusion_tokens,
         return_attention,
         max_length,
         ban_unk_token,
@@ -104,11 +104,11 @@ class DecodeStrategy(object):
         self.max_length = max_length
         self.ban_unk_token = ban_unk_token
 
-        self.block_ngram_repeat = block_ngram_repeat
+        # self.block_ngram_repeat = block_ngram_repeat
         n_paths = batch_size * parallel_paths
         self.forbidden_tokens = [dict() for _ in range(n_paths)]
 
-        self.exclusion_tokens = exclusion_tokens
+        # self.exclusion_tokens = exclusion_tokens
         self.return_attention = return_attention
 
         self.done = False
