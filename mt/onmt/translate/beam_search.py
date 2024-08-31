@@ -304,7 +304,7 @@ class BeamSearchBase(DecodeStrategy):
             curr_scores = log_probs
 
         # Avoid any direction that would repeat unwanted ngrams
-        self.block_ngram_repeats(curr_scores)
+        # self.block_ngram_repeats(curr_scores)
 
         # Pick up candidate token by curr_scores
         self.topk_scores, self.topk_ids = self._pick(curr_scores)
@@ -330,7 +330,7 @@ class BeamSearchBase(DecodeStrategy):
             -1,
         )
 
-        self.maybe_update_forbidden_tokens()
+        # self.maybe_update_forbidden_tokens()
 
         if self.return_attention:
             current_attn = attn[self.select_indices]
