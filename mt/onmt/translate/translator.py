@@ -65,10 +65,6 @@ class Inference(object):
         stepwise_penalty (bool): Whether coverage penalty is applied every step
             or not.
         dump_beam (bool): Debugging option.
-        block_ngram_repeat (int): See
-            :class:`onmt.translate.decode_strategy.DecodeStrategy`.
-        ignore_when_blocking (set or frozenset): See
-            :class:`onmt.translate.decode_strategy.DecodeStrategy`.
         replace_unk (bool): Replace unknown token.
         tgt_file_prefix (bool): Force the predictions begin with provided -tgt.
         verbose (bool): Print/log every translation.
@@ -95,8 +91,6 @@ class Inference(object):
         random_sampling_topp=0.0,
         random_sampling_temp=1.0,
         dump_beam=False,
-        # block_ngram_repeat=0,
-        # ignore_when_blocking=frozenset(),
         replace_unk=False,
         ban_unk_token=False,
         tgt_file_prefix=False,
@@ -111,7 +105,6 @@ class Inference(object):
         logger=None,
         seed=-1,
         with_score=False,
-        # return_gold_log_probs=False,
     ):
         self.model = model
         self.vocabs = vocabs
@@ -141,9 +134,6 @@ class Inference(object):
         self.ban_unk_token = ban_unk_token
         self.ratio = ratio
         self.dump_beam = dump_beam
-        # self.block_ngram_repeat = block_ngram_repeat
-        # self.ignore_when_blocking = ignore_when_blocking
-        # self._exclusion_idxs = {self._tgt_vocab[t] for t in self.ignore_when_blocking}
         self.replace_unk = replace_unk
         if self.replace_unk and not self.model.decoder.attentional:
             raise ValueError("replace_unk requires an attentional decoder.")
@@ -159,21 +149,8 @@ class Inference(object):
         self.report_score = report_score
         self.logger = logger
 
-        # # for debugging
-        # self.beam_trace = self.dump_beam != ""
-        # self.beam_accum = None
-        # if self.beam_trace:
-        #     self.beam_accum = {
-        #         "predicted_ids": [],
-        #         "beam_parent_ids": [],
-        #         "scores": [],
-        #         "log_probs": [],
-        #     }
-
         set_random_seed(seed, self._use_cuda)
         self.with_score = with_score
-
-        # self.return_gold_log_probs = return_gold_log_probs
 
     @classmethod
     def from_opt(
@@ -219,10 +196,7 @@ class Inference(object):
             random_sampling_topk=opt.random_sampling_topk,
             random_sampling_topp=opt.random_sampling_topp,
             random_sampling_temp=opt.random_sampling_temp,
-            # stepwise_penalty=opt.stepwise_penalty,
             dump_beam=opt.dump_beam,
-            # block_ngram_repeat=opt.block_ngram_repeat,
-            # ignore_when_blocking=set(opt.ignore_when_blocking),
             replace_unk=opt.replace_unk,
             ban_unk_token=opt.ban_unk_token,
             tgt_file_prefix=opt.tgt_file_prefix,
@@ -443,14 +417,6 @@ class Inference(object):
             )
             self._log("Tokens per second: %.1f" % (pred_words_total / total_time))
 
-        # if self.dump_beam:
-        #     import json
-        #
-        #     json.dump(
-        #         self.translator.beam_accum,
-        #         codecs.open(self.dump_beam, "w", "utf-8"),
-        #     )
-
         return all_scores, all_predictions
 
     def _align_pad_prediction(self, predictions, bos, pad):
@@ -543,9 +509,6 @@ class Inference(object):
     def translate_batch(self, batch, attn_debug):
         """Translate a batch of sentences."""
         raise NotImplementedError
-
-    # def _score_target(self, batch, enc_out, src_len):
-    #     raise NotImplementedError
 
     def report_results(
         self,
@@ -646,8 +609,6 @@ class Translator(Inference):
                     global_scorer=self.global_scorer,
                     min_length=self.min_length,
                     max_length=max_length,
-                    # block_ngram_repeat=self.block_ngram_repeat,
-                    # exclusion_tokens=self._exclusion_idxs,
                     return_attention=attn_debug or self.replace_unk,
                     sampling_temp=self.random_sampling_temp,
                     keep_topk=self.sample_from_topk,
@@ -671,9 +632,6 @@ class Translator(Inference):
                     min_length=self.min_length,
                     max_length=max_length,
                     return_attention=attn_debug or self.replace_unk,
-                    # block_ngram_repeat=self.block_ngram_repeat,
-                    # exclusion_tokens=self._exclusion_idxs,
-                    # stepwise_penalty=self.stepwise_penalty,
                     ratio=self.ratio,
                     ban_unk_token=self.ban_unk_token,
                 )

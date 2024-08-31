@@ -26,8 +26,6 @@ class BeamSearchBase(DecodeStrategy):
         min_length (int): See base.
         max_length (int): See base.
         return_attention (bool): See base.
-        block_ngram_repeat (int): See base.
-        exclusion_tokens (set[int]): See base.
 
     Attributes:
         _batch_offset (LongTensor): Shape ``(B,)``.
@@ -68,8 +66,6 @@ class BeamSearchBase(DecodeStrategy):
         min_length,
         max_length,
         return_attention,
-        # block_ngram_repeat,
-        # exclusion_tokens,
         ratio,
         ban_unk_token,
     ):
@@ -83,8 +79,6 @@ class BeamSearchBase(DecodeStrategy):
             beam_size,
             global_scorer,
             min_length,
-            # block_ngram_repeat,
-            # exclusion_tokens,
             return_attention,
             max_length,
             ban_unk_token,
@@ -303,9 +297,6 @@ class BeamSearchBase(DecodeStrategy):
         else:
             curr_scores = log_probs
 
-        # Avoid any direction that would repeat unwanted ngrams
-        # self.block_ngram_repeats(curr_scores)
-
         # Pick up candidate token by curr_scores
         self.topk_scores, self.topk_ids = self._pick(curr_scores)
 
@@ -329,8 +320,6 @@ class BeamSearchBase(DecodeStrategy):
             ],
             -1,
         )
-
-        # self.maybe_update_forbidden_tokens()
 
         if self.return_attention:
             current_attn = attn[self.select_indices]

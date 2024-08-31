@@ -104,8 +104,6 @@ class GreedySearch(DecodeStrategy):
         min_length (int): See base.
         max_length (int): See base.
         ban_unk_token (Boolean): See base.
-        block_ngram_repeat (int): See base.
-        exclusion_tokens (set[int]): See base.
         return_attention (bool): See base.
         max_length (int): See base.
         sampling_temp (float): See
@@ -128,8 +126,6 @@ class GreedySearch(DecodeStrategy):
         batch_size,
         global_scorer,
         min_length,
-        # block_ngram_repeat,
-        # exclusion_tokens,
         return_attention,
         max_length,
         sampling_temp,
@@ -148,8 +144,6 @@ class GreedySearch(DecodeStrategy):
             beam_size,
             global_scorer,
             min_length,
-            # block_ngram_repeat,
-            # exclusion_tokens,
             return_attention,
             max_length,
             ban_unk_token,
@@ -223,7 +217,6 @@ class GreedySearch(DecodeStrategy):
 
         self.ensure_min_length(log_probs)
         self.ensure_unk_removed(log_probs)
-        # self.block_ngram_repeats(log_probs)
 
         topk_ids, self.topk_scores = self._pick(log_probs)
         self.beams_scores += self.topk_scores
