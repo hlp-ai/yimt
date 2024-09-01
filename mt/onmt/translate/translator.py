@@ -598,6 +598,7 @@ class Translator(Inference):
 
         with torch.no_grad():
             if self.sample_from_topk != 0 or self.sample_from_topp != 0:
+                self._log("Decoding using GreedySearch")
                 decode_strategy = GreedySearch(
                     pad=self._tgt_pad_idx,
                     bos=self._tgt_bos_idx,
@@ -619,6 +620,7 @@ class Translator(Inference):
             else:
                 # TODO: support these blacklisted features
                 assert not self.dump_beam
+                self._log("Decoding using BeamSearch")
                 decode_strategy = BeamSearch(
                     self.beam_size,
                     batch_size=len(batch["srclen"]),

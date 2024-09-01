@@ -81,7 +81,7 @@ class DecodeStrategy(object):
         self.start = start
 
         self.batch_size = batch_size
-        self.parallel_paths = parallel_paths
+        self.parallel_paths = parallel_paths  # beam_size
         self.global_scorer = global_scorer
 
         # result caching
@@ -95,9 +95,6 @@ class DecodeStrategy(object):
         self.min_length = min_length
         self.max_length = max_length
         self.ban_unk_token = ban_unk_token
-
-        n_paths = batch_size * parallel_paths
-        self.forbidden_tokens = [dict() for _ in range(n_paths)]
 
         self.return_attention = return_attention
 
