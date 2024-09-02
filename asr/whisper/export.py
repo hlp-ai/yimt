@@ -1,6 +1,7 @@
 import torch
 import onnxruntime as ort
 import numpy as np
+from onnxruntime.quantization import quantize_dynamic
 
 import whisper
 
@@ -9,7 +10,11 @@ model.cpu()
 model.eval()
 mels = torch.randn(1, 80, 3000)
 tokens = torch.randint(0, 51865, (1, 448))
-torch.onnx.export(model, (mels, tokens), 'tiny.en.onnx')
+model_fp32 = 'tiny-en-fp32.onnx'
+torch.onnx.export(model, (mels, tokens), model_fp32)
+
+model_quant = 'tiny-en-quant.onnx'
+quantized_model = quantize_dynamic(model_fp32, model_quant)
 
 # 加载模型
 sess = ort.InferenceSession('tiny.en.onnx')
