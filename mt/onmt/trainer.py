@@ -1,14 +1,3 @@
-"""
-    This is the loadable seq2seq trainer library that is
-    in charge of training details, loss compute, and statistics.
-    See train.py for a use case of this library.
-
-    Note: To make this a general library, we implement *only*
-          mechanism things here(i.e. what to do), and leave the strategy
-          things to users(i.e. how to do it). Also see train.py(one of the
-          users of this library) for the strategy things we do.
-"""
-
 import time
 import sys
 import torch
@@ -160,8 +149,6 @@ class Trainer(object):
         attention_dropout=[0.1],
         dropout_steps=[0],
     ):
-        # Basic attributes.
-
         self.model = model
         self.train_loss = train_loss
         self.valid_loss = valid_loss
@@ -229,9 +216,7 @@ class Trainer(object):
         for batch, bucket_idx in iterator:
             batches.append(batch)
             if self.norm_method == "tokens":
-                num_tokens = (
-                    batch["tgt"][:, 1:, 0].ne(self.train_loss.padding_idx).sum()
-                )
+                num_tokens = batch["tgt"][:, 1:, 0].ne(self.train_loss.padding_idx).sum()
                 normalization += num_tokens.item()
                 normalization -= len(batch["tgt"])  # don't count for EOS
             else:
@@ -246,15 +231,11 @@ class Trainer(object):
 
     def _update_average(self, step):
         if self.moving_average is None:
-            copy_params = [
-                params.detach().float() for params in self.model.parameters()
-            ]
+            copy_params = [params.detach().float() for params in self.model.parameters()]
             self.moving_average = copy_params
         else:
             average_decay = max(self.average_decay, 1 - (step + 1) / (step + 10))
-            for (i, avg), cpt in zip(
-                enumerate(self.moving_average), self.model.parameters()
-            ):
+            for (i, avg), cpt in zip(enumerate(self.moving_average), self.model.parameters()):
                 self.moving_average[i] = (
                     1 - average_decay
                 ) * avg + cpt.detach().float() * average_decay
@@ -285,9 +266,7 @@ class Trainer(object):
             logger.info("Start training loop without validation...")
             valid_stats = None
         else:
-            logger.info(
-                "Start training loop and validate every %d steps...", valid_steps
-            )
+            logger.info("Start training loop and validate every %d steps...", valid_steps)
         logger.info("Scoring with: {}".format(self.scoring_preparator.transform))
 
         total_stats = onmt.utils.Statistics()
@@ -303,26 +282,18 @@ class Trainer(object):
             self._maybe_update_dropout(step)
 
             if self.n_gpu > 1 and self.parallel_mode == "data_parallel":
-                normalization = sum(
-                    onmt.utils.distributed.all_gather_list(normalization)
-                )
+                normalization = sum(onmt.utils.distributed.all_gather_list(normalization))
 
-            self._gradient_accumulation(
-                batches, normalization, total_stats, report_stats
-            )
+            self._gradient_accumulation(batches, normalization, total_stats, report_stats)
 
             if self.average_decay > 0 and i % self.average_every == 0:
                 self._update_average(step)
 
-            report_stats = self._maybe_report_training(
-                step, train_steps, self.optim.learning_rate(), report_stats
-            )
+            report_stats = self._maybe_report_training(step, train_steps, self.optim.learning_rate(), report_stats)
 
             if valid_iter is not None and step % valid_steps == 0:
                 if self.parallel_mode == "tensor_parallel" or self.gpu_rank <= 0:
-                    valid_stats = self.validate(
-                        valid_iter, moving_average=self.moving_average
-                    )
+                    valid_stats = self.validate(valid_iter, moving_average=self.moving_average)
 
             if step % valid_steps == 0 and self.gpu_rank <= 0:
                 self._report_step(
@@ -368,9 +339,7 @@ class Trainer(object):
             model_params_data = []
             for avg, param in zip(self.moving_average, valid_model.parameters()):
                 model_params_data.append(param.data)
-                param.data = (
-                    avg.data.half() if param.dtype == torch.float16 else avg.data
-                )
+                param.data = (avg.data.half() if param.dtype == torch.float16 else avg.data)
 
         # Set model in validating mode.
         valid_model.eval()
@@ -387,9 +356,7 @@ class Trainer(object):
 
                 with torch.cuda.amp.autocast(enabled=self.optim.amp):
                     # F-prop through the model.
-                    model_out, attns = valid_model(
-                        src, tgt, src_len, with_align=self.with_align
-                    )
+                    model_out, attns = valid_model(src, tgt, src_len, with_align=self.with_align)
 
                     # Compute loss.
                     _, batch_stats = self.valid_loss(batch, model_out, attns)
@@ -426,14 +393,10 @@ class Trainer(object):
                     )
                     computed_metrics[metric] = self.valid_scorers[metric]["value"]
                     logger.info(
-                        "validation {}: {}".format(
-                            metric, self.valid_scorers[metric]["value"]
-                        )
+                        "validation {}: {}".format(metric, self.valid_scorers[metric]["value"])
                     )
                     # Compute stats
-                    metric_stats = onmt.utils.Statistics(
-                        0, 0, 0, 0, 0, computed_metrics
-                    )
+                    metric_stats = onmt.utils.Statistics(0, 0, 0, 0, 0, computed_metrics)
 
                 # Update statistics.
                 stats.update(metric_stats)
@@ -447,9 +410,7 @@ class Trainer(object):
 
         return stats
 
-    def _gradient_accumulation(
-        self, true_batches, normalization, total_stats, report_stats
-    ):
+    def _gradient_accumulation(self, true_batches, normalization, total_stats, report_stats):
         """Function that iterates over big batches = ``true_batches``
 
         Perform a backward on the loss of each sub_batch and
@@ -508,10 +469,7 @@ class Trainer(object):
                 except Exception as exc:
                     trace_content = traceback.format_exc()
                     if "CUDA out of memory" in trace_content:
-                        logger.info(
-                            "Step %d, cuda OOM - batch removed",
-                            self.optim.training_step,
-                        )
+                        logger.info("Step %d, cuda OOM - batch removed", self.optim.training_step,)
                         torch.cuda.empty_cache()
                         if self.n_gpu > 1 and self.parallel_mode == "tensor_parallel":
                             torch.distributed.destroy_process_group()
@@ -532,9 +490,7 @@ class Trainer(object):
                 for p in self.model.parameters()
                 if p.requires_grad and p.grad is not None
             ]
-            onmt.utils.distributed.all_reduce_and_rescale_tensors(
-                grads, float(self.n_gpu)
-            )
+            onmt.utils.distributed.all_reduce_and_rescale_tensors(grads, float(self.n_gpu))
 
         self.optim.step()
 

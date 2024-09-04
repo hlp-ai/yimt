@@ -5,10 +5,7 @@ import torch
 from onmt.utils.logging import init_logger, logger
 from onmt.utils.parse import ArgumentParser
 from onmt.constants import CorpusTask
-from onmt.transforms import (
-    get_specials,
-    get_transforms_cls,
-)
+from onmt.transforms import get_specials, get_transforms_cls
 from onmt.inputters import build_vocab
 from onmt.inputters.inputter import dict_to_vocabs, vocabs_to_dict
 from onmt.inputters.dynamic_iterator import build_dynamic_dataset_iter
@@ -180,9 +177,7 @@ def main(opt, device_id):
     # Build model saver
     model_saver = build_model_saver(model_opt, opt, model, vocabs, optim, device_id)
 
-    trainer = build_trainer(
-        opt, device_id, model, vocabs, optim, model_saver=model_saver
-    )
+    trainer = build_trainer(opt, device_id, model, vocabs, optim, model_saver=model_saver)
 
     offset = max(0, device_id) if opt.parallel_mode == "data_parallel" else 0
     stride = max(1, len(opt.gpu_ranks)) if opt.parallel_mode == "data_parallel" else 1
