@@ -14,7 +14,9 @@ model.eval()
 mels = torch.randn(1, 80, 3000)
 tokens = torch.randint(0, 51865, (1, 448))
 model_fp32 = 'tiny-en-fp32.onnx'
-torch.onnx.export(model, (mels, tokens), model_fp32)
+torch.onnx.export(model, (mels, tokens), model_fp32,
+                  input_names=["mels", "tokens"],
+                  output_names=["logits"])
 
 model = onnx.load(model_fp32)
 onnx.checker.check_model(model)
@@ -34,6 +36,8 @@ sess = ort.InferenceSession(model_quant)
 # 创建输入数据
 mels = np.random.randn(1, 80, 3000).astype(np.float32)
 tokens = np.random.randint(0, 51865, (1, 448)).astype(np.int64)
+
+print(ort.get_available_providers())
 
 # 进行推理
 input_name_1 = sess.get_inputs()[0].name
