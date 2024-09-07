@@ -80,16 +80,6 @@ class LossCompute(nn.Module):
     def padding_idx(self):
         return self.criterion.ignore_index
 
-    def _compute_alignement_loss(self, align_head, ref_align):
-        """Compute loss between 2 partial alignment matrix."""
-        # align_head contains value in [0, 1) presenting attn prob,
-        # 0 was resulted by the context attention src_pad_mask
-        # So, the correspand position in ref_align should also be 0
-        # Therefore, clip align_head to > 1e-18 should be bias free.
-        align_loss = -align_head.clamp(min=1e-18).log().mul(ref_align).sum()
-        align_loss *= self.lambda_align
-        return align_loss
-
 
     def _bottle(self, _v):
         return _v.view(-1, _v.size(2))
@@ -130,25 +120,6 @@ class LossCompute(nn.Module):
 
         scores = self.generator(self._bottle(output))
         loss = self.criterion(scores.to(torch.float32), flat_tgt)
-
-        if self.lambda_align != 0.0:
-            align_head = attns["align"]
-            if align_head.dtype != loss.dtype:  # Fix FP16
-                align_head = align_head.to(loss.dtype)
-            align_idx = batch["align"]
-            batch_size, pad_tgt_size, _ = batch["tgt"].size()
-            _, pad_src_size, _ = batch["src"].size()
-            align_matrix_size = [batch_size, pad_tgt_size, pad_src_size]
-            ref_align = onmt.utils.make_batch_align_matrix(
-                align_idx, align_matrix_size, normalize=True
-            )
-            ref_align = ref_align[:, trunc_range[0]: trunc_range[1], :]
-            if ref_align.dtype != loss.dtype:
-                ref_align = ref_align.to(loss.dtype)
-            align_loss = self._compute_alignement_loss(
-                align_head=align_head, ref_align=ref_align
-            )
-            loss += align_loss
 
         n_sents = len(batch["srclen"]) if trunc_start == 0 else 0
         stats = self._stats(n_sents, loss.sum().item(), scores, flat_tgt)
