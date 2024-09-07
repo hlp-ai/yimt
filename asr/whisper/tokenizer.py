@@ -302,6 +302,14 @@ def get_encoding(name: str = "gpt2", num_languages: int = 99):
         special_tokens[token] = n_vocab
         n_vocab += 1
 
+    print(name)
+    print("# of vocab:", n_vocab)
+    print("# of real tokens:", len(ranks))
+    print("# of special tokens:", len(special_tokens))
+    # print(ranks)
+    print()
+    print(special_tokens)
+
     return tiktoken.Encoding(
         name=os.path.basename(vocab_path),
         explicit_n_vocab=n_vocab,
@@ -341,3 +349,10 @@ def get_tokenizer(
     return Tokenizer(
         encoding=encoding, num_languages=num_languages, language=language, task=task
     )
+
+
+if __name__ == "__main__":
+    gpt2_tokenizer = get_tokenizer(multilingual=False)
+    print(gpt2_tokenizer.sot)
+    multilingual_tokenizer = get_tokenizer(multilingual=True)
+    print(multilingual_tokenizer.sot)
