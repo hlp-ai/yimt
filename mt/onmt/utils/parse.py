@@ -61,16 +61,7 @@ class DataOptsCheckerMixin(object):
                     cls._validate_file(path_txt, info=f"{cname}/path_txt")
                 if path_tgt is not None:
                     cls._validate_file(path_tgt, info=f"{cname}/path_tgt")
-            path_align = corpus.get("path_align", None)
-            if path_align is None:
-                if hasattr(opt, "lambda_align") and opt.lambda_align > 0.0:
-                    raise ValueError(
-                        f"Corpus {cname} alignment file path are "
-                        "required when lambda_align > 0.0"
-                    )
-                corpus["path_align"] = None
-            else:
-                cls._validate_file(path_align, info=f"{cname}/path_align")
+
             # Check weight
             weight = corpus.get("weight", None)
             if weight is None:
@@ -99,16 +90,7 @@ class DataOptsCheckerMixin(object):
             _transforms = set(corpus["transforms"])
             if len(_transforms) != 0:
                 all_transforms.update(_transforms)
-        if hasattr(opt, "lambda_align") and opt.lambda_align > 0.0:
-            if not all_transforms.isdisjoint({"sentencepiece", "bpe", "onmt_tokenize"}):
-                raise ValueError(
-                    "lambda_align is not compatible with" " on-the-fly tokenization."
-                )
-            if not all_transforms.isdisjoint({"tokendrop", "prefix", "bart"}):
-                raise ValueError(
-                    "lambda_align is not compatible yet with"
-                    " potentiel token deletion/addition."
-                )
+
         opt._all_transform = all_transforms
 
     @classmethod
@@ -185,12 +167,6 @@ class ArgumentParser(cfargparse.ArgumentParser, DataOptsCheckerMixin):
             model_opt.src_word_vec_size = model_opt.word_vec_size
             model_opt.tgt_word_vec_size = model_opt.word_vec_size
 
-        # # Backward compatibility with "fix_word_vecs_*" opts
-        # if hasattr(model_opt, "fix_word_vecs_enc"):
-        #     model_opt.freeze_word_vecs_enc = model_opt.fix_word_vecs_enc
-        # if hasattr(model_opt, "fix_word_vecs_dec"):
-        #     model_opt.freeze_word_vecs_dec = model_opt.fix_word_vecs_dec
-
         if model_opt.layers > 0:
             model_opt.enc_layers = model_opt.layers
             model_opt.dec_layers = model_opt.layers
@@ -209,23 +185,6 @@ class ArgumentParser(cfargparse.ArgumentParser, DataOptsCheckerMixin):
         # encoder and decoder should be same sizes
         same_size = model_opt.enc_hid_size == model_opt.dec_hid_size
         assert same_size, "The encoder and decoder rnns must be the same size for now"
-
-        if model_opt.lambda_align > 0.0:
-            assert (
-                model_opt.decoder_type == "transformer"
-            ), "Only transformer is supported to joint learn alignment."
-            assert (
-                model_opt.alignment_layer < model_opt.dec_layers
-                and model_opt.alignment_layer >= -model_opt.dec_layers
-            ), "N° alignment_layer should be smaller than number of layers."
-            logger.info(
-                "Joint learn alignment at layer [{}] "
-                "with {} heads in full_context '{}'.".format(
-                    model_opt.alignment_layer,
-                    model_opt.alignment_heads,
-                    model_opt.full_context_alignment,
-                )
-            )
 
         if model_opt.position_encoding and model_opt.max_relative_positions != 0:
             raise ValueError(

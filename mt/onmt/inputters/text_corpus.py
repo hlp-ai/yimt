@@ -111,9 +111,6 @@ class ParallelCorpus(object):
         """
 
         def make_ex(sline, tline, align):
-            # sline = parse_features(
-            #     sline,
-            # )
             # 'src_original' and 'tgt_original' store the
             # original line before tokenization. These
             # fields are used later on in the feature
@@ -168,7 +165,7 @@ def get_corpora(opts, task=CorpusTask.TRAIN, src=None, tgt=None, align=None):
                         corpus_id,
                         corpus_dict["path_src"],
                         corpus_dict["path_tgt"],
-                        corpus_dict["path_align"],
+                        # corpus_dict["path_align"],
                     )
                 else:
                     corpora_dict[corpus_id] = BlockwiseCorpus(
@@ -182,7 +179,7 @@ def get_corpora(opts, task=CorpusTask.TRAIN, src=None, tgt=None, align=None):
                 CorpusName.VALID,
                 opts.data[CorpusName.VALID]["path_src"],
                 opts.data[CorpusName.VALID]["path_tgt"] if tgt is None else None,
-                opts.data[CorpusName.VALID]["path_align"],
+                # opts.data[CorpusName.VALID]["path_align"],
             )
         else:
             return None
