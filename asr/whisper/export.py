@@ -16,7 +16,9 @@ tokens = torch.randint(0, 51865, (1, 448))
 model_fp32 = 'tiny-en-fp32.onnx'
 torch.onnx.export(model, (mels, tokens), model_fp32,
                   input_names=["mels", "tokens"],
-                  output_names=["logits"])
+                  output_names=["logits"],
+                  dynamic_axes={"tokens":[1],
+                                "logits":[1]})
 
 model = onnx.load(model_fp32)
 onnx.checker.check_model(model)
@@ -35,7 +37,7 @@ sess = ort.InferenceSession(model_quant)
 
 # 创建输入数据
 mels = np.random.randn(1, 80, 3000).astype(np.float32)
-tokens = np.random.randint(0, 51865, (1, 448)).astype(np.int64)
+tokens = np.random.randint(0, 51865, (1, 320)).astype(np.int64)
 
 print(ort.get_available_providers())
 
