@@ -2,11 +2,7 @@ body {
     padding: 0;
     margin: 0;
     font-size: 12px;
-    font-family: PingFangSC-Semibold,"Microsoft YaHei",Arial,sans-serif,Helvetica,STHeiti;
-    color: rgb(40, 5, 5);
-    letter-spacing: 0;
     color: #460a0a;
-    background-color: #fff;
     min-width: 1060px;
     text-align: center;
 }
@@ -270,13 +266,9 @@ body {
 
 .fanyi__input_file {
     position: relative;
-    margin: 0 60px;
-    margin-top: 18px; 
-    margin-bottom: 15px;
-    margin:auto;
+    margin: 0 auto;
     max-width: 1400px;
     min-width: 960px;
-    font-size: 0
 }
 
 .fanyi__input__bg {
