@@ -296,6 +296,17 @@ body {
     z-index: 0;
 }
 
+.file_image{
+    height: 100%;
+    width: auto;
+    margin: auto;
+    background: #f4f4f4;
+    background-image: url(../static/img/file.jpg);
+    background-repeat:no-repeat;
+    background-position:center;
+    background-size: cover;
+}
+
 .select_file{
     opacity: 0; /*透明关键*/
     position: absolute;
@@ -578,16 +589,4 @@ body {
 .target_copy:hover {
     cursor:pointer;
     background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABcAAAAWCAYAAAArdgcFAAAAAXNSR0IArs4c6QAAANdJREFUOBFj/Pz5c/3///8bGKgMGBkZG5iobCaKcTQ1nAXFKjTO57xKht9HTqCJ4uay2lgw8E5qhyvA63JSDAaZiK4er8thThA6tx/GxEm/M3LEkMNruMCuNRgaSBFAMZzSMEa3GCXM0cMMXTE6n5B6FJfDNPNO64ExcdKfs0pwysEkUFwOE6QWPWo41pCkSrB8cA+hneEwk9lsLWBMMI01KaKoIIIjsBN7TqZKsOCyH6vLickguAxEFkdxOag8JgWghzG6XhSXIxf06ArJ4aO4nBwD8OkBAKfJLIzQd5MHAAAAAElFTkSuQmCC) 50% 50% no-repeat
-}
-
-.image{
-    display: block;
-    height: 100%;
-    width: auto;
-    margin:auto;
-    background: #f4f4f4;
-    background-image: url(../static/img/file.jpg);
-    background-repeat:no-repeat;
-    background-position:center;
-    background-size: cover;
 }
