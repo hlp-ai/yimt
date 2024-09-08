@@ -178,6 +178,15 @@ body {
     background-size:100% 100%;
 }
 
+.fanyi__input {
+    position: relative;
+    margin: 0 60px;
+    margin-top: 18px; 
+    margin:auto;
+    max-width: 1400px;
+    font-size: 0
+}
+
 .restriction{
     margin-left: 60px;
     margin-right: 60px;
@@ -255,20 +264,60 @@ body {
     background: #205472
 }
 
-.fanyi__input {
-    position: relative;
-    margin: 0 60px;
-    margin-top: 18px; 
-    margin:auto;
-    max-width: 1400px;
-    font-size: 0
-}
-
 .fanyi__input_file {
     position: relative;
     margin: 0 auto;
     max-width: 1400px;
     min-width: 960px;
+}
+
+.input__original_file {
+    background: #f4f4f4;
+    vertical-align: top;
+    border-radius: 3px;
+    border-color: rgba(102,102,102,.3);
+    border-style: solid;
+    border-width: 1px;
+}
+
+.input_area_file{
+    position: relative;
+    height: 180px;
+    margin-top: 18px;
+    //background: #f4f4f4;
+    z-index: 0;
+}
+
+.image_container{
+    position:relative;
+    height: 160px;
+    width:100%;
+    //background-color: #f4f4f4;
+    z-index: 0;
+}
+
+.select_file{
+    opacity: 0; /*透明关键*/
+    position: absolute;
+    height: 200px;
+    width: 100%;
+    top: 0px;
+    left: 0px;
+    background: #dc0000;
+    font-size: 14px;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    z-index: 1;
+}
+
+.progress_line{
+    display: none;
+    margin-left: 20%;
+    height: 40px;
+    width:60%;
+    color: #357aa1;
+    z-index: 5;
 }
 
 .fanyi__input__bg {
@@ -314,19 +363,6 @@ body {
     font-family: Arial-BoldMT;
     font-size: 24px;
     color: rgba(102,102,102,.3)
-}
-
-.input__original_file {
-    display: inline-block;
-    background: #f4f4f4;
-    width: 99.999999%;
-    font-size: 14px;
-    vertical-align: top;
-    border-radius: 3px;
-    border-color: rgba(102,102,102,.3);
-    border-style: solid;
-    border-width: 1px;
-    z-index: 1;
 }
 
 .input__target__area {
@@ -444,38 +480,6 @@ body {
     border: none
 }
 
-.input_area_file{
-    position: relative;
-    height: 180px;
-    margin-top: 18px;
-    background: #f4f4f4;
-    z-index: 0;
-}
-
-.select_file{
-    opacity:0;/*透明关键*/
-    position: absolute;
-    height: 200px;
-    width:100%;
-    top:0px;
-    left: 0px;
-    background: #dc0000;
-    font-size: 14px;
-    color: #fff;
-    border:none;
-    cursor: pointer;
-    z-index: 1;
-}
-
-.progress_line{
-    display: none;
-    margin-left: 20%;
-    height: 40px;
-    width:60%;
-    color: #357aa1;
-    z-index: 5;
-}
-
 .bottom_block{
     border-top: 1px solid #e8e8e8;
     max-width: 1400px;
@@ -548,16 +552,6 @@ body {
     bottom: 2px;
     right: 18px;
     color: #999
-}
-
-.image_container{
-    display: block;
-    position:relative;
-    height: 160px;
-    width:100%;
-    background-color: #f4f4f4;
-    z-index: 0;
-
 }
 
 .target_copy{
