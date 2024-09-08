@@ -38,7 +38,6 @@
 
             document.getElementById("showProgress").innerHTML = "正在上传";
             document.getElementById("showProgress").style.display ="block";
-            document.getElementById("progress_line").style.display ="block";
 
 		    var form = new FormData();
 		    form.append("file", fileObj);
@@ -51,16 +50,9 @@
             xhr.upload.addEventListener("progress", function(evt){
                 if (evt.lengthComputable) {
                     var percentComplete = Math.round(evt.loaded * 100 / evt.total);
-                    if (percentComplete == 100){
-                        setTimeout(function () {
-                        document.getElementById("progress_line").value=percentComplete;
-                      }, 10)
-                    }else{
-                        document.getElementById("showProgress").innerHTML = '已上传'+percentComplete+"%";
-                        document.getElementById("progress_line").value=percentComplete;
-                    }
+                    document.getElementById("showProgress").innerHTML = '已上传' + percentComplete + "%";
                 }else {
-                    document.getElementById("showProgress").innerHTML = '无法计算';
+                    document.getElementById("showProgress").innerHTML = '文件上传中...';
                 }
               }, false);
 
@@ -119,7 +111,7 @@
                     if(is_translated == false)
                         document.getElementById("showProgress").innerHTML = '正在翻译：'+ this.responseText;
                 }
-                xhr.open("POST",url);
+                xhr.open("POST", url);
                 xhr.send(form);
             }
         }
@@ -201,8 +193,7 @@
             </div>
        
         </div>
-        <progress id="progress_line" class="progress_line" value="0" max="100"> </progress>
-        <a id="showProgress" style="display:none; font-size:19px; color:#357aa1; z-index:6;">11</a>
+        <div id="showProgress" class="showProgress" style="display:none; font-size:19px; color:#357aa1; z-index:6;"></div>
     </div>
 
     <div class="bottom_block">

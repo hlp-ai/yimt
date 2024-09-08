@@ -322,13 +322,13 @@ body {
     z-index: 1;
 }
 
-.progress_line{
-    display: none;
-    margin-left: 20%;
+.showProgress{
     height: 40px;
-    width:60%;
-    color: #357aa1;
-    z-index: 5;
+    margin-top: 16px;
+    display:none;
+    font-size:19px;
+    color:#357aa1;
+    z-index:6;
 }
 
 .fanyi__input__bg {
