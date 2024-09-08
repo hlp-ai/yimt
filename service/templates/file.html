@@ -28,6 +28,7 @@
         var uploaded = false;
         var upload_file = "";
         var xhr;
+        var timeoutId;
        
 		function uploadFile() {
             var files = document.getElementById("select_file").files;
@@ -97,7 +98,7 @@
 		    xhr.onload = translateComplete;  // 服务器翻译结束处理事件
 		    xhr.send(form);
 
-            setInterval("translate_progress()", 2000);  // 每2秒发送查看进度
+            timeoutId = setInterval("translate_progress()", 2000);  // 每2秒发送查看进度
 		}
 
         function translate_progress(){
@@ -119,24 +120,16 @@
 		function translateComplete(evt) {
 		    is_finished = true;
 
+		    clearTimeout(timeoutId);  // 删除进展报告定时器
+
 			res_json = JSON.parse(evt.target.responseText);
 			if(res_json.error){
 			    alert(res_json.error);
 			    return;
 			}
 
-            var file_path = res_json.filepath;
-            var translated_file_path = res_json.translated_file_path;
-            var file_type = res_json.file_type;
-
-            var queryParams = new URLSearchParams();
-            queryParams.append("file_path", file_path);
-            queryParams.append("translated_file_path", translated_file_path);
-            queryParams.append("translated_file_url", res_json.translatedFileUrl);
-            queryParams.append("file_type", file_type);
-
-            var url = "{{ url_for('reference') }}?" + queryParams.toString();
-            window.location.href = url;  // 跳转到翻译对照页面
+            var translated_file_url = res_json.translatedFileUrl;
+            document.getElementById("showProgress").innerHTML = "翻译完成，" + "<a href=" + translated_file_url + ">下载翻译文件</a>";
 		}
 
 	</script>
