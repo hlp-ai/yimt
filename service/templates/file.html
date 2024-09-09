@@ -104,7 +104,7 @@
 		    xhr.onload = translateComplete;  // 服务器翻译结束处理事件
 		    xhr.send(form);
 
-            timeoutId = setInterval("translate_progress()", 1500);  // 每2秒发送查看进度
+            timeoutId = setInterval("translate_progress()", 2000);  // 每2秒发送查看进度
 		}
 
         function translate_progress(){

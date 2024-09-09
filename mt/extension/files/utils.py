@@ -1,10 +1,14 @@
 import re
+import threading
 
 
 class Progress:
 
     def report(self, total, done, fid=None):
         pass
+
+
+progress_lock = threading.Lock()
 
 
 class TranslationProgress(Progress):
@@ -15,19 +19,23 @@ class TranslationProgress(Progress):
         if fid is None:
             return
         progress_info = "{}/{}".format(done, total)
-        self.info_dict[fid] = progress_info
+
+        with progress_lock:
+            self.info_dict[fid] = progress_info
 
         print("[Progress]", fid, progress_info)
 
     def set_info(self, info, fid):
-        self.info_dict[fid] = info
+        with progress_lock:
+            self.info_dict[fid] = info
 
         print("[Progress]", fid, info)
 
     def get_info(self, fid=None):
-        for f, p in self.info_dict.items():
-            if f == fid or f.endswith(fid):
-                return p
+        with progress_lock:
+            for f, p in self.info_dict.items():
+                if f == fid or f.endswith(fid):
+                    return p
 
         return ""
 

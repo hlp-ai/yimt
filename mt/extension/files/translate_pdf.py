@@ -347,18 +347,18 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
     input_df = PdfReader(open(temp_pdf, "rb"))
     output_pdf = open(translated_fn, "wb")
     output = PdfWriter()
-    for i, template_page in enumerate(input_df.pages):  # 循环每一页
-        print("页面{}".format(i))
+    for page_no, template_page in enumerate(input_df.pages):  # 循环每一页
+        print("页面{}".format(page_no+1))
 
         packet = io.BytesIO()  # 画布写出目的地
         canvas_draw = Canvas(packet,
-                             pagesize=(input_df.pages[i].mediabox.width, input_df.pages[i].mediabox.height))
+                             pagesize=(input_df.pages[page_no].mediabox.width, input_df.pages[page_no].mediabox.height))
 
-        page_h = float(input_df.pages[i].mediabox.height)  # 页面高度，用户坐标转换
+        page_h = float(input_df.pages[page_no].mediabox.height)  # 页面高度，用户坐标转换
 
-        blocks = text_pages[i]
+        blocks = text_pages[page_no]
         for block in blocks:
-            print(block)
+            # print(block)
             text = block["text"]
             text = text.replace("-\n", "").replace("\n", " ").strip()
             if len(text) == 0:
@@ -386,7 +386,7 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
                     else:
                         source_sents_tag.append((False, s))
 
-                translations = translator.translate_list(to_translate, source_lang, target_lang, callbacker)
+                translations = translator.translate_list(to_translate, source_lang, target_lang)
                 result = ""
                 j = 0
                 for i in range(len(source_sents_tag)):
@@ -399,7 +399,7 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
                 block["text"] = result.strip()
 
             # print(text)
-            print(block)
+            # print(block)
 
             # 写出到画布
             print_to_page(block, canvas_draw, page_h)
@@ -413,7 +413,7 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
         output.write(output_pdf)
 
         if callbacker:
-            callbacker.report(total_pages, i+1, fid=pdf_fn)
+            callbacker.report(total_pages, page_no+1, fid=pdf_fn)
 
     if callbacker:
         callbacker.set_info("翻译完成，写出翻译结果", pdf_fn)
