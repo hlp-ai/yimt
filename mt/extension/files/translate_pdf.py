@@ -308,6 +308,9 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
     outpdf = pymupdf.open()
 
     print("复制图形和图像，提取文本信息...")
+    if callbacker:
+        callbacker.set_info("读取源文档...", pdf_fn)
+
     text_pages = []  # 每页文本块
     for page in doc:
         # 生成输出页面
@@ -366,6 +369,8 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
                     source_lang = detect_lang(text)  # TODO: 语言检测更安全些
 
                 translator = translator_factory.get_translator(source_lang, target_lang)
+                if translator is None:
+                    raise ValueError("给定语言对不支持: {}".format(source_lang + "-" + target_lang))
 
             toks = text.split()
             avg_len = sum([len(t) for t in toks]) / len(toks)
@@ -409,6 +414,9 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
 
         if callbacker:
             callbacker.report(total_pages, i+1, fid=pdf_fn)
+
+    if callbacker:
+        callbacker.set_info("翻译完成，写出翻译结果", pdf_fn)
 
     output_pdf.close()
 

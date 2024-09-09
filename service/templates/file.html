@@ -69,7 +69,7 @@
 			    return;
 			}
 
-			document.getElementById("showProgress").innerHTML = '待翻译文件已上传';
+			document.getElementById("showProgress").innerHTML = '待翻译文件已上传，选择语言后点击"翻译"按钮';
             uploaded = true;
             upload_file = res_json.filename;
 
@@ -81,6 +81,12 @@
 		        alert("文件未上传，请先上传文件");
 		        return;
 		    }
+
+		    var r = window.confirm("文件翻译需要点击广告。\r'确定'将打开广告页面，继续翻译；'取消'将不进行翻译。");
+		    if(!r)
+		        return;
+		    else
+		        window.open(document.getElementById("ad_url").href, "ad");
 
             source_lang = document.getElementById('source').value;
             target_lang = document.getElementById('target').value;
@@ -98,7 +104,7 @@
 		    xhr.onload = translateComplete;  // 服务器翻译结束处理事件
 		    xhr.send(form);
 
-            timeoutId = setInterval("translate_progress()", 2000);  // 每2秒发送查看进度
+            timeoutId = setInterval("translate_progress()", 1500);  // 每2秒发送查看进度
 		}
 
         function translate_progress(){
@@ -130,6 +136,12 @@
 
             var translated_file_url = res_json.translatedFileUrl;
             document.getElementById("showProgress").innerHTML = "翻译完成，" + "<a href=" + translated_file_url + ">下载翻译文件</a>";
+		}
+
+		function inputUrl(){
+		    // var url = window.prompt("请输入要翻译的网页链接：", "http://");
+		    // alert(document.getElementById("ad_url").href);
+		    window.open(document.getElementById("ad_url").href, "ad");
 		}
 
 	</script>
@@ -175,6 +187,7 @@
     
         <div class="fanyi__input_file">
             <div class="input__original_file">
+                <!--<div style="padding-top:12pt; font-size:22pt;"><button onclick="inputUrl()">输入要翻译网页链接</button></div>-->
                 <div style="padding-top:12pt; font-size:16px; color:#818181;">点 击 上 传</div>
                 <div class="input_area_file">
                     <div class="image_container">

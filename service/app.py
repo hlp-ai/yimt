@@ -557,20 +557,18 @@ def create_app(args):
 
         source_lang = request.form.get("source")
         target_lang = request.form.get("target")
-        file = request.form.get('file')
+        filename = request.form.get('file')
 
         api_key = request.form.get("api_key")
         if not api_key:
             api_key = ""
 
-        if not file:
-            abort(400, description="Invalid request: missing file parameter")
+        if not filename:
+            abort(400, description="无效请求: 参数file缺失")
         if not source_lang:
-            abort(400, description="Invalid request: missing source parameter")
+            abort(400, description="无效请求: 参数source缺失")
         if not target_lang:
-            abort(400, description="Invalid request: missing target parameter")
-
-        filename = file
+            abort(400, description="无效请求: 参数target缺失")
 
         log_service.info("/translate_file2: " + filename + "&source=" + source_lang + "&target=" + target_lang
                          + "&api_key=" + api_key)
@@ -578,12 +576,12 @@ def create_app(args):
         file_type = os.path.splitext(filename)[1]
 
         if not support(file_type):
-            abort(400, description="Invalid request: file format not supported")
+            abort(400, description="无效请求: 文件类型不支持")
 
         try:
             filepath = os.path.join(get_upload_dir(), filename)
 
-            translate_progress.report(0, 0, fid=filepath)
+            translate_progress.set_info("待翻译文件提交", fid=filepath)
 
             translated_file_path = translate_doc(filepath, source_lang, target_lang, callbacker=translate_progress)
             translated_filename = os.path.basename(translated_file_path)
