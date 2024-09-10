@@ -21,7 +21,6 @@ class LossCompute(nn.Module):
     Args:
         criterion (:obj:`nn. loss function`) : NLLoss or customed loss
         generator (:obj:`nn.Module`) :
-        lambda_align: Hyper-param for alignment loss
         tgt_shift_index (int): 1 for NMT, 0 for LM
         vocab: target vocab (for copy attention score calculation)
              module that maps the output of the decoder to a
@@ -32,14 +31,12 @@ class LossCompute(nn.Module):
         self,
         criterion,
         generator,
-        lambda_align=0.0,
         tgt_shift_index=1,
         vocab=None,
     ):
         super(LossCompute, self).__init__()
         self.criterion = criterion
         self.generator = generator
-        self.lambda_align = lambda_align
         self.tgt_shift_index = tgt_shift_index
         self.vocab = vocab  # target vocab for copy_attn need
 
@@ -68,7 +65,6 @@ class LossCompute(nn.Module):
         compute = cls(
             criterion,
             model.generator,
-            lambda_align=opt.lambda_align,
             tgt_shift_index=tgt_shift_idx,
             vocab=vocab,
         )
