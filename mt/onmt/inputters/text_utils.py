@@ -1,7 +1,6 @@
 import torch
 from onmt.constants import DefaultTokens, CorpusTask, ModelTask
 from torch.nn.utils.rnn import pad_sequence
-from onmt.utils.logging import logger
 
 
 def text_sort_key(ex):
@@ -15,8 +14,7 @@ def clean_example(maybe_example):
     maybe_example["src"] = {"src": " ".join(maybe_example["src"])}
     if maybe_example["tgt"] is not None:
         maybe_example["tgt"] = {"tgt": " ".join(maybe_example["tgt"])}
-    # if "align" in maybe_example:
-    #     maybe_example["align"] = " ".join(maybe_example["align"])
+
     return maybe_example
 
 
@@ -71,23 +69,6 @@ def numericalize(vocabs, example):
         )
 
     return numeric
-
-
-# def parse_align_idx(align_pharaoh):
-#     """
-#     Parse Pharaoh alignment into [[<src>, <tgt>], ...]
-#     """
-#     align_list = align_pharaoh.strip().split(" ")
-#     flatten_align_idx = []
-#     for align in align_list:
-#         try:
-#             src_idx, tgt_idx = align.split("-")
-#         except ValueError:
-#             logger.warning("{} in `{}`".format(align, align_pharaoh))
-#             logger.warning("Bad alignement line exists. Please check file!")
-#             raise
-#         flatten_align_idx.append([int(src_idx), int(tgt_idx)])
-#     return flatten_align_idx
 
 
 def tensorify(vocabs, minibatch, device, left_pad=False):
@@ -169,27 +150,6 @@ def tensorify(vocabs, minibatch, device, left_pad=False):
         else:
             tensor_batch["tgt"] = tbatchtgt
         tensor_batch["tgtlen"] = tbatchtgtlen
-
-    # if "align" in minibatch[0][0].keys() and minibatch[0][0]["align"] is not None:
-    #     sparse_idx = []
-    #     for i, (ex, indice) in enumerate(minibatch):
-    #         for src, tgt in parse_align_idx(ex["align"]):
-    #             sparse_idx.append([i, tgt + 1, src])
-    #     tbatchalign = torch.tensor(sparse_idx, dtype=torch.long, device=device)
-    #     tensor_batch["align"] = tbatchalign
-
-    # if "alignment" in minibatch[0][0].keys():
-    #     alignment = torch.zeros(
-    #         len(tensor_batch["srclen"]),
-    #         tbatchtgt.size(1),
-    #         dtype=torch.long,
-    #         device=device,
-    #     )
-    #     for i, (ex, indice) in enumerate(minibatch):
-    #         alignment[i, : len(ex["alignment"])] = torch.tensor(
-    #             ex["alignment"], dtype=torch.long, device=device
-    #         )
-    #     tensor_batch["alignment"] = alignment
 
     if "src_ex_vocab" in minibatch[0][0].keys():
         tensor_batch["src_ex_vocab"] = [ex["src_ex_vocab"] for ex, indice in minibatch]
