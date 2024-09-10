@@ -93,10 +93,10 @@
             target_lang = document.getElementById('target').value;
 
             // 翻译URL对应的页面
-            if(isUrl(qstr)) {
-                window.location.href = "/translate_page?q=" + qstr + "&source=" + source_lang + "&target=" + target_lang;
-                return;
-            }
+            //if(isUrl(qstr)) {
+            //    window.location.href = "/translate_page?q=" + qstr + "&source=" + source_lang + "&target=" + target_lang;
+            //    return;
+            //}
 
             const res = await fetch(END_POINT + "/translate", {
                 method: "POST",
@@ -159,7 +159,7 @@
         <div class="fanyi__input">
             <div class="input__original">
                 <div class="fanyi__input__bg">
-                    <textarea id="q" name="q" rows="25" maxlength="1000" cols="50" class="input__original__area" placeholder="请输入您要翻译的文字或网页链接"></textarea>
+                    <textarea id="q" name="q" rows="25" maxlength="1000" cols="50" class="input__original__area" placeholder="请输入要翻译的文字"></textarea>
 
                     <script>
                         document.getElementById("q").oninput = function() {myFunction();getc_num()};
@@ -172,7 +172,6 @@
                                 document.getElementById("inputDelete").style.visibility='hidden';
                                 document.getElementById("target_copy").style.visibility='hidden';
                                 document.getElementById("words_count").style.visibility='hidden';
-
                             }
                         }
                         function getc_num()
