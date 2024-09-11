@@ -25,8 +25,6 @@ class TransformerDecoderLayerBase(nn.Module):
         max_relative_positions=0,
         relative_positions_buckets=0,
         aan_useffn=False,
-        full_context_alignment=False,
-        alignment_heads=0,
         pos_ffn_activation_fn=ActivationFunction.relu,
         add_qkvbias=False,
         num_kv=0,
@@ -63,11 +61,6 @@ class TransformerDecoderLayerBase(nn.Module):
                 relative position bias see
                 https://github.com/google-research/text-to-text-transfer-transformer
             aan_useffn (bool): Turn on the FFN layer in the AAN decoder
-            full_context_alignment (bool):
-                whether enable an extra full context decoder forward for
-                alignment
-            alignment_heads (int):
-                N. of cross attention heads to use for alignment guiding
             pos_ffn_activation_fn (ActivationFunction):
                 activation function choice for PositionwiseFeedForward layer
             add_qkvbias (bool): whether to add bias to the Key/Value nn.Linear
@@ -135,8 +128,6 @@ class TransformerDecoderLayerBase(nn.Module):
 
         self.dropout = nn.Dropout(dropout)
         self.dropout_p = dropout
-        self.full_context_alignment = full_context_alignment
-        self.alignment_heads = alignment_heads
         self.sliding_window = sliding_window
         self.self_attn_type = self_attn_type
 
@@ -162,18 +153,6 @@ class TransformerDecoderLayerBase(nn.Module):
         layer_out, attns = self._forward(*args, **kwargs)
         top_attn = None if attns is None else attns[:, 0, :, :].contiguous()
         attn_align = None
-        # if with_align:
-        #     if self.full_context_alignment:
-        #         # return _, (B, Q_len, K_len)
-        #         _, attns = self._forward(*args, **kwargs, future=True)
-        #
-        #     if self.alignment_heads > 0:
-        #         attns = attns[:, : self.alignment_heads, :, :].contiguous()
-        #     # layer average attention across heads, get ``(B, Q, K)``
-        #     # Case 1: no full_context, no align heads -> layer avg baseline
-        #     # Case 2: no full_context, 1 align heads -> guided align
-        #     # Case 3: full_context, 1 align heads -> full cte guided align
-        #     attn_align = attns.mean(dim=1)
 
         return layer_out, top_attn, attn_align
 
@@ -242,8 +221,6 @@ class TransformerDecoderLayer(TransformerDecoderLayerBase):
         max_relative_positions=0,
         relative_positions_buckets=0,
         aan_useffn=False,
-        full_context_alignment=False,
-        alignment_heads=0,
         pos_ffn_activation_fn=ActivationFunction.relu,
         add_qkvbias=False,
         num_kv=0,
@@ -273,8 +250,6 @@ class TransformerDecoderLayer(TransformerDecoderLayerBase):
             max_relative_positions,
             relative_positions_buckets,
             aan_useffn,
-            full_context_alignment,
-            alignment_heads,
             pos_ffn_activation_fn=pos_ffn_activation_fn,
             add_qkvbias=add_qkvbias,
             num_kv=num_kv,
@@ -403,9 +378,7 @@ class TransformerDecoderBase(DecoderBase):
             opt.max_relative_positions,
             opt.relative_positions_buckets,
             opt.aan_useffn,
-            opt.full_context_alignment,
             opt.alignment_layer,
-            alignment_heads=opt.alignment_heads,
             pos_ffn_activation_fn=opt.pos_ffn_activation_fn,
             add_qkvbias=opt.add_qkvbias,
             num_kv=opt.num_kv,
@@ -485,11 +458,7 @@ class TransformerDecoder(TransformerDecoderBase):
         relative_positions_buckets (int):
             Number of buckets when using relative position bias
         aan_useffn (bool): Turn on the FFN layer in the AAN decoder
-        full_context_alignment (bool):
-            whether enable an extra full context decoder forward for alignment
         alignment_layer (int): N° Layer to supervise with for alignment guiding
-        alignment_heads (int):
-            N. of cross attention heads to use for alignment guiding
         pos_ffn_activation_fn (ActivationFunction):
             activation function choice for PositionwiseFeedForward layer
         add_qkvbias (bool): whether to add bias to the Key/Value nn.Linear
@@ -520,9 +489,7 @@ class TransformerDecoder(TransformerDecoderBase):
         max_relative_positions,
         relative_positions_buckets,
         aan_useffn,
-        full_context_alignment,
         alignment_layer,
-        alignment_heads,
         pos_ffn_activation_fn=ActivationFunction.relu,
         add_qkvbias=False,
         num_kv=0,
@@ -554,8 +521,6 @@ class TransformerDecoder(TransformerDecoderBase):
                     max_relative_positions=max_relative_positions,
                     relative_positions_buckets=relative_positions_buckets,
                     aan_useffn=aan_useffn,
-                    full_context_alignment=full_context_alignment,
-                    alignment_heads=alignment_heads,
                     pos_ffn_activation_fn=pos_ffn_activation_fn,
                     add_qkvbias=add_qkvbias,
                     num_kv=num_kv,
@@ -633,9 +598,6 @@ class TransformerDecoder(TransformerDecoderBase):
         dec_out = self.layer_norm(dec_out)
 
         attns = {"std": attn}
-        # if with_align:
-        #     attns["align"] = attn_aligns[self.alignment_layer]  # `(B, Q, K)`
-        #     # attns["align"] = torch.stack(attn_aligns, 0).mean(0)  # All avg
 
         # TODO change the way attns is returned dict => list or tuple (onnx)
         return dec_out, attns
