@@ -707,19 +707,6 @@ def model_opts(parser):
         default=-3,
         help="Layer number which has to be supervised.",
     )
-    group.add(
-        "--alignment_heads",
-        "-alignment_heads",
-        type=int,
-        default=0,
-        help="N. of cross attention heads per layer to supervised with",
-    )
-    group.add(
-        "--full_context_alignment",
-        "-full_context_alignment",
-        action="store_true",
-        help="Whether alignment is conditioned on full target context.",
-    )
 
     # Generator and loss options.
     group = parser.add_argument_group("Generator")
