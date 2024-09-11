@@ -50,6 +50,9 @@ def translate_docx_auto(docx_fn, source_lang="auto", target_lang="zh", translati
     else:
         translated_fn = translation_file
 
+    if callbacker:
+        callbacker.set_info("读取源文档...", docx_fn)
+
     doc = docx.Document(docx_fn)  # TODO: 大文档能一次读入？
     runs = scan_doc(doc)
 
@@ -59,12 +62,17 @@ def translate_docx_auto(docx_fn, source_lang="auto", target_lang="zh", translati
     translator = translator_factory.get_translator(source_lang, target_lang)
 
     if translator is None:
-        raise ValueError("给定语言不支持: {}".format(source_lang+"-"+target_lang))
+        raise ValueError("给定语言对不支持: {}".format(source_lang+"-"+target_lang))
 
     txt_list = [r.text for r in runs]
     for t in txt_list:
         print(t)
-    result_list = translator.translate_list(txt_list, sl=source_lang, tl=target_lang, callbacker=callbacker)
+    result_list = translator.translate_list(txt_list, sl=source_lang, tl=target_lang,
+                                            callbacker=callbacker, fn=docx_fn)
+
+    if callbacker:
+        callbacker.set_info("翻译完成，写出翻译结果", docx_fn)
+
     for i in range(len(runs)):
         runs[i].text = result_list[i]
 

@@ -58,6 +58,10 @@ def translate_ppt_auto(in_fn, source_lang="auto", target_lang="zh", translation_
     txt_list = [r.text for r in runs]
     result_list = translator.translate_list(txt_list, sl=source_lang, tl=target_lang,
                                             callbacker=callbacker, fn=in_fn)
+
+    if callbacker:
+        callbacker.set_info("翻译完成，写出翻译结果", in_fn)
+
     for i in range(len(runs)):
         runs[i].text = result_list[i]  # 替换源文本为翻译文本，其他不变（位置样式和非文本内容）
 
