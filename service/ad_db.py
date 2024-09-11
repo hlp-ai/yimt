@@ -6,13 +6,17 @@ from service.utils import get_logger
 class ADDB:
 
     def get_ad(self, type):
+        """获得给定类型的广告"""
         pass
 
-    def log_ad(self, ad, where=None):
+    def log_ad(self, platform, ad_id, where=None, action="P"):
+        """记录广告播放情况"""
         pass
 
 
 class ADList(ADDB):
+    """内存中广告DB测试类"""
+
     def __init__(self):
         self.all_ad = {"image": [("AD-20221020", "image", "./static/img/ad11.png", "https://www.hust.edu.cn"),
                                  ("AD-20221021", "image", "./static/img/ad1.png", "https://www.hust.edu.cn")],
@@ -20,6 +24,7 @@ class ADList(ADDB):
                                 ("AD-20221023", "text", "广告内容2广告内容", "https://www.hust.edu.cn")]
                        }
 
+        # 广告展示记录日志
         self.logger_ad = get_logger(log_filename="ad.log", name="AD")
 
     def get_ad(self, type):
@@ -29,9 +34,9 @@ class ADList(ADDB):
 
         return ads[idx]
 
-    def log_ad(self, platform, ad, where=None, action="P"):
+    def log_ad(self, platform, ad_id, where=None, action="P"):
         where = where+": " if where else "";
-        self.logger_ad.info(platform + " " + where + str(ad) + " " + action)
+        self.logger_ad.info(platform + " " + where + ad_id + " " + action)
 
 
 ad_db = None

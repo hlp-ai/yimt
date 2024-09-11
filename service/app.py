@@ -692,7 +692,7 @@ def create_app(args):
         ad = addb.get_ad(type)  # 随机获取广告
         ad_id = ad[0]
 
-        addb.log_ad(platform, ad, get_remote_address());
+        addb.log_ad(platform, ad_id, get_remote_address());
 
         if type == "text":
             content = ad[2]
