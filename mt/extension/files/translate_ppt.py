@@ -34,15 +34,17 @@ def scan_doc(ppt, new_ppt):
 
 def translate_ppt_auto(in_fn, source_lang="auto", target_lang="zh", translation_file=None, callbacker=None):
     paths = os.path.splitext(in_fn)
-    docx_fn = in_fn
 
     if translation_file is None:
         translated_fn = paths[0] + "-translated.pptx"
     else:
         translated_fn = translation_file
 
-    doc = Presentation(docx_fn)
-    translated_doc = Presentation(docx_fn)  # 原样拷贝源文档
+    if callbacker:
+        callbacker.set_info("读取源文档...", in_fn)
+
+    doc = Presentation(in_fn)
+    translated_doc = Presentation(in_fn)  # 原样拷贝源文档
     runs = scan_doc(doc, translated_doc)  # 提取源文档中可以翻译的文本对象
 
     if source_lang == "auto":
@@ -51,10 +53,11 @@ def translate_ppt_auto(in_fn, source_lang="auto", target_lang="zh", translation_
     translator = translator_factory.get_translator(source_lang, target_lang)
 
     if translator is None:
-        raise ValueError("给定语言不支持: {}".format(source_lang+"-"+target_lang))
+        raise ValueError("给定语言对不支持: {}".format(source_lang+"-"+target_lang))
 
     txt_list = [r.text for r in runs]
-    result_list = translator.translate_list(txt_list, sl=source_lang, tl=target_lang, callbacker=callbacker)  # translate
+    result_list = translator.translate_list(txt_list, sl=source_lang, tl=target_lang,
+                                            callbacker=callbacker, fn=in_fn)
     for i in range(len(runs)):
         runs[i].text = result_list[i]  # 替换源文本为翻译文本，其他不变（位置样式和非文本内容）
 
