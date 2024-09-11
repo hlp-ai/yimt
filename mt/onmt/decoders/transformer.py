@@ -345,7 +345,7 @@ class TransformerDecoderLayer(TransformerDecoderLayerBase):
 
 class TransformerDecoderBase(DecoderBase):
     def __init__(
-        self, d_model, embeddings, alignment_layer, layer_norm, norm_eps
+        self, d_model, embeddings, layer_norm, norm_eps
     ):
         super(TransformerDecoderBase, self).__init__()
 
@@ -358,8 +358,6 @@ class TransformerDecoderBase(DecoderBase):
         # attention. But it was never actually used -- the "copy" attention
         # just reuses the context attention.
         self.layer_norm = nn.LayerNorm(d_model, eps=norm_eps)
-
-        self.alignment_layer = alignment_layer
 
     @classmethod
     def from_opt(cls, opt, embeddings):
@@ -378,7 +376,6 @@ class TransformerDecoderBase(DecoderBase):
             opt.max_relative_positions,
             opt.relative_positions_buckets,
             opt.aan_useffn,
-            opt.alignment_layer,
             pos_ffn_activation_fn=opt.pos_ffn_activation_fn,
             add_qkvbias=opt.add_qkvbias,
             num_kv=opt.num_kv,
@@ -458,7 +455,6 @@ class TransformerDecoder(TransformerDecoderBase):
         relative_positions_buckets (int):
             Number of buckets when using relative position bias
         aan_useffn (bool): Turn on the FFN layer in the AAN decoder
-        alignment_layer (int): N° Layer to supervise with for alignment guiding
         pos_ffn_activation_fn (ActivationFunction):
             activation function choice for PositionwiseFeedForward layer
         add_qkvbias (bool): whether to add bias to the Key/Value nn.Linear
@@ -489,7 +485,6 @@ class TransformerDecoder(TransformerDecoderBase):
         max_relative_positions,
         relative_positions_buckets,
         aan_useffn,
-        alignment_layer,
         pos_ffn_activation_fn=ActivationFunction.relu,
         add_qkvbias=False,
         num_kv=0,
@@ -506,7 +501,7 @@ class TransformerDecoder(TransformerDecoderBase):
         num_experts_per_tok=2,
     ):
         super(TransformerDecoder, self).__init__(
-            d_model, embeddings, alignment_layer, layer_norm, norm_eps
+            d_model, embeddings, layer_norm, norm_eps
         )
 
         self.transformer_layers = nn.ModuleList(
