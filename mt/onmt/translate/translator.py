@@ -100,7 +100,7 @@ class Inference(object):
         global_scorer=None,
         out_file=None,
         report_align=False,
-        gold_align=False,
+        # gold_align=False,
         report_score=True,
         logger=None,
         seed=-1,
@@ -145,7 +145,7 @@ class Inference(object):
         self.global_scorer = global_scorer
         self.out_file = out_file
         self.report_align = report_align
-        self.gold_align = gold_align
+        # self.gold_align = gold_align
         self.report_score = report_score
         self.logger = logger
 
@@ -206,7 +206,7 @@ class Inference(object):
             global_scorer=global_scorer,
             out_file=out_file,
             report_align=report_align,
-            gold_align=opt.gold_align,
+            # gold_align=opt.gold_align,
             report_score=report_score,
             logger=logger,
             seed=opt.seed,
@@ -330,10 +330,10 @@ class Inference(object):
                     self._log(output)
 
                 if align_debug:
-                    if self.gold_align:
-                        tgts = trans.gold_sent
-                    else:
-                        tgts = trans.pred_sents[0]
+                    # if self.gold_align:
+                    #     tgts = trans.gold_sent
+                    # else:
+                    tgts = trans.pred_sents[0]
                     align = trans.word_aligns[0].tolist()
                     srcs = [voc_src[tok] for tok in trans.src[: trans.srclen].tolist()]
 
@@ -546,11 +546,11 @@ class Translator(Inference):
         """
 
         # (0) add BOS and padding to tgt prediction
-        if "tgt" in batch.keys() and self.gold_align:
-            self._log("Computing alignments with gold target")
-            batch_tgt_idxs = batch["tgt"].transpose(1, 2)
-        else:
-            batch_tgt_idxs = self._align_pad_prediction(
+        # if "tgt" in batch.keys() and self.gold_align:
+        #     self._log("Computing alignments with gold target")
+        #     batch_tgt_idxs = batch["tgt"].transpose(1, 2)
+        # else:
+        batch_tgt_idxs = self._align_pad_prediction(
                 predictions, bos=self._tgt_bos_idx, pad=self._tgt_pad_idx
             )
         tgt_mask = (

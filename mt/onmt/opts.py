@@ -1386,13 +1386,13 @@ def translate_opts(parser):
         action="store_true",
         help="Report alignment for each translation.",
     )
-    group.add(
-        "--gold_align",
-        "-gold_align",
-        action="store_true",
-        help="Report alignment between source and gold target."
-        "Useful to test the performance of learnt alignments.",
-    )
+    # group.add(
+    #     "--gold_align",
+    #     "-gold_align",
+    #     action="store_true",
+    #     help="Report alignment between source and gold target."
+    #     "Useful to test the performance of learnt alignments.",
+    # )
     group.add(
         "--report_time",
         "-report_time",
