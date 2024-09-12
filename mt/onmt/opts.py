@@ -689,24 +689,24 @@ def model_opts(parser):
         action="store_true",
         help="Add bias to nn.linear of Position_wise FFN",
     )
-    # Alignement options
-    group = parser.add_argument_group("Model - Alignement")
-    group.add(
-        "--lambda_align",
-        "-lambda_align",
-        type=float,
-        default=0.0,
-        help="Lambda value for alignement loss of Garg et al (2019)"
-        "For more detailed information, see: "
-        "https://arxiv.org/abs/1909.02074",
-    )
-    group.add(
-        "--alignment_layer",
-        "-alignment_layer",
-        type=int,
-        default=-3,
-        help="Layer number which has to be supervised.",
-    )
+    # # Alignement options
+    # group = parser.add_argument_group("Model - Alignement")
+    # group.add(
+    #     "--lambda_align",
+    #     "-lambda_align",
+    #     type=float,
+    #     default=0.0,
+    #     help="Lambda value for alignement loss of Garg et al (2019)"
+    #     "For more detailed information, see: "
+    #     "https://arxiv.org/abs/1909.02074",
+    # )
+    # group.add(
+    #     "--alignment_layer",
+    #     "-alignment_layer",
+    #     type=int,
+    #     default=-3,
+    #     help="Layer number which has to be supervised.",
+    # )
 
     # Generator and loss options.
     group = parser.add_argument_group("Generator")

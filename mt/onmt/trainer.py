@@ -72,7 +72,7 @@ def build_trainer(opt, device_id, model, vocabs, optim, model_saver=None):
         gpu_rank,
         parallel_mode,
         report_manager,
-        with_align=True if opt.lambda_align > 0 else False,
+        with_align=False,  # True if opt.lambda_align > 0 else False,
         model_saver=model_saver,
         average_decay=average_decay,
         average_every=average_every,

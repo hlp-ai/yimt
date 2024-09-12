@@ -175,10 +175,10 @@ class ArgumentParser(cfargparse.ArgumentParser, DataOptsCheckerMixin):
             model_opt.enc_hid_size = model_opt.hidden_size
             model_opt.dec_hid_size = model_opt.hidden_size
 
-        if model_opt.alignment_layer is None:
-            model_opt.alignment_layer = -2
-            model_opt.lambda_align = 0.0
-            model_opt.full_context_alignment = False
+        # if model_opt.alignment_layer is None:
+        #     model_opt.alignment_layer = -2
+        #     model_opt.lambda_align = 0.0
+        #     model_opt.full_context_alignment = False
 
     @classmethod
     def validate_model_opts(cls, model_opt):
