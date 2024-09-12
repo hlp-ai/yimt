@@ -1266,22 +1266,6 @@ def _add_decoding_opts(parser):
     )
     # Decoding content constraint
     group.add(
-        "--block_ngram_repeat",
-        "-block_ngram_repeat",
-        type=int,
-        default=0,
-        help="Block repetition of ngrams during decoding.",
-    )
-    group.add(
-        "--ignore_when_blocking",
-        "-ignore_when_blocking",
-        nargs="+",
-        type=str,
-        default=[],
-        help="Ignore these strings when blocking repeats. "
-        "You want to block sentence delimiters.",
-    )
-    group.add(
         "--replace_unk",
         "-replace_unk",
         action="store_true",
