@@ -689,24 +689,6 @@ def model_opts(parser):
         action="store_true",
         help="Add bias to nn.linear of Position_wise FFN",
     )
-    # # Alignement options
-    # group = parser.add_argument_group("Model - Alignement")
-    # group.add(
-    #     "--lambda_align",
-    #     "-lambda_align",
-    #     type=float,
-    #     default=0.0,
-    #     help="Lambda value for alignement loss of Garg et al (2019)"
-    #     "For more detailed information, see: "
-    #     "https://arxiv.org/abs/1909.02074",
-    # )
-    # group.add(
-    #     "--alignment_layer",
-    #     "-alignment_layer",
-    #     type=int,
-    #     default=-3,
-    #     help="Layer number which has to be supervised.",
-    # )
 
     # Generator and loss options.
     group = parser.add_argument_group("Generator")
@@ -1370,13 +1352,6 @@ def translate_opts(parser):
         action="store_true",
         help="Report alignment for each translation.",
     )
-    # group.add(
-    #     "--gold_align",
-    #     "-gold_align",
-    #     action="store_true",
-    #     help="Report alignment between source and gold target."
-    #     "Useful to test the performance of learnt alignments.",
-    # )
     group.add(
         "--report_time",
         "-report_time",

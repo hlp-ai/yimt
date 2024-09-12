@@ -50,11 +50,7 @@ class DataOptsCheckerMixin(object):
                 opt.data_task = ModelTask.SEQ2SEQ
                 if path_tgt is None:
                     raise ValueError("path_tgt is None, it should be set")
-                    # opt.data_task = ModelTask.LANGUAGE_MODEL
-                    # # tgt is src for LM task
-                    # corpus["path_tgt"] = path_src
-                    # corpora[cname] = corpus
-                    # path_tgt = path_src
+
                 if path_src is not None:
                     cls._validate_file(path_src, info=f"{cname}/path_src")
                 if path_txt is not None:
@@ -175,11 +171,6 @@ class ArgumentParser(cfargparse.ArgumentParser, DataOptsCheckerMixin):
             model_opt.enc_hid_size = model_opt.hidden_size
             model_opt.dec_hid_size = model_opt.hidden_size
 
-        # if model_opt.alignment_layer is None:
-        #     model_opt.alignment_layer = -2
-        #     model_opt.lambda_align = 0.0
-        #     model_opt.full_context_alignment = False
-
     @classmethod
     def validate_model_opts(cls, model_opt):
         # encoder and decoder should be same sizes
@@ -242,12 +233,6 @@ class ArgumentParser(cfargparse.ArgumentParser, DataOptsCheckerMixin):
 
     @classmethod
     def validate_translate_opts(cls, opt):
-        # if opt.gold_align:
-        #     assert opt.report_align, "-report_align should be enabled with -gold_align"
-        #     assert (
-        #         not opt.replace_unk
-        #     ), "-replace_unk option can not be used with -gold_align enabled"
-        #     assert opt.tgt, "-tgt should be specified with -gold_align"
         pass
 
     @classmethod
