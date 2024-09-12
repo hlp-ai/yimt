@@ -64,7 +64,6 @@ class Inference(object):
             :class:`onmt.translate.greedy_search.GreedySearch`.
         stepwise_penalty (bool): Whether coverage penalty is applied every step
             or not.
-        dump_beam (bool): Debugging option.
         replace_unk (bool): Replace unknown token.
         tgt_file_prefix (bool): Force the predictions begin with provided -tgt.
         verbose (bool): Print/log every translation.
@@ -90,7 +89,6 @@ class Inference(object):
         random_sampling_topk=0,
         random_sampling_topp=0.0,
         random_sampling_temp=1.0,
-        dump_beam=False,
         replace_unk=False,
         ban_unk_token=False,
         tgt_file_prefix=False,
@@ -131,7 +129,6 @@ class Inference(object):
         self.min_length = min_length
         self.ban_unk_token = ban_unk_token
         self.ratio = ratio
-        self.dump_beam = dump_beam
         self.replace_unk = replace_unk
         if self.replace_unk and not self.model.decoder.attentional:
             raise ValueError("replace_unk requires an attentional decoder.")
@@ -193,7 +190,6 @@ class Inference(object):
             random_sampling_topk=opt.random_sampling_topk,
             random_sampling_topp=opt.random_sampling_topp,
             random_sampling_temp=opt.random_sampling_temp,
-            dump_beam=opt.dump_beam,
             replace_unk=opt.replace_unk,
             ban_unk_token=opt.ban_unk_token,
             tgt_file_prefix=opt.tgt_file_prefix,
@@ -607,8 +603,6 @@ class Translator(Inference):
                     ban_unk_token=self.ban_unk_token,
                 )
             else:
-                # TODO: support these blacklisted features
-                assert not self.dump_beam
                 self._log("Decoding using BeamSearch")
                 decode_strategy = BeamSearch(
                     self.beam_size,
