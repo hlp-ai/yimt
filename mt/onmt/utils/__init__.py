@@ -1,6 +1,5 @@
 """Module defining various utilities."""
 from onmt.utils.misc import use_gpu, set_random_seed
-from onmt.utils.alignment import make_batch_align_matrix
 from onmt.utils.report_manager import ReportMgr, build_report_manager
 from onmt.utils.statistics import Statistics
 from onmt.utils.optimizers import MultipleOptimizer, Optimizer, FusedAdam
@@ -17,5 +16,4 @@ __all__ = [
     "FusedAdam",
     "EarlyStopping",
     "scorers_from_opts",
-    "make_batch_align_matrix",
 ]
