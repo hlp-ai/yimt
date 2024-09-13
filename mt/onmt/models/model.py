@@ -15,7 +15,7 @@ class BaseModel(nn.Module):
     def __init__(self, encoder, decoder):
         super(BaseModel, self).__init__()
 
-    def forward(self, src, tgt, src_len, bptt=False, with_align=False):
+    def forward(self, src, tgt, src_len, bptt=False):
         """Forward propagate a `src` and `tgt` pair for training.
 
         Args:
@@ -28,8 +28,6 @@ class BaseModel(nn.Module):
             src_len(LongTensor): The src lengths, pre-padding ``(batch,)``.
             bptt (Boolean): A flag indicating if truncated bptt is set.
                 If bptt is false then init decoder state.
-            with_align (Boolean): A flag indicating whether output alignment,
-                Only valid for transformer decoder.
 
         Returns:
             (FloatTensor, dict[str, FloatTensor]):
@@ -232,7 +230,7 @@ class NMTModel(BaseModel):
         self.encoder = encoder
         self.decoder = decoder
 
-    def forward(self, src, tgt, src_len, bptt=False, with_align=False):
+    def forward(self, src, tgt, src_len, bptt=False):
         """An NMTModel forward the src side to the encoder.
         Then the output of encoder ``enc_out`` is forwarded to the
         decoder along with the target excluding the last token.
@@ -244,7 +242,7 @@ class NMTModel(BaseModel):
         if not bptt:
             self.decoder.init_state(src, enc_out)
 
-        dec_out, attns = self.decoder(dec_in, enc_out, src_len=src_len, with_align=with_align)
+        dec_out, attns = self.decoder(dec_in, enc_out, src_len=src_len)
         return dec_out, attns
 
     def update_dropout(self, dropout, attention_dropout):

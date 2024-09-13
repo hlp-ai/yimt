@@ -73,7 +73,6 @@ class ScoringPreparator:
             model_opt,
             global_scorer=scorer,
             out_file=out_file,
-            report_align=opt.report_align,
             report_score=False,
             logger=None,
         )

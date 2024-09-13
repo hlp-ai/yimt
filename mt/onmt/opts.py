@@ -1347,12 +1347,6 @@ def translate_opts(parser):
         "be the decoded sequence",
     )
     group.add(
-        "--report_align",
-        "-report_align",
-        action="store_true",
-        help="Report alignment for each translation.",
-    )
-    group.add(
         "--report_time",
         "-report_time",
         action="store_true",

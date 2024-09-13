@@ -72,7 +72,6 @@ def build_trainer(opt, device_id, model, vocabs, optim, model_saver=None):
         gpu_rank,
         parallel_mode,
         report_manager,
-        with_align=False,  # True if opt.lambda_align > 0 else False,
         model_saver=model_saver,
         average_decay=average_decay,
         average_every=average_every,
@@ -109,8 +108,6 @@ class Trainer(object):
         gpu_rank (int): ordinal rank of the gpu in the list.
         report_manager(:obj:`onmt.utils.ReportMgrBase`):
           the object that creates reports, or None
-        with_align (bool): whether to jointly lear alignment
-          (Transformer)
         model_saver(:obj:`onmt.models.ModelSaverBase`): the saver is
           used to save a checkpoint.
           Thus nothing will be saved if this parameter is None.
@@ -139,7 +136,6 @@ class Trainer(object):
         gpu_rank=1,
         parallel_mode="data_parallel",
         report_manager=None,
-        with_align=False,
         model_saver=None,
         average_decay=0,
         average_every=1,
@@ -165,7 +161,6 @@ class Trainer(object):
         self.gpu_rank = gpu_rank
         self.parallel_mode = parallel_mode
         self.report_manager = report_manager
-        self.with_align = with_align
         self.model_saver = model_saver
         self.average_decay = average_decay
         self.moving_average = None
@@ -356,7 +351,7 @@ class Trainer(object):
 
                 with torch.cuda.amp.autocast(enabled=self.optim.amp):
                     # F-prop through the model.
-                    model_out, attns = valid_model(src, tgt, src_len, with_align=self.with_align)
+                    model_out, attns = valid_model(src, tgt, src_len)
 
                     # Compute loss.
                     _, batch_stats = self.valid_loss(batch, model_out, attns)
@@ -446,9 +441,7 @@ class Trainer(object):
                     self.optim.zero_grad(set_to_none=True)
                 try:
                     with torch.cuda.amp.autocast(enabled=self.optim.amp):
-                        model_out, attns = self.model(
-                            src, tgt, src_len, bptt=bptt, with_align=self.with_align
-                        )
+                        model_out, attns = self.model(src, tgt, src_len, bptt=bptt)
                         bptt = True
 
                         # 3. Compute loss.

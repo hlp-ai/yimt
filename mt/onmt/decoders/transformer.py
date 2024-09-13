@@ -139,7 +139,6 @@ class TransformerDecoderLayerBase(nn.Module):
 
         Args:
             * All arguments of _forward, of which
-            with_align (bool): needed to compute attn_align
             return_attn (bool): to force MHA to return attns
 
         Returns:
@@ -149,7 +148,6 @@ class TransformerDecoderLayerBase(nn.Module):
             * top_attn ``(batch_size, T, src_len)``
             * attn_align ``(batch_size, T, src_len)`` or None
         """
-        with_align = kwargs.pop("with_align", False)
         layer_out, attns = self._forward(*args, **kwargs)
         top_attn = None if attns is None else attns[:, 0, :, :].contiguous()
         attn_align = None
@@ -571,9 +569,7 @@ class TransformerDecoder(TransformerDecoderBase):
         )  # [B x 1 x slen]
         tgt_pad_mask = tgt[:, :, 0].eq(pad_idx).unsqueeze(1)  # [B, 1, T_tgt]
 
-        with_align = kwargs.pop("with_align", False)
-        # return_attn = with_align or self._copy or kwargs.pop("return_attn", False)
-        return_attn = with_align or kwargs.pop("return_attn", False)
+        return_attn = kwargs.pop("return_attn", False)
 
         attn_aligns = []
 
@@ -584,7 +580,6 @@ class TransformerDecoder(TransformerDecoderBase):
                 src_pad_mask,
                 tgt_pad_mask,
                 step=step,
-                with_align=with_align,
                 return_attn=return_attn,
             )
             if attn_align is not None:

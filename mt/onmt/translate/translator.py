@@ -12,7 +12,6 @@ from onmt.constants import DefaultTokens
 from onmt.translate.beam_search import BeamSearch
 from onmt.translate.greedy_search import GreedySearch
 from onmt.utils.misc import tile, set_random_seed, report_matrix
-from onmt.utils.alignment import extract_alignment, build_align_pharaoh
 from onmt.transforms import TransformPipe
 
 
@@ -37,7 +36,6 @@ def build_translator(opt, device_id=0, report_score=True, logger=None, out_file=
             model_opt,
             global_scorer=scorer,
             out_file=out_file,
-            report_align=opt.report_align,
             report_score=report_score,
             logger=logger,
         )
@@ -97,7 +95,6 @@ class Inference(object):
         report_time=False,
         global_scorer=None,
         out_file=None,
-        report_align=False,
         report_score=True,
         logger=None,
         seed=-1,
@@ -139,7 +136,6 @@ class Inference(object):
 
         self.global_scorer = global_scorer
         self.out_file = out_file
-        self.report_align = report_align
         self.report_score = report_score
         self.logger = logger
 
@@ -155,7 +151,6 @@ class Inference(object):
         model_opt,
         global_scorer=None,
         out_file=None,
-        report_align=False,
         report_score=True,
         logger=None,
     ):
@@ -172,7 +167,6 @@ class Inference(object):
                 :func:`__init__()`..
             out_file (TextIO or codecs.StreamReaderWriter): See
                 :func:`__init__()`.
-            report_align (bool) : See :func:`__init__()`.
             report_score (bool) : See :func:`__init__()`.
             logger (logging.Logger or NoneType): See :func:`__init__()`.
         """
@@ -198,7 +192,6 @@ class Inference(object):
             report_time=opt.report_time,
             global_scorer=global_scorer,
             out_file=out_file,
-            report_align=report_align,
             report_score=report_score,
             logger=logger,
             seed=opt.seed,
@@ -278,17 +271,6 @@ class Inference(object):
                     bucket_gold_words += len(trans.gold_sent) + 1
 
                 n_best_preds = [" ".join(pred) for pred in trans.pred_sents[: self.n_best]]
-
-                if self.report_align:
-                    align_pharaohs = [
-                        build_align_pharaoh(align)
-                        for align in trans.word_aligns[: self.n_best]
-                    ]
-                    n_best_preds_align = [" ".join(align[0]) for align in align_pharaohs]
-                    n_best_preds = [
-                        pred + DefaultTokens.ALIGNMENT_SEPARATOR + align
-                        for pred, align in zip(n_best_preds, n_best_preds_align)
-                    ]
 
                 if transform_pipe is not None:
                     n_best_preds = transform_pipe.batch_apply_reverse(n_best_preds)
@@ -519,60 +501,11 @@ class Inference(object):
         results["scores"] = decode_strategy.scores
         results["predictions"] = decode_strategy.predictions
         results["attention"] = decode_strategy.attention
-        if self.report_align:
-            results["alignment"] = self._align_forward(batch, decode_strategy.predictions)
-        else:
-            results["alignment"] = [[] for _ in range(batch_size)]
+        results["alignment"] = [[] for _ in range(batch_size)]
         return results
 
 
 class Translator(Inference):
-
-    def _align_forward(self, batch, predictions):
-        """
-        For a batch of input and its prediction, return a list of batch predict
-        alignment src indice Tensor in size ``(batch, n_best,)``.
-        """
-
-        # (0) add BOS and padding to tgt prediction
-        batch_tgt_idxs = self._align_pad_prediction(
-                predictions, bos=self._tgt_bos_idx, pad=self._tgt_pad_idx
-            )
-        tgt_mask = (
-            batch_tgt_idxs.eq(self._tgt_pad_idx)
-            | batch_tgt_idxs.eq(self._tgt_eos_idx)
-            | batch_tgt_idxs.eq(self._tgt_bos_idx)
-        )
-
-        n_best = batch_tgt_idxs.size(1)
-        # (1) Encoder forward.
-        src, enc_out, src_len = self._run_encoder(batch)
-
-        # (2) Repeat src objects `n_best` times.
-        # We use batch_size x n_best, get ``(batch * n_best, src_len, nfeat)``
-        src = tile(src, n_best, dim=0)
-        if isinstance(enc_out, tuple):
-            enc_out = tuple(tile(x, n_best, dim=0) for x in enc_out)
-        else:
-            enc_out = tile(enc_out, n_best, dim=0)
-        src_len = tile(src_len, n_best)  # ``(batch * n_best,)``
-
-        # (3) Init decoder with n_best src,
-        self.model.decoder.init_state(src, enc_out)
-        # reshape tgt to ``(len, batch * n_best, nfeat)``
-        # it should be done in a better way
-        tgt = batch_tgt_idxs.view(-1, batch_tgt_idxs.size(-1)).T.unsqueeze(-1)
-        dec_in = tgt[:-1].transpose(0, 1)  # exclude last target from inputs
-        # here dec_in is batch first
-        _, attns = self.model.decoder(dec_in, enc_out, src_len=src_len, with_align=True)
-
-        alignment_attn = attns["align"]  # ``(B, tgt_len-1, src_len)``
-        # masked_select
-        align_tgt_mask = tgt_mask.view(-1, tgt_mask.size(-1))
-        prediction_mask = align_tgt_mask[:, 1:]  # exclude bos to match pred
-        # get aligned src id for each prediction's valid tgt tokens
-        alignement = extract_alignment(alignment_attn, prediction_mask, src_len, n_best)
-        return alignement
 
     def translate_batch(self, batch, attn_debug):
         """Translate a batch of sentences."""
