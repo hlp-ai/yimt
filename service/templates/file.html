@@ -138,10 +138,30 @@
             document.getElementById("showProgress").innerHTML = "翻译完成，" + "<a href=" + translated_file_url + ">下载翻译文件</a>";
 		}
 
-		function inputUrl(){
-		    // var url = window.prompt("请输入要翻译的网页链接：", "http://");
-		    // alert(document.getElementById("ad_url").href);
-		    window.open(document.getElementById("ad_url").href, "ad");
+		async function inputUrl(){
+		    var u = window.prompt("请输入要翻译的网页链接：", "http://");
+
+		    document.getElementById("showProgress").innerHTML = "正在下载网页...";
+            document.getElementById("showProgress").style.display ="block";
+
+		    const res = await fetch(END_POINT + "/fetch", {
+                method: "POST",
+                body: JSON.stringify({url: u, token:API_KEY}),
+                headers: { "Content-Type": "application/json" }}
+            );
+
+            trans_json = await res.json();
+            if(res.ok){
+                document.getElementById("showProgress").innerHTML = '网页已下载，选择语言后点击"翻译"按钮';
+
+                upload_file = trans_json.filename;
+                uploaded = true;
+            }
+            else{
+                alert(trans_json.error)
+            }
+
+            request_ad();
 		}
 
 	</script>
@@ -187,7 +207,7 @@
     
         <div class="fanyi__input_file">
             <div class="input__original_file">
-                <!--<div style="padding-top:12pt; font-size:22pt;"><button onclick="inputUrl()">输入要翻译网页链接</button></div>-->
+                <!--<div style="padding-top:12pt; font-size:22pt;"><button onclick="inputUrl()">输入要翻译网页链接</button>-->
                 <div style="padding-top:12pt; font-size:16px; color:#818181;">点 击 上 传</div>
                 <div class="input_area_file">
                     <div class="image_container">

@@ -641,6 +641,38 @@ def create_app(args):
         except Exception as e:
             abort(500, description=e)
 
+    @app.post("/fetch")
+    # @access_check
+    def fetch():
+        json = get_json_dict(request)
+        log_service.info("/fetch: {}".format(json))
+
+        token = json.get("token")
+        url = json.get("url")
+
+        if not url:
+            abort(400, description="Invalid request: missing url parameter")
+
+        try:
+            # 获得URL对应的页面
+            page = get_page(url)
+
+            # 保存页面到临时文件
+            filename = str(random.randint(0, 10000)) + ".html"
+            filename = str(uuid.uuid4()) + '.' + secure_filename(filename)  # 安全文件名
+            filepath = os.path.join(get_upload_dir(), filename)
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write(page)
+
+            return jsonify(
+                {
+                    "filename": filename,
+                    "filepath": filepath,
+                }
+            )
+        except Exception as e:
+            abort(500, description=e)
+
     @app.get("/download_file/<string:filename>")
     def download_file(filename: str):
         """Download a translated file"""
