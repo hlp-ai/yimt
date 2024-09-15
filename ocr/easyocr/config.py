@@ -31,12 +31,12 @@ other_lang_list = ['th','ch_sim','ch_tra','ja','ko','ta','te','kn']
 all_lang_list = latin_lang_list + arabic_lang_list+ cyrillic_lang_list +\
                 devanagari_lang_list + bengali_lang_list + other_lang_list
 imgH = 64
-separator_list = {
-    'th': ['\xa2', '\xa3'],
-    'en': ['\xa4', '\xa5']
-}
-separator_char = []
-for lang, sep in separator_list.items():
-    separator_char += sep
+# separator_list = {
+#     'th': ['\xa2', '\xa3'],
+#     'en': ['\xa4', '\xa5']
+# }
+# separator_char = []
+# for lang, sep in separator_list.items():
+#     separator_char += sep
 
 recognition_models = conf["recognition_models"]
