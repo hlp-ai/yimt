@@ -107,19 +107,6 @@ class PositionalEncoding(nn.Module):
 class Embeddings(nn.Module):
     """Words embeddings for encoder/decoder.
 
-    .. mermaid::
-
-       graph LR
-          A[Input]
-          C[Feature 1 Lookup]
-          A-->B[Word Lookup]
-          A-->C
-          A-->D[Feature N Lookup]
-          B-->E[MLP/Concat]
-          C-->E
-          D-->E
-          E-->F[Output]
-
     Args:
         word_vec_size (int): size of the dictionary of embeddings.
         word_vocab_size (int): size of dictionary of embeddings for words.
@@ -151,7 +138,7 @@ class Embeddings(nn.Module):
         pad_indices = [word_padding_idx]
 
         # The embedding matrix look-up tables. The first look-up table
-        # is for words. Subsequent ones are for features, if any exist.
+        # is for words.
         emb_params = zip(vocab_sizes, emb_dims, pad_indices)
         embeddings = [
             skip_init(
