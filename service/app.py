@@ -417,7 +417,7 @@ def create_app(args):
         len = json.get("len")
         lang = json.get("lang")
 
-        log_service.info("/asr: {}".format(lang))
+        log_service.info("/asr: " + format + ", " + lang)
 
         if not audio_64_string:
             abort(400, description="Invalid request: missing audio base64 parameter")
@@ -427,6 +427,8 @@ def create_app(args):
         temp_audio_file = os.path.join(tempfile.gettempdir(), str(random.randint(0, 10000)) + ".{}".format(format))
         with open(temp_audio_file, "wb") as audio_file:
             audio_file.write(audio_data)
+
+        print(temp_audio_file)
 
         if format == "amr":
             print("转换AMR文件...")
