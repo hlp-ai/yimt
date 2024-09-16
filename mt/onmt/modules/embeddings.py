@@ -209,7 +209,7 @@ class Embeddings(nn.Module):
         if self.position_encoding:
             for i, module in enumerate(self.make_embedding._modules.values()):
                 if i == len(self.make_embedding._modules.values()) - 1:
-                    source = module(source, step=step)
+                    source = module(source, step=step)  # 最后一个模块是位置嵌入模块
                 else:
                     source = module(source)
         else:

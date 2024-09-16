@@ -57,12 +57,8 @@ def apply_rotary_emb(query, key, rope, interleave):
         rotary_dim = cos.size(1)
         head_dim = query.size(3)
         if rotary_dim < head_dim:
-            q_embed = (query[:, :, :, :rotary_dim] * cos) + (
-                rotate_half(query[:, :, :, :rotary_dim]) * sin
-            )
-            k_embed = (key[:, :, :, :rotary_dim] * cos) + (
-                rotate_half(key[:, :, :, :rotary_dim]) * sin
-            )
+            q_embed = (query[:, :, :, :rotary_dim] * cos) + (rotate_half(query[:, :, :, :rotary_dim]) * sin)
+            k_embed = (key[:, :, :, :rotary_dim] * cos) + (rotate_half(key[:, :, :, :rotary_dim]) * sin)
             q_embed = torch.cat([q_embed, query[:, :, :, rotary_dim:]], dim=-1)
             k_embed = torch.cat([k_embed, key[:, :, :, rotary_dim:]], dim=-1)
         else:
@@ -106,9 +102,7 @@ def gen_relative_positions(
         range_vec = torch.arange(length, device=device)
         range_mat = range_vec.unsqueeze(-1).expand(-1, length).transpose(0, 1)
         distance_mat = range_mat - range_mat.transpose(0, 1)
-    distance_mat_clipped = torch.clamp(
-        distance_mat, min=-max_relative_positions, max=max_relative_positions
-    )
+    distance_mat_clipped = torch.clamp(distance_mat, min=-max_relative_positions, max=max_relative_positions)
     # Shift values to be >= 0
     final_mat = distance_mat_clipped + max_relative_positions
     return final_mat
@@ -147,9 +141,7 @@ def _relative_position_bucket(
         relative_buckets += (relative_position > 0).to(torch.long) * num_buckets
         relative_position = torch.abs(relative_position)
     else:
-        relative_position = -torch.min(
-            relative_position, torch.zeros_like(relative_position)
-        )
+        relative_position = -torch.min(relative_position, torch.zeros_like(relative_position))
     # now relative_position is in the range [0, inf)
     # half of the buckets are for exact increments in positions
     max_exact = num_buckets // 2
@@ -167,9 +159,7 @@ def _relative_position_bucket(
         torch.full_like(relative_position_if_large, num_buckets - 1),
     )
 
-    relative_buckets += torch.where(
-        is_small, relative_position, relative_position_if_large
-    )
+    relative_buckets += torch.where(is_small, relative_position, relative_position_if_large)
     return relative_buckets
 
 
@@ -182,9 +172,7 @@ def compute_bias(
     device=None,
 ):
     """Compute binned relative position bias"""
-    context_position = torch.arange(query_length, dtype=torch.long, device=device)[
-        :, None
-    ]
+    context_position = torch.arange(query_length, dtype=torch.long, device=device)[:, None]
     memory_position = torch.arange(key_length, dtype=torch.long, device=device)[None, :]
     relative_position = (
         memory_position - context_position
@@ -348,9 +336,7 @@ class MultiHeadedAttention(torch.nn.Module):
             {"keys": torch.tensor([]), "values": torch.tensor([])},
         )
         if relative_positions_buckets > 0:
-            self.relative_attention_bias = nn.Embedding(
-                relative_positions_buckets, head_count
-            )
+            self.relative_attention_bias = nn.Embedding(relative_positions_buckets, head_count)
             self.relative_positions_embeddings = None
         elif max_relative_positions > 0:
             # https://arxiv.org/pdf/1803.02155.pdf
@@ -359,9 +345,7 @@ class MultiHeadedAttention(torch.nn.Module):
             # relative_key. We implemented the same embed
             # for both.
             vocab_size = max_relative_positions * 2 + 1
-            self.relative_positions_embeddings = nn.Embedding(
-                vocab_size, self.dim_per_head
-            )
+            self.relative_positions_embeddings = nn.Embedding(vocab_size, self.dim_per_head)
             self.relative_attention_bias = None
         else:
             self.relative_positions_embeddings = None
@@ -372,9 +356,7 @@ class MultiHeadedAttention(torch.nn.Module):
                     self.rotary_dim = self.dim_per_head
                 else:
                     self.rotary_dim = rotary_dim
-                self.rope, self.cos, self.sin = rotaryembeddings(
-                    self.rotary_dim, base=rotary_theta
-                )
+                self.rope, self.cos, self.sin = rotaryembeddings(self.rotary_dim, base=rotary_theta)
                 self.rotary_interleave = rotary_interleave
                 self.rotary_theta = rotary_theta
             else:
@@ -391,9 +373,7 @@ class MultiHeadedAttention(torch.nn.Module):
                 and torch.cuda.get_device_capability()[0] >= 8
             ):
                 self.flash_attn_func = getattr(flash_pack, "flash_attn_func")
-                self.flash_attn_with_kvcache = getattr(
-                    flash_pack, "flash_attn_with_kvcache"
-                )
+                self.flash_attn_with_kvcache = getattr(flash_pack, "flash_attn_with_kvcache")
                 self.flash2 = True
             else:
                 self.flash2 = False
@@ -470,9 +450,7 @@ class MultiHeadedAttention(torch.nn.Module):
                                 device=self.rope.device,
                             )
                         rope = self.rope[start_pos : start_pos + seqlen]
-                        query, key = apply_rotary_emb(
-                            query, key, rope, interleave=self.rotary_interleave
-                        )
+                        query, key = apply_rotary_emb(query, key, rope, interleave=self.rotary_interleave)
 
                     if self.layer_cache[1]["keys"].numel() != 0:
                         key = torch.cat((self.layer_cache[1]["keys"], key), dim=2)
@@ -525,12 +503,8 @@ class MultiHeadedAttention(torch.nn.Module):
                             )
 
                     if sliding_window > 0 and key.size(2) > sliding_window:
-                        self.layer_cache[1]["keys"] = self.layer_cache[1]["keys"][
-                            :, :, 1:, :
-                        ]
-                        self.layer_cache[1]["values"] = self.layer_cache[1]["values"][
-                            :, :, 1:, :
-                        ]
+                        self.layer_cache[1]["keys"] = self.layer_cache[1]["keys"][:, :, 1:, :]
+                        self.layer_cache[1]["values"] = self.layer_cache[1]["values"][:, :, 1:, :]
                     context = self.flash_attn_with_kvcache(
                         query.transpose(1, 2),
                         self.layer_cache[1]["keys"].transpose(1, 2),
@@ -555,10 +529,7 @@ class MultiHeadedAttention(torch.nn.Module):
                     key = shape(key, self.dim_per_head)
                     value = shape(value, self.dim_per_head)
                 else:
-                    key, value = (
-                        self.layer_cache[1]["keys"],
-                        self.layer_cache[1]["values"],
-                    )
+                    key, value = (self.layer_cache[1]["keys"], self.layer_cache[1]["values"],)
                 self.layer_cache[1]["keys"] = key
                 self.layer_cache[1]["values"] = value
 
@@ -571,9 +542,7 @@ class MultiHeadedAttention(torch.nn.Module):
                         dtype=torch.bool,
                         device=key_pad_mask.device,
                     )
-                    self.layer_cache[1]["key_pad_mask"] = torch.cat(
-                        (key_pad_mask, y), 2
-                    )
+                    self.layer_cache[1]["key_pad_mask"] = torch.cat((key_pad_mask, y), 2)
                     key_pad_mask = self.layer_cache[1]["key_pad_mask"]
         else:
             # Retrieve keys and values from linear layers (training mode).
@@ -597,9 +566,7 @@ class MultiHeadedAttention(torch.nn.Module):
                         device=query.device,
                     )
                 rope = self.rope[start_pos : start_pos + seqlen]
-                query, key = apply_rotary_emb(
-                    query, key, rope, interleave=self.rotary_interleave
-                )
+                query, key = apply_rotary_emb(query, key, rope, interleave=self.rotary_interleave)
 
         b, h, l, d = key.size()
         if self.num_kv > 0:
@@ -647,9 +614,7 @@ class MultiHeadedAttention(torch.nn.Module):
                 ).transpose(1, 2)
             else:
                 # Apply scaled dot product attention.
-                with torch.backends.cuda.sdp_kernel(
-                    enable_flash=False, enable_math=True, enable_mem_efficient=True
-                ):
+                with torch.backends.cuda.sdp_kernel(enable_flash=False, enable_math=True, enable_mem_efficient=True):
                     attn_output = scaled_dot_product_attention(
                         query,
                         key,
@@ -675,12 +640,8 @@ class MultiHeadedAttention(torch.nn.Module):
                     self.relative_positions_buckets,
                     device=key.device,
                 )
-                values = self.relative_attention_bias(
-                    relative_position_bucket
-                )  # shape (query_length, key_length, num_heads)
-                position_bias = values.permute([2, 0, 1]).unsqueeze(
-                    0
-                )  # shape (1, num_heads, query_length, key_length)
+                values = self.relative_attention_bias(relative_position_bucket)  # shape (query_length, key_length, num_heads)
+                position_bias = values.permute([2, 0, 1]).unsqueeze(0)  # shape (1, num_heads, query_length, key_length)
                 if self.layer_cache[0]:
                     position_bias = position_bias[:, :, -query.size(2) :, :]
                 scores.add_(position_bias)
@@ -695,9 +656,7 @@ class MultiHeadedAttention(torch.nn.Module):
                     device=key.device,
                 )
                 #  1 or key_len x key_len x dim_per_head
-                relations_keys = self.relative_positions_embeddings(
-                    relative_positions_matrix
-                )
+                relations_keys = self.relative_positions_embeddings(relative_positions_matrix)
                 scores.add_(relative_matmul(query, relations_keys, True))
 
             scores = scores.float()
