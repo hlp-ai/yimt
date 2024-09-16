@@ -705,15 +705,15 @@ def create_app(args):
     def request_ad():
         """广告请求展示接口"""
         json = get_json_dict(request)
-        log_service.info("/ad: {}".format(json))
+        log_service.info("/request_ad: {}".format(json))
 
         platform = json.get("platform")
         support_platforms = ["app", "web", "plugin"]
 
         if not platform:
-            abort(400, description="Invalid request: missing parameter: platform")
+            abort(400, description="无效请求: 缺失platform请求参数")
         if platform not in support_platforms:
-            abort(400, description="platform %s is not supported" % platform)
+            abort(400, description="平台%s不支持" % platform)
 
         # 目前，Web端展示广告图片，其他端展示广告文本
         if platform == "web":
@@ -754,73 +754,73 @@ def create_app(args):
         args = request.args
         ad_id = args["ad_id"]
         platform = args["platform"]
-        url = args["url"]
+        url = args["url"]  # TODO: 这个广告URL没必要，有广告ID即可
 
         log_service.info("/click_ad: " + ad_id + ", " + url + ", " + platform)
         addb.log_ad(platform, ad_id, get_remote_address(), action="C")
 
         return redirect(url)  # 重定向到广告URL
 
-    #####################################################################
+    # #####################################################################
+    # #
+    # # 内部路径
+    # #
+    # #####################################################################
     #
-    # 内部路径
+    # @app.route("/reference")
+    # @limiter.exempt
+    # def reference():
+    #     if args.disable_web_ui:
+    #         abort(404)
+    #     return render_template('reference.html')
     #
-    #####################################################################
-
-    @app.route("/reference")
-    @limiter.exempt
-    def reference():
-        if args.disable_web_ui:
-            abort(404)
-        return render_template('reference.html')
-
-    @app.route("/translate_file_progress", methods=['GET', 'POST'])
-    def get_translate_progress():
-        file = request.form.get("file")
-        progress = translate_progress.get_info(fid=file)
-        log_service.info("/translate_file_progress: {}: {}".format(file, progress))
-
-        return progress
-
-    @app.post("/get_blob_file")
-    # @access_check
-    def get_blob_file():
-        json = get_json_dict(request)
-        file_path = json.get("file_path")
-        import base64
-        file_64_string = base64.b64encode(open(file_path, "rb").read())
-        resp = {
-            'base64': file_64_string.decode('utf-8')
-        }
-        return jsonify(resp)
-
-    @app.get("/pptx")
-    def pptx():
-        file_path = request.args.get('file_path')
-        return send_file(file_path)
-
-    @app.get("/request_source")
-    def request_source():
-        file_type = request.args.get('file_type')
-        file_path = request.args.get('file_path')
-        if file_type == 'docx' or file_type == 'pptx' or file_type == 'xlsx':  # office文件
-            file_path_str = url_for('static', filename=file_path)
-            file_path_str = file_path_str.replace('/static/', '/')
-            file_path_str = file_path_str.lstrip('/')
-            return render_template("media_source.html", file_type=file_type, file_path=file_path_str)
-
-        return send_file(file_path)
-
-    @app.get("/request_target")
-    def request_target():
-        file_type = request.args.get('file_type')
-        file_path = request.args.get('translated_file_path')
-        if file_type == 'docx' or file_type == 'pptx' or file_type == 'xlsx':  # office文件
-            file_path_str = url_for('static', filename=file_path)
-            file_path_str = file_path_str.replace('/static/', '/')
-            file_path_str = file_path_str.lstrip('/')
-            return render_template("media_target.html", file_type=file_type, file_path=file_path_str)
-
-        return send_file(file_path)
+    # @app.route("/translate_file_progress", methods=['GET', 'POST'])
+    # def get_translate_progress():
+    #     file = request.form.get("file")
+    #     progress = translate_progress.get_info(fid=file)
+    #     log_service.info("/translate_file_progress: {}: {}".format(file, progress))
+    #
+    #     return progress
+    #
+    # @app.post("/get_blob_file")
+    # # @access_check
+    # def get_blob_file():
+    #     json = get_json_dict(request)
+    #     file_path = json.get("file_path")
+    #     import base64
+    #     file_64_string = base64.b64encode(open(file_path, "rb").read())
+    #     resp = {
+    #         'base64': file_64_string.decode('utf-8')
+    #     }
+    #     return jsonify(resp)
+    #
+    # @app.get("/pptx")
+    # def pptx():
+    #     file_path = request.args.get('file_path')
+    #     return send_file(file_path)
+    #
+    # @app.get("/request_source")
+    # def request_source():
+    #     file_type = request.args.get('file_type')
+    #     file_path = request.args.get('file_path')
+    #     if file_type == 'docx' or file_type == 'pptx' or file_type == 'xlsx':  # office文件
+    #         file_path_str = url_for('static', filename=file_path)
+    #         file_path_str = file_path_str.replace('/static/', '/')
+    #         file_path_str = file_path_str.lstrip('/')
+    #         return render_template("media_source.html", file_type=file_type, file_path=file_path_str)
+    #
+    #     return send_file(file_path)
+    #
+    # @app.get("/request_target")
+    # def request_target():
+    #     file_type = request.args.get('file_type')
+    #     file_path = request.args.get('translated_file_path')
+    #     if file_type == 'docx' or file_type == 'pptx' or file_type == 'xlsx':  # office文件
+    #         file_path_str = url_for('static', filename=file_path)
+    #         file_path_str = file_path_str.replace('/static/', '/')
+    #         file_path_str = file_path_str.lstrip('/')
+    #         return render_template("media_target.html", file_type=file_type, file_path=file_path_str)
+    #
+    #     return send_file(file_path)
 
     return app
