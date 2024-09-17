@@ -670,19 +670,19 @@ def model_opts(parser):
         help="Add bias to nn.linear of Query/Key/Value in MHA"
         "Note: this will add bias to output proj layer too",
     )
-    group.add(
-        "--multiquery",
-        "-multiquery",
-        action="store_true",
-        help="Use MultiQuery attention" "Note: https://arxiv.org/pdf/1911.02150.pdf",
-    )
-    group.add(
-        "--num_kv",
-        "-num_kv",
-        type=int,
-        default=0,
-        help="Number of heads for KV in the variant of MultiQuery attention (egs: Falcon 40B)",
-    )
+    # group.add(
+    #     "--multiquery",
+    #     "-multiquery",
+    #     action="store_true",
+    #     help="Use MultiQuery attention" "Note: https://arxiv.org/pdf/1911.02150.pdf",
+    # )
+    # group.add(
+    #     "--num_kv",
+    #     "-num_kv",
+    #     type=int,
+    #     default=0,
+    #     help="Number of heads for KV in the variant of MultiQuery attention (egs: Falcon 40B)",
+    # )
     group.add(
         "--add_ffnbias",
         "-add_ffnbias",

@@ -217,29 +217,6 @@ class MultiHeadedAttention(torch.nn.Module):
     multiple attention distributions simulataneously
     to select relevant items.
 
-    .. mermaid::
-
-       graph BT
-          A[key]
-          B[value]
-          C[query]
-          O[output]
-          subgraph Attn
-            D[Attn 1]
-            E[Attn 2]
-            F[Attn N]
-          end
-          A --> D
-          C --> D
-          A --> E
-          C --> E
-          A --> F
-          C --> F
-          D --> O
-          E --> O
-          F --> O
-          B --> O
-
     Also includes several additional tricks.
 
     Args:
@@ -265,7 +242,7 @@ class MultiHeadedAttention(torch.nn.Module):
         attn_type: str = None,
         self_attn_type: str = None,
         add_qkvbias=False,
-        num_kv=0,
+        # num_kv=0,
         use_ckpting=[],
         parallel_gpu=1,
     ) -> None:
@@ -275,42 +252,60 @@ class MultiHeadedAttention(torch.nn.Module):
         self.dim_per_head = model_dim // head_count
         super(MultiHeadedAttention, self).__init__()
         self.head_count = head_count
-        self.num_kv = num_kv
+        # self.num_kv = num_kv
         self.parallel_gpu = parallel_gpu
-        if num_kv == 0:
-            assert (
+
+        assert (
                 model_dim % parallel_gpu == 0
-            ), "Model dimension must be divisible by the number of partitions"
-            self.linear_keys = skip_init(
-                nn.Linear,
-                in_features=model_dim,
-                out_features=model_dim // parallel_gpu,
-                bias=add_qkvbias,
-            )
-            self.linear_values = skip_init(
-                nn.Linear,
-                in_features=model_dim,
-                out_features=model_dim // parallel_gpu,
-                bias=add_qkvbias,
-            )
-        else:
-            assert (
-                self.dim_per_head * self.num_kv
-            ) % parallel_gpu == 0, (
-                "Model dimension must be divisible by the number of partitions"
-            )
-            self.linear_keys = skip_init(
-                nn.Linear,
-                in_features=model_dim,
-                out_features=self.dim_per_head * self.num_kv // parallel_gpu,
-                bias=add_qkvbias,
-            )
-            self.linear_values = skip_init(
-                nn.Linear,
-                in_features=model_dim,
-                out_features=self.dim_per_head * self.num_kv // parallel_gpu,
-                bias=add_qkvbias,
-            )
+        ), "Model dimension must be divisible by the number of partitions"
+        self.linear_keys = skip_init(
+            nn.Linear,
+            in_features=model_dim,
+            out_features=model_dim // parallel_gpu,
+            bias=add_qkvbias,
+        )
+        self.linear_values = skip_init(
+            nn.Linear,
+            in_features=model_dim,
+            out_features=model_dim // parallel_gpu,
+            bias=add_qkvbias,
+        )
+
+        # if num_kv == 0:
+        #     assert (
+        #         model_dim % parallel_gpu == 0
+        #     ), "Model dimension must be divisible by the number of partitions"
+        #     self.linear_keys = skip_init(
+        #         nn.Linear,
+        #         in_features=model_dim,
+        #         out_features=model_dim // parallel_gpu,
+        #         bias=add_qkvbias,
+        #     )
+        #     self.linear_values = skip_init(
+        #         nn.Linear,
+        #         in_features=model_dim,
+        #         out_features=model_dim // parallel_gpu,
+        #         bias=add_qkvbias,
+        #     )
+        # else:
+        #     assert (
+        #         self.dim_per_head * self.num_kv
+        #     ) % parallel_gpu == 0, (
+        #         "Model dimension must be divisible by the number of partitions"
+        #     )
+        #     self.linear_keys = skip_init(
+        #         nn.Linear,
+        #         in_features=model_dim,
+        #         out_features=self.dim_per_head * self.num_kv // parallel_gpu,
+        #         bias=add_qkvbias,
+        #     )
+        #     self.linear_values = skip_init(
+        #         nn.Linear,
+        #         in_features=model_dim,
+        #         out_features=self.dim_per_head * self.num_kv // parallel_gpu,
+        #         bias=add_qkvbias,
+        #     )
+
         self.linear_query = skip_init(
             nn.Linear,
             in_features=model_dim,
@@ -569,15 +564,15 @@ class MultiHeadedAttention(torch.nn.Module):
                 query, key = apply_rotary_emb(query, key, rope, interleave=self.rotary_interleave)
 
         b, h, l, d = key.size()
-        if self.num_kv > 0:
-            qh = query.size(1)
-            # expand key on heads dimension when it's less than query heads (multi-query variant)
-            key = key.view(b, -1, 1, l, d).repeat(1, 1, qh // h, 1, 1)
-            key = key.view(b, qh, l, d)
-
-            # expand value on heads dimension when it's less than query heads (multi-query variant)
-            value = value.view(b, -1, 1, l, d).repeat(1, 1, qh // h, 1, 1)
-            value = value.view(b, qh, l, d)
+        # if self.num_kv > 0:
+        #     qh = query.size(1)
+        #     # expand key on heads dimension when it's less than query heads (multi-query variant)
+        #     key = key.view(b, -1, 1, l, d).repeat(1, 1, qh // h, 1, 1)
+        #     key = key.view(b, qh, l, d)
+        #
+        #     # expand value on heads dimension when it's less than query heads (multi-query variant)
+        #     value = value.view(b, -1, 1, l, d).repeat(1, 1, qh // h, 1, 1)
+        #     value = value.view(b, qh, l, d)
 
         # 2) When standard pos. enc. or rotary, use flash attention
 
