@@ -576,52 +576,52 @@ def model_opts(parser):
         help="Self attention type in Transformer decoder "
         'layer -- currently "scaled-dot", "scaled-dot-flash" or "average" ',
     )
-    group.add(
-        "--max_relative_positions",
-        "-max_relative_positions",
-        type=int,
-        default=0,
-        help="This setting enable relative position encoding"
-        "We support two types of encodings:"
-        "set this -1 to enable Rotary Embeddings"
-        "more info: https://arxiv.org/abs/2104.09864"
-        "set this to > 0 (ex: 16, 32) to use"
-        "Maximum distance between inputs in relative "
-        "positions representations. "
-        "more info: https://arxiv.org/pdf/1803.02155.pdf",
-    )
-    group.add(
-        "--relative_positions_buckets",
-        "-relative_positions_buckets",
-        type=int,
-        default=0,
-        help="This setting enable relative position bias"
-        "more info: https://github.com/google-research/text-to-text-transfer-transformer",
-    )
-    group.add(
-        "--rotary_interleave",
-        "-rotary_interleave",
-        action="store_true",
-        help="Interleave the head dimensions when rotary"
-        " embeddings are applied."
-        "    Otherwise the head dimensions are sliced in half."
-        "True = default Llama from Meta (original)"
-        "False = used by all Hugging face models",
-    )
-    group.add(
-        "--rotary_theta",
-        "-rotary_theta",
-        type=int,
-        default=10000,
-        help="Rotary theta base length" "1e4 for Llama2.Mistral" "1e6 for Mixtral",
-    )
-    group.add(
-        "--rotary_dim",
-        "-rotary_dim",
-        type=int,
-        default=0,
-        help="Rotary dim when model requires it to be different to head dim",
-    )
+    # group.add(
+    #     "--max_relative_positions",
+    #     "-max_relative_positions",
+    #     type=int,
+    #     default=0,
+    #     help="This setting enable relative position encoding"
+    #     "We support two types of encodings:"
+    #     "set this -1 to enable Rotary Embeddings"
+    #     "more info: https://arxiv.org/abs/2104.09864"
+    #     "set this to > 0 (ex: 16, 32) to use"
+    #     "Maximum distance between inputs in relative "
+    #     "positions representations. "
+    #     "more info: https://arxiv.org/pdf/1803.02155.pdf",
+    # )
+    # group.add(
+    #     "--relative_positions_buckets",
+    #     "-relative_positions_buckets",
+    #     type=int,
+    #     default=0,
+    #     help="This setting enable relative position bias"
+    #     "more info: https://github.com/google-research/text-to-text-transfer-transformer",
+    # )
+    # group.add(
+    #     "--rotary_interleave",
+    #     "-rotary_interleave",
+    #     action="store_true",
+    #     help="Interleave the head dimensions when rotary"
+    #     " embeddings are applied."
+    #     "    Otherwise the head dimensions are sliced in half."
+    #     "True = default Llama from Meta (original)"
+    #     "False = used by all Hugging face models",
+    # )
+    # group.add(
+    #     "--rotary_theta",
+    #     "-rotary_theta",
+    #     type=int,
+    #     default=10000,
+    #     help="Rotary theta base length" "1e4 for Llama2.Mistral" "1e6 for Mixtral",
+    # )
+    # group.add(
+    #     "--rotary_dim",
+    #     "-rotary_dim",
+    #     type=int,
+    #     default=0,
+    #     help="Rotary dim when model requires it to be different to head dim",
+    # )
     group.add(
         "--heads",
         "-heads",

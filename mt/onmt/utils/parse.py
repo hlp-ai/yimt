@@ -177,14 +177,14 @@ class ArgumentParser(cfargparse.ArgumentParser, DataOptsCheckerMixin):
         same_size = model_opt.enc_hid_size == model_opt.dec_hid_size
         assert same_size, "The encoder and decoder rnns must be the same size for now"
 
-        if model_opt.position_encoding and model_opt.max_relative_positions != 0:
-            raise ValueError(
-                "Cannot use absolute and relative position encoding at the"
-                "same time. Use either --position_encoding=true for legacy"
-                "absolute position encoding or --max_realtive_positions with"
-                " -1 for Rotary, or > 0 for Relative Position Representations"
-                "as in https://arxiv.org/pdf/1803.02155.pdf"
-            )
+        # if model_opt.position_encoding and model_opt.max_relative_positions != 0:
+        #     raise ValueError(
+        #         "Cannot use absolute and relative position encoding at the"
+        #         "same time. Use either --position_encoding=true for legacy"
+        #         "absolute position encoding or --max_realtive_positions with"
+        #         " -1 for Rotary, or > 0 for Relative Position Representations"
+        #         "as in https://arxiv.org/pdf/1803.02155.pdf"
+        #     )
         # if model_opt.multiquery and model_opt.num_kv == 0:
         #     model_opt.num_kv = 1
 
