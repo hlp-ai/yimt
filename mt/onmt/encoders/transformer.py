@@ -44,8 +44,8 @@ class TransformerEncoderLayer(nn.Module):
         d_ff,
         dropout,
         attention_dropout,
-        max_relative_positions=0,
-        relative_positions_buckets=0,
+        # max_relative_positions=0,
+        # relative_positions_buckets=0,
         pos_ffn_activation_fn=ActivationFunction.relu,
         add_qkvbias=False,
         # num_kv=0,
@@ -54,9 +54,9 @@ class TransformerEncoderLayer(nn.Module):
         norm_eps=1e-6,
         use_ckpting=[],
         parallel_gpu=1,
-        rotary_interleave=True,
-        rotary_theta=1e4,
-        rotary_dim=0,
+        # rotary_interleave=True,
+        # rotary_theta=1e4,
+        # rotary_dim=0,
     ):
         super(TransformerEncoderLayer, self).__init__()
 
@@ -65,11 +65,11 @@ class TransformerEncoderLayer(nn.Module):
             d_model,
             dropout=attention_dropout,
             is_decoder=False,
-            max_relative_positions=max_relative_positions,
-            relative_positions_buckets=relative_positions_buckets,
-            rotary_interleave=rotary_interleave,
-            rotary_theta=rotary_theta,
-            rotary_dim=rotary_dim,
+            # max_relative_positions=max_relative_positions,
+            # relative_positions_buckets=relative_positions_buckets,
+            # rotary_interleave=rotary_interleave,
+            # rotary_theta=rotary_theta,
+            # rotary_dim=rotary_dim,
             attn_type="self",
             add_qkvbias=add_qkvbias,
             # num_kv=num_kv,
@@ -150,8 +150,8 @@ class TransformerEncoder(EncoderBase):
         dropout,
         attention_dropout,
         embeddings,
-        max_relative_positions,
-        relative_positions_buckets,
+        # max_relative_positions,
+        # relative_positions_buckets,
         pos_ffn_activation_fn=ActivationFunction.relu,
         add_qkvbias=False,
         # num_kv=0,
@@ -160,9 +160,9 @@ class TransformerEncoder(EncoderBase):
         norm_eps=1e-6,
         use_ckpting=[],
         parallel_gpu=1,
-        rotary_interleave=True,
-        rotary_theta=1e4,
-        rotary_dim=0,
+        # rotary_interleave=True,
+        # rotary_theta=1e4,
+        # rotary_dim=0,
     ):
         super(TransformerEncoder, self).__init__()
 
@@ -175,8 +175,8 @@ class TransformerEncoder(EncoderBase):
                     d_ff,
                     dropout,
                     attention_dropout,
-                    max_relative_positions=max_relative_positions,
-                    relative_positions_buckets=relative_positions_buckets,
+                    # max_relative_positions=max_relative_positions,
+                    # relative_positions_buckets=relative_positions_buckets,
                     pos_ffn_activation_fn=pos_ffn_activation_fn,
                     add_qkvbias=add_qkvbias,
                     # num_kv=num_kv,
@@ -185,9 +185,9 @@ class TransformerEncoder(EncoderBase):
                     norm_eps=norm_eps,
                     use_ckpting=use_ckpting,
                     parallel_gpu=parallel_gpu,
-                    rotary_interleave=rotary_interleave,
-                    rotary_theta=rotary_theta,
-                    rotary_dim=rotary_dim,
+                    # rotary_interleave=rotary_interleave,
+                    # rotary_theta=rotary_theta,
+                    # rotary_dim=rotary_dim,
                 )
                 for i in range(num_layers)
             ]
@@ -207,8 +207,8 @@ class TransformerEncoder(EncoderBase):
             if type(opt.attention_dropout) is list
             else opt.attention_dropout,
             embeddings,
-            opt.max_relative_positions,
-            opt.relative_positions_buckets,
+            # opt.max_relative_positions,
+            # opt.relative_positions_buckets,
             pos_ffn_activation_fn=opt.pos_ffn_activation_fn,
             add_qkvbias=opt.add_qkvbias,
             # num_kv=opt.num_kv,
@@ -219,9 +219,9 @@ class TransformerEncoder(EncoderBase):
             parallel_gpu=opt.world_size
             if opt.parallel_mode == "tensor_parallel"
             else 1,
-            rotary_interleave=opt.rotary_interleave,
-            rotary_theta=opt.rotary_theta,
-            rotary_dim=opt.rotary_dim,
+            # rotary_interleave=opt.rotary_interleave,
+            # rotary_theta=opt.rotary_theta,
+            # rotary_dim=opt.rotary_dim,
         )
 
     def forward(self, src, src_len=None):

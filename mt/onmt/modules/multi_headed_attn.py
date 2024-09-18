@@ -234,11 +234,11 @@ class MultiHeadedAttention(torch.nn.Module):
         model_dim: int,
         dropout: float = 0.1,
         is_decoder: bool = True,
-        max_relative_positions: int = 0,
-        relative_positions_buckets: int = 0,
-        rotary_interleave: bool = True,
-        rotary_theta: int = 1e4,
-        rotary_dim: int = 0,
+        # max_relative_positions: int = 0,
+        # relative_positions_buckets: int = 0,
+        # rotary_interleave: bool = True,
+        # rotary_theta: int = 1e4,
+        # rotary_dim: int = 0,
         attn_type: str = None,
         self_attn_type: str = None,
         add_qkvbias=False,
@@ -322,8 +322,8 @@ class MultiHeadedAttention(torch.nn.Module):
             bias=add_qkvbias,
         )
         self.is_decoder = is_decoder
-        self.max_relative_positions = max_relative_positions
-        self.relative_positions_buckets = relative_positions_buckets
+        # self.max_relative_positions = max_relative_positions
+        # self.relative_positions_buckets = relative_positions_buckets
         self.attn_type = attn_type
         self.self_attn_type = self_attn_type
         self.layer_cache = (
@@ -586,8 +586,8 @@ class MultiHeadedAttention(torch.nn.Module):
         )
 
         if (
-            self.max_relative_positions in [-1, 0]
-            and not return_attn
+            # self.max_relative_positions in [-1, 0]
+            not return_attn
             and query.device != torch.device("cpu")
             and self.self_attn_type == "scaled-dot-flash"
         ):
