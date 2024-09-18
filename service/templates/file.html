@@ -8,16 +8,16 @@
     
     <script>
         var API_KEY = "";
-        var END_POINT = "http://127.0.0.1:5555";
+        //var END_POINT = "http://127.0.0.1:5555";
         window.onload = function()
         {
             document.getElementById("settings").addEventListener("click", display_setting_func);
 
-            var server = window.localStorage.getItem("server_url");
+            //var server = window.localStorage.getItem("server_url");
             var key = window.localStorage.getItem("key");
             API_KEY=key;
-            if(!!server)
-                END_POINT = server;
+            //if(!!server)
+            //    END_POINT = server;
 
             request_languages();
 
@@ -44,7 +44,7 @@
 		    form.append("file", fileObj);
             form.append("api_key", API_KEY);
 
-		    var url = END_POINT + "/upload_file";
+		    var url = "/upload_file";
 		    xhr = new XMLHttpRequest();
             is_translated = false;
 
@@ -97,7 +97,7 @@
 		    form.append("target", target_lang);
             form.append("api_key", API_KEY);
 
-		    var url = END_POINT + "/translate_file2";
+		    var url = "/translate_file2";
 		    xhr = new XMLHttpRequest();
 
 		    xhr.open("post", url, true);
@@ -110,7 +110,7 @@
         function translate_progress(){
             if(is_translated == false)
             {
-                var url = END_POINT + "/translate_file_progress";
+                var url = "/translate_file_progress";
                 var form = new FormData();
 		        form.append("file", upload_file);
                 xhr = new XMLHttpRequest();
@@ -144,7 +144,7 @@
 		    document.getElementById("showProgress").innerHTML = "正在下载网页...";
             document.getElementById("showProgress").style.display ="block";
 
-		    const res = await fetch(END_POINT + "/fetch", {
+		    const res = await fetch("/fetch", {
                 method: "POST",
                 body: JSON.stringify({url: u, token:API_KEY}),
                 headers: { "Content-Type": "application/json" }}

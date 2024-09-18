@@ -27,7 +27,7 @@ function close_setting_func()
 }
 
 async function request_ad(){
-    const res = await fetch(END_POINT + "/request_ad", {
+    const res = await fetch("/request_ad", {
           method: "POST",
           body: JSON.stringify({platform:"web"}),
           headers: { "Content-Type": "application/json" },
@@ -53,7 +53,7 @@ async function request_ad(){
 }
 
 async function request_languages(){
-    const res = await fetch(END_POINT + "/languages", {method: "GET"});
+    const res = await fetch("/languages", {method: "GET"});
     ret_json = await res.json();
 
     console.log("languages: "+ret_json);

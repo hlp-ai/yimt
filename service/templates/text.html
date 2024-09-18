@@ -8,16 +8,18 @@
 
     <script>
         var API_KEY = "";
-        var END_POINT = "http://127.0.0.1:5555";
+        // var END_POINT = window.location.protocol + "://" + window.location.host + ":" + window.location.port; //"http://127.0.0.1:5555";
+        //var END_POINT = window.location.protocol + "://" + window.location.host;
+        //alert(END_POINT);
         window.onload = function()
         {
             document.getElementById("settings").addEventListener("click", display_setting_func);
 
-            var server = window.localStorage.getItem("server_url");
+            //var server = window.localStorage.getItem("server_url");
             var key = window.localStorage.getItem("key");
             API_KEY=key;
-            if(!!server)
-                END_POINT = server;
+            //if(!!server)
+            //    END_POINT = server;
 
             var userAgentInfo = navigator.userAgent;
             var Agents = ["Android","iPhone","SymbianOS","Windows Phone","iPad","iPod"];
@@ -51,12 +53,12 @@
             source_lang = document.getElementById('source').value;
             target_lang = document.getElementById('target').value;
 
-            END_POINT = window.localStorage.getItem("server_url");
+            //END_POINT = window.localStorage.getItem("server_url");
             API_KEY = window.localStorage.getItem("key");
-            if(END_POINT=="")
-            {
-                END_POINT = "http://127.0.0.1:5555";
-            }
+            //if(END_POINT=="")
+            //{
+            //    END_POINT = "http://127.0.0.1:5555";
+            //}
 		    console.log(fileObj);
 		    var form = new FormData();
 		    form.append("file", fileObj);
@@ -64,7 +66,7 @@
 		    form.append("target", target_lang);
             form.append("api_key", API_KEY);
 
-		    var url = END_POINT + "/translate_image";
+		    var url = "/translate_image";
 		    xhr = new XMLHttpRequest();
 		    xhr.open("post", url, true);
 		    xhr.onload = uploadComplete;
@@ -98,7 +100,7 @@
             //    return;
             //}
 
-            const res = await fetch(END_POINT + "/translate", {
+            const res = await fetch("/translate", {
                 method: "POST",
                 body: JSON.stringify({q: qstr, source: source_lang, target: target_lang, api_key:API_KEY, format: "text"}),
                 headers: { "Content-Type": "application/json" }}
