@@ -10,8 +10,8 @@ function display_setting_func()
 
 function reset_setting_func()
 {
-    END_POINT = document.getElementById("url").value;
-    window.localStorage.setItem("server", END_POINT);
+    END_POINT = document.getElementById("server_url").value;
+    window.localStorage.setItem("server_url", END_POINT);
 
     document.getElementById("url_setting_block").style.visibility='hidden';
     document.getElementById("mask").style.display='none';

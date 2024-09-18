@@ -13,7 +13,7 @@
         {
             document.getElementById("settings").addEventListener("click", display_setting_func);
 
-            var server = window.localStorage.getItem("server");
+            var server = window.localStorage.getItem("server_url");
             var key = window.localStorage.getItem("key");
             API_KEY=key;
             if(!!server)
