@@ -30,5 +30,3 @@ translators:
 languages:
   - {code: en, name: English, cname: 英语}
   - {code: zh, name: Chinese, cname: 汉语}
-  - {code: ja, name: Japanese, cname: 日语}
-  - {code: ar, name: Arabic, cname: 阿拉伯语}
