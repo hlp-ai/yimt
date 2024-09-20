@@ -214,13 +214,13 @@ def create_app(args):
 
         return render_template('mobile_text.html')
 
-    @app.route('/usage')
+    @app.route('/company')
     @limiter.exempt
     def usage():
         if args.disable_web_ui:
             abort(404)
 
-        return render_template('usage.html')
+        return render_template('company.html')
 
     @app.route('/others')
     @limiter.exempt
