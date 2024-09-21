@@ -111,9 +111,6 @@ class MultiHeadedAttention(torch.nn.Module):
             {"keys": torch.tensor([]), "values": torch.tensor([])},
         )
 
-        self.relative_positions_embeddings = None
-        self.relative_attention_bias = None
-
         self.cos = None
         self.sin = None
         self.rotary_interleave = None
@@ -133,6 +130,8 @@ class MultiHeadedAttention(torch.nn.Module):
                 self.flash2 = False
         except ImportError:
             self.flash2 = False
+
+        print("flash-attn:", self.flash2)
 
     def update_dropout(self, dropout: float) -> None:
         self.dropout.p = dropout
