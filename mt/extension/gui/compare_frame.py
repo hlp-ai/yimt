@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import *
 from functools import partial
 
-from extension.gui.win_utils import ask_open_file
+from extension.gui.win_utils import ask_open_file, ask_save_file
 
 
 def create_translate_file(parent):
@@ -22,7 +22,7 @@ def create_translate_file(parent):
     tk.Label(parent, text="输出翻译结果文件").grid(row=2, column=0, padx=10, pady=5, sticky="e")
     entry_target = tk.Entry(parent, width=50)
     entry_target.grid(row=2, column=1, padx=10, pady=5)
-    tk.Button(parent, text="...", command=partial(ask_open_file, entry=entry_target)).grid(row=2, column=2,
+    tk.Button(parent, text="...", command=partial(ask_save_file, entry=entry_target)).grid(row=2, column=2,
                                                                                            padx=10, pady=5)
 
     def go():
