@@ -1,3 +1,4 @@
+import os
 import random
 
 from service.utils import get_logger
@@ -31,6 +32,8 @@ class ADList(ADDB):
     """内存中广告DB测试类"""
 
     def __init__(self):
+        super().__init__()
+
         self.all_ad = {"image": [("AD-20221020", "image", "./static/img/ad11.png", "https://www.hust.edu.cn"),
                                  ("AD-20221021", "image", "./static/img/ad1.png", "https://www.hust.edu.cn")],
                        "text": [("AD-20221022", "text", "广告内容1广告内容", "https://www.hust.edu.cn"),
@@ -64,7 +67,8 @@ def get_addb():
     if ad_db is not None:
         return ad_db
 
-    ad_db = ADList()
+    # ad_db = ADList()
+    ad_db = ADFile(os.path.join(os.path.dirname(__file__), "ads.csv"))
     return ad_db
 
 
