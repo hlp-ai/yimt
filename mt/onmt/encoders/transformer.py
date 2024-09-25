@@ -25,16 +25,11 @@ class TransformerEncoderLayer(nn.Module):
         pos_ffn_activation_fn (ActivationFunction):
             activation function choice for PositionwiseFeedForward layer
         add_qkvbias (bool): whether to add bias to the Key/Value nn.Linear
-        num_kv (int): number of heads for KV when different vs Q (multiquery)
         add_ffnbias (bool): whether to add bias to the FF nn.Linear
         layer_norm (string): type of layer normalization standard/rms
         norm_eps (float): layer norm epsilon
         use_ckpting (List): layers for which we checkpoint for backward
         parallel_gpu (int): Number of gpu for tensor parallelism
-        rotary_interleave (bool): Interleave the head dimensions when rotary
-            embeddings are applied
-        rotary_theta (int): rotary base theta
-        rotary_dim (int): rotary dim when different to dim per head
     """
 
     def __init__(
@@ -44,19 +39,13 @@ class TransformerEncoderLayer(nn.Module):
         d_ff,
         dropout,
         attention_dropout,
-        # max_relative_positions=0,
-        # relative_positions_buckets=0,
         pos_ffn_activation_fn=ActivationFunction.relu,
         add_qkvbias=False,
-        # num_kv=0,
         add_ffnbias=True,
         layer_norm="standard",
         norm_eps=1e-6,
         use_ckpting=[],
         parallel_gpu=1,
-        # rotary_interleave=True,
-        # rotary_theta=1e4,
-        # rotary_dim=0,
     ):
         super(TransformerEncoderLayer, self).__init__()
 
@@ -65,14 +54,8 @@ class TransformerEncoderLayer(nn.Module):
             d_model,
             dropout=attention_dropout,
             is_decoder=False,
-            # max_relative_positions=max_relative_positions,
-            # relative_positions_buckets=relative_positions_buckets,
-            # rotary_interleave=rotary_interleave,
-            # rotary_theta=rotary_theta,
-            # rotary_dim=rotary_dim,
             attn_type="self",
             add_qkvbias=add_qkvbias,
-            # num_kv=num_kv,
             use_ckpting=use_ckpting,
             parallel_gpu=parallel_gpu,
         )
@@ -150,19 +133,13 @@ class TransformerEncoder(EncoderBase):
         dropout,
         attention_dropout,
         embeddings,
-        # max_relative_positions,
-        # relative_positions_buckets,
         pos_ffn_activation_fn=ActivationFunction.relu,
         add_qkvbias=False,
-        # num_kv=0,
         add_ffnbias=True,
         layer_norm="standard",
         norm_eps=1e-6,
         use_ckpting=[],
         parallel_gpu=1,
-        # rotary_interleave=True,
-        # rotary_theta=1e4,
-        # rotary_dim=0,
     ):
         super(TransformerEncoder, self).__init__()
 
@@ -175,19 +152,13 @@ class TransformerEncoder(EncoderBase):
                     d_ff,
                     dropout,
                     attention_dropout,
-                    # max_relative_positions=max_relative_positions,
-                    # relative_positions_buckets=relative_positions_buckets,
                     pos_ffn_activation_fn=pos_ffn_activation_fn,
                     add_qkvbias=add_qkvbias,
-                    # num_kv=num_kv,
                     add_ffnbias=add_ffnbias,
                     layer_norm=layer_norm,
                     norm_eps=norm_eps,
                     use_ckpting=use_ckpting,
                     parallel_gpu=parallel_gpu,
-                    # rotary_interleave=rotary_interleave,
-                    # rotary_theta=rotary_theta,
-                    # rotary_dim=rotary_dim,
                 )
                 for i in range(num_layers)
             ]
@@ -207,11 +178,8 @@ class TransformerEncoder(EncoderBase):
             if type(opt.attention_dropout) is list
             else opt.attention_dropout,
             embeddings,
-            # opt.max_relative_positions,
-            # opt.relative_positions_buckets,
             pos_ffn_activation_fn=opt.pos_ffn_activation_fn,
             add_qkvbias=opt.add_qkvbias,
-            # num_kv=opt.num_kv,
             add_ffnbias=opt.add_ffnbias,
             layer_norm=opt.layer_norm,
             norm_eps=opt.norm_eps,
@@ -219,9 +187,6 @@ class TransformerEncoder(EncoderBase):
             parallel_gpu=opt.world_size
             if opt.parallel_mode == "tensor_parallel"
             else 1,
-            # rotary_interleave=opt.rotary_interleave,
-            # rotary_theta=opt.rotary_theta,
-            # rotary_dim=opt.rotary_dim,
         )
 
     def forward(self, src, src_len=None):

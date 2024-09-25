@@ -22,21 +22,15 @@ class TransformerDecoderLayerBase(nn.Module):
         dropout,
         attention_dropout,
         self_attn_type="scaled_dot",
-        # max_relative_positions=0,
-        # relative_positions_buckets=0,
         aan_useffn=False,
         pos_ffn_activation_fn=ActivationFunction.relu,
         add_qkvbias=False,
-        # num_kv=0,
         add_ffnbias=True,
         layer_norm="standard",
         norm_eps=1e-6,
         use_ckpting=[],
         parallel_gpu=1,
         sliding_window=0,
-        # rotary_interleave=True,
-        # rotary_theta=1e4,
-        # rotary_dim=0,
         num_experts=0,
         num_experts_per_tok=2,
     ):
@@ -54,27 +48,16 @@ class TransformerDecoderLayerBase(nn.Module):
                 self-attn(avg))
             self_attn_type (string): type of self-attention scaled-dot,
                 flash-scaled-dot
-            max_relative_positions (int):
-                Max distance between inputs in relative positions
-                representations
-            relative_positions_buckets (int):
-                relative position bias see
-                https://github.com/google-research/text-to-text-transfer-transformer
             aan_useffn (bool): Turn on the FFN layer in the AAN decoder
             pos_ffn_activation_fn (ActivationFunction):
                 activation function choice for PositionwiseFeedForward layer
             add_qkvbias (bool): whether to add bias to the Key/Value nn.Linear
-            num_kv (int): number of heads for KV when different vs Q (multiquery)
             add_ffnbias (bool): whether to add bias to the FF nn.Linear
             layer_norm (string): type of layer normalization standard/rms
             norm_eps (float): layer norm epsilon
             use_ckpting (List): layers for which we checkpoint for backward
             parallel_gpu (int): Number of gpu for tensor parallelism
             sliding_window (int): Width of the band mask and KV cache (cf Mistral Model)
-            rotary_interleave (bool): Interleave the head dimensions when rotary
-                embeddings are applied
-            rotary_theta (int): rotary base theta
-            rotary_dim (int): in some cases the rotary dim is lower than head dim
             num_experts (int): Number of experts for MoE
             num_experts_per_tok (int): Number of experts choice per token
         """
@@ -84,15 +67,9 @@ class TransformerDecoderLayerBase(nn.Module):
             heads,
             d_model,
             dropout=attention_dropout,
-            # max_relative_positions=max_relative_positions,
-            # relative_positions_buckets=relative_positions_buckets,
-            # rotary_interleave=rotary_interleave,
-            # rotary_theta=rotary_theta,
-            # rotary_dim=rotary_dim,
             attn_type="self",
             self_attn_type=self_attn_type,
             add_qkvbias=add_qkvbias,
-            # num_kv=num_kv,
             use_ckpting=use_ckpting,
             parallel_gpu=parallel_gpu,
         )
@@ -216,21 +193,15 @@ class TransformerDecoderLayer(TransformerDecoderLayerBase):
         dropout,
         attention_dropout,
         self_attn_type="scaled-dot",
-        # max_relative_positions=0,
-        # relative_positions_buckets=0,
         aan_useffn=False,
         pos_ffn_activation_fn=ActivationFunction.relu,
         add_qkvbias=False,
-        # num_kv=0,
         add_ffnbias=True,
         layer_norm="standard",
         norm_eps=1e-6,
         use_ckpting=[],
         parallel_gpu=1,
         sliding_window=0,
-        # rotary_interleave=True,
-        # rotary_theta=1e4,
-        # rotary_dim=0,
         num_experts=0,
         num_experts_per_tok=2,
     ):
@@ -245,21 +216,15 @@ class TransformerDecoderLayer(TransformerDecoderLayerBase):
             dropout,
             attention_dropout,
             self_attn_type,
-            # max_relative_positions,
-            # relative_positions_buckets,
             aan_useffn,
             pos_ffn_activation_fn=pos_ffn_activation_fn,
             add_qkvbias=add_qkvbias,
-            # num_kv=num_kv,
             add_ffnbias=add_ffnbias,
             layer_norm=layer_norm,
             norm_eps=norm_eps,
             use_ckpting=use_ckpting,
             parallel_gpu=parallel_gpu,
             sliding_window=sliding_window,
-            # rotary_interleave=rotary_interleave,
-            # rotary_theta=rotary_theta,
-            # rotary_dim=rotary_dim,
             num_experts=num_experts,
             num_experts_per_tok=num_experts_per_tok,
         )
@@ -270,7 +235,6 @@ class TransformerDecoderLayer(TransformerDecoderLayerBase):
             attn_type="context",
             self_attn_type=self.self_attn_type,
             add_qkvbias=add_qkvbias,
-            # num_kv=num_kv,
             use_ckpting=use_ckpting,
             parallel_gpu=parallel_gpu,
         )
@@ -371,12 +335,9 @@ class TransformerDecoderBase(DecoderBase):
             if type(opt.attention_dropout) is list
             else opt.attention_dropout,
             embeddings,
-            # opt.max_relative_positions,
-            # opt.relative_positions_buckets,
             opt.aan_useffn,
             pos_ffn_activation_fn=opt.pos_ffn_activation_fn,
             add_qkvbias=opt.add_qkvbias,
-            # num_kv=opt.num_kv,
             add_ffnbias=opt.add_ffnbias,
             layer_norm=opt.layer_norm,
             norm_eps=opt.norm_eps,
@@ -385,9 +346,6 @@ class TransformerDecoderBase(DecoderBase):
             if opt.parallel_mode == "tensor_parallel"
             else 1,
             sliding_window=opt.sliding_window,
-            # rotary_interleave=opt.rotary_interleave,
-            # rotary_theta=opt.rotary_theta,
-            # rotary_dim=opt.rotary_dim,
             num_experts=opt.num_experts,
             num_experts_per_tok=opt.num_experts_per_tok,
         )
@@ -448,24 +406,16 @@ class TransformerDecoder(TransformerDecoderBase):
         attention_dropout (float): dropout in context_attn (and self-attn(avg))
         embeddings (onmt.modules.Embeddings):
             embeddings to use, should have positional encodings
-        max_relative_positions (int):
-            Max distance between inputs in relative positions representations
-        relative_positions_buckets (int):
-            Number of buckets when using relative position bias
         aan_useffn (bool): Turn on the FFN layer in the AAN decoder
         pos_ffn_activation_fn (ActivationFunction):
             activation function choice for PositionwiseFeedForward layer
         add_qkvbias (bool): whether to add bias to the Key/Value nn.Linear
-        num_kv (int): number of heads for KV when different vs Q (multiquery)
         add_ffnbias (bool): whether to add bias to the FF nn.Linear
         layer_norm (string): type of layer normalization standard/rms
         norm_eps (float): layer norm epsilon
         use_ckpting (List): layers for which we checkpoint for backward
         parallel_gpu (int): Number of gpu for tensor parallelism
         sliding_window (int): Width of the band mask and KV cache (cf Mistral Model)
-        rotary_interleave (bool): Interleave the head dimensions when rotary embeddings are applied
-        rotary_theta (int): rotary base theta
-        rotary_dim (int): in some cases the rotary dim is lower than head dim
         num_experts (int): Number of experts for MoE
         num_experts_per_tok (int): Number of experts choice per token
     """
@@ -480,21 +430,15 @@ class TransformerDecoder(TransformerDecoderBase):
         dropout,
         attention_dropout,
         embeddings,
-        # max_relative_positions,
-        # relative_positions_buckets,
         aan_useffn,
         pos_ffn_activation_fn=ActivationFunction.relu,
         add_qkvbias=False,
-        # num_kv=0,
         add_ffnbias=True,
         layer_norm="standard",
         norm_eps=1e-6,
         use_ckpting=[],
         parallel_gpu=1,
         sliding_window=0,
-        # rotary_interleave=True,
-        # rotary_theta=1e4,
-        # rotary_dim=0,
         num_experts=0,
         num_experts_per_tok=2,
     ):
@@ -511,21 +455,15 @@ class TransformerDecoder(TransformerDecoderBase):
                     dropout,
                     attention_dropout,
                     self_attn_type=self_attn_type,
-                    # max_relative_positions=max_relative_positions,
-                    # relative_positions_buckets=relative_positions_buckets,
                     aan_useffn=aan_useffn,
                     pos_ffn_activation_fn=pos_ffn_activation_fn,
                     add_qkvbias=add_qkvbias,
-                    # num_kv=num_kv,
                     add_ffnbias=add_ffnbias,
                     layer_norm=layer_norm,
                     norm_eps=norm_eps,
                     use_ckpting=use_ckpting,
                     parallel_gpu=parallel_gpu,
                     sliding_window=sliding_window,
-                    # rotary_interleave=rotary_interleave,
-                    # rotary_theta=rotary_theta,
-                    # rotary_dim=rotary_dim,
                     num_experts=num_experts,
                     num_experts_per_tok=num_experts_per_tok,
                 )
