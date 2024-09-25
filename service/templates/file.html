@@ -8,19 +8,17 @@
     
     <script>
         var API_KEY = "";
-        //var END_POINT = "http://127.0.0.1:5555";
+
         window.onload = function()
         {
             document.getElementById("settings").addEventListener("click", display_setting_func);
 
-            //var server = window.localStorage.getItem("server_url");
-            var key = window.localStorage.getItem("key");
-            API_KEY=key;
-            //if(!!server)
-            //    END_POINT = server;
+            API_KEY = window.localStorage.getItem("key");
 
+            // 请求翻译语言列表
             request_languages();
 
+            // 请求展示广告
             request_ad();
         }
 
@@ -192,10 +190,9 @@
                 <a target="_blank" href="/">文本翻译</a><a href="/others" target="_blank">其他产品</a><a target="_blank" href="/">登录</a><a target="_blank" id="settings">设置</a>
             </div>
         </div>
-
     </div>
 
-    <div class="restriction">
+    <div class="content">
         <div class="fanyi__operations">
             <div id="toolbar">
                 <select id="source" name="source" class="source_select"></select>

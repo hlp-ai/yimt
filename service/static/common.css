@@ -10,7 +10,8 @@ body {
 .header_nav {
     position: relative;
     height: 72px;
-    box-shadow: 0 0 3px 0 rgba(0,0,0,.2);
+    //box-shadow: 0 0 3px 0 rgba(0,0,0,.2);
+    border-bottom: 1px solid #e8e8e8;
     min-width: 960px;
     margin-bottom: 38px
 }
@@ -24,7 +25,7 @@ body {
 
 .nav_logo {
     display: block;
-    position:absolute;
+    position: absolute;
     left: 28px;
     width: 340px;
     height: 72px;
@@ -32,7 +33,7 @@ body {
 }
 
 .nav_urls{
-    position:absolute;
+    position: absolute;
     height: 72px;
     vertical-align: middle;
     padding-top: 30px;
@@ -41,7 +42,7 @@ body {
 }
 
 .nav_urls a{
-    text-decoration:none;
+    text-decoration: none;
     color: #999;
     margin-left: 22px;
     cursor: pointer;
@@ -187,7 +188,7 @@ body {
     font-size: 0
 }
 
-.restriction{
+.content{
     margin-left: 60px;
     margin-right: 60px;
 }

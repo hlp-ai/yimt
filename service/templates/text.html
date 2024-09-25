@@ -3,23 +3,15 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="../static/common.css">
-
     <script src="../static/common_block.js" type="text/javascript"></script>
 
     <script>
         var API_KEY = "";
-        // var END_POINT = window.location.protocol + "://" + window.location.host + ":" + window.location.port; //"http://127.0.0.1:5555";
-        //var END_POINT = window.location.protocol + "://" + window.location.host;
-        //alert(END_POINT);
         window.onload = function()
         {
             document.getElementById("settings").addEventListener("click", display_setting_func);
 
-            //var server = window.localStorage.getItem("server_url");
-            var key = window.localStorage.getItem("key");
-            API_KEY=key;
-            //if(!!server)
-            //    END_POINT = server;
+            API_KEY = window.localStorage.getItem("key");
 
             var userAgentInfo = navigator.userAgent;
             var Agents = ["Android","iPhone","SymbianOS","Windows Phone","iPad","iPod"];
@@ -35,31 +27,28 @@
             if(mobile)
                 window.location.href="{{url_for('mobile')}}"
 
+            // 请求翻译语言列表
             request_languages();
 
+            // 请求展示广告
             request_ad();  
         }
-
 
         var xhr;
 
         function uploadImage(){
-            var fileObj = document.getElementById("select_image").files[0];
             var files = document.getElementById("select_image").files;
             if(files.length==0)
-            {
                 return;
-            }
+
             source_lang = document.getElementById('source').value;
             target_lang = document.getElementById('target').value;
-
-            //END_POINT = window.localStorage.getItem("server_url");
             API_KEY = window.localStorage.getItem("key");
-            //if(END_POINT=="")
-            //{
-            //    END_POINT = "http://127.0.0.1:5555";
-            //}
+
+            var fileObj = files[0];  // 文件上传框选择的文件
 		    console.log(fileObj);
+
+		    // 构建提交表单数据
 		    var form = new FormData();
 		    form.append("file", fileObj);
 		    form.append("source", source_lang);
@@ -74,14 +63,14 @@
         }
 
         function uploadComplete(evt) {
-			//alert(evt.target.responseText);
+			//console.log(evt.target.responseText);
 			res_json = JSON.parse(evt.target.responseText);
 			if(res_json.error){
 			  alert(res_json.error);
 			  return;
 			}
-			//alert(res_json)
-			//alert(res_json.originalText);
+			//console.log(res_json)
+			//console.log(res_json.originalText);
             document.getElementById('q').value = res_json.originalText;
             document.getElementById('translation').value = res_json.translatedText;
 		}
@@ -100,9 +89,10 @@
             //    return;
             //}
 
+            // 发送翻译请求
             const res = await fetch("/translate", {
                 method: "POST",
-                body: JSON.stringify({q: qstr, source: source_lang, target: target_lang, api_key:API_KEY, format: "text"}),
+                body: JSON.stringify({q: qstr, source: source_lang, target: target_lang, api_key: API_KEY, format: "text"}),
                 headers: { "Content-Type": "application/json" }}
             );
 
@@ -116,6 +106,7 @@
                 alert(trans_json.error)
             }
 
+            // 翻译完成后刷新广告
             request_ad();
         }
 
@@ -141,14 +132,14 @@
 
     <div class="header_nav">
         <div class="nav_container" id="nav_container">
-                <a href="/" class="nav_logo"></a>
-                <div class="nav_urls">
-                    <a target="_blank" href="/file">文档翻译</a><a href="/others" target="_blank">其他产品</a><a target="_blank" href="/">登录</a><a target="_blank" id="settings">设置</a>
-                </div>  
+            <a href="/" class="nav_logo"></a>
+            <div class="nav_urls">
+                <a target="_blank" href="/file">文档翻译</a><a href="/others" target="_blank">其他产品</a><a target="_blank" href="/">登录</a><a target="_blank" id="settings">设置</a>
+            </div>
         </div>
     </div>
 
-    <div class="restriction">
+    <div class="content">
         <div class="fanyi__operations">
             <div id="toolbar">
                 <select id="source" name="source" class="source_select"></select>
