@@ -140,7 +140,7 @@
     </div>
 
     <div class="content">
-        <div class="fanyi__operations">
+        <div class="operations">
             <div id="toolbar">
                 <select id="source" name="source" class="source_select"></select>
                 <span class="between_langs">-></span>
@@ -149,48 +149,49 @@
             </div>
         </div>
 
-        <div class="fanyi__input">
-            <div class="input__original">
-                <div class="fanyi__input__bg">
-                    <textarea id="q" name="q" rows="25" maxlength="1000" cols="50" class="input__original__area" placeholder="请输入要翻译的文字"></textarea>
+        <div class="text_input">
+            <div class="input_source">
+                <div class="input_bg">
+                    <textarea id="q" name="q" rows="25" maxlength="1000" cols="50" class="input_source_area" placeholder="请输入要翻译的文字"></textarea>
 
                     <script>
-                        document.getElementById("q").oninput = function() {myFunction();getc_num()};
-                        function myFunction() {
+                        document.getElementById("q").oninput = function() {showOrHide(); showInputLen()};
+                        function showOrHide() {
                             document.getElementById("inputDelete").style.visibility='visible';
                             document.getElementById("target_copy").style.visibility='visible';
-                            document.getElementById("words_count").style.visibility='visible';
+                            //document.getElementById("words_count").style.visibility='visible';
                             if(document.getElementById("q").value=='')
                             {
                                 document.getElementById("inputDelete").style.visibility='hidden';
                                 document.getElementById("target_copy").style.visibility='hidden';
-                                document.getElementById("words_count").style.visibility='hidden';
+                                //document.getElementById("words_count").style.visibility='hidden';
                             }
                         }
-                        function getc_num()
+
+                        function showInputLen()
                         {
-                            document.getElementById("count").innerHTML=document.getElementById("q").value.length;
+                            document.getElementById("count").innerHTML = document.getElementById("q").value.length;
                         }
                     </script>
 
-                    <a id="inputDelete" class="input__original_delete"></a>
-                    <div id="words_count" class="words_count" style="visibility: hidden;">
-                        <span id="count"></span>/1000
+                    <a id="inputDelete" class="input_source_delete"></a>
+                    <div id="words_count" class="words_count">
+                        <span id="count">0</span>/1000
                     </div>
                     <script>
-                        function clear_func()
+                        function clearAll()
                         {
-                            document.getElementById("q").value='';
-                            document.getElementById("translation").value='';
-                            getc_num();
+                            document.getElementById("q").value = '';
+                            document.getElementById("translation").value = '';
+                            showInputLen();
                         }
-                        document.getElementById("inputDelete").addEventListener("click", clear_func);
+                        document.getElementById("inputDelete").addEventListener("click", clearAll);
                     </script>
                 </div>
             </div>
 
-            <div class="input__target">
-                <div class="fanyi__input__bg">
+            <div class="input_target">
+                <div class="input_bg">
                     <textarea id="translation" name="translation" rows="25" cols="50" readonly class="input__target__area"></textarea>
                     <a id="target_copy" class="target_copy"></a>
                     <div id="post_edit" class="post_edit"><input type="checkbox" id="check_edit" onchange="post_edit_click()" />允许编辑</div>
