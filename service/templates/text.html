@@ -192,14 +192,14 @@
 
             <div class="input_target">
                 <div class="input_bg">
-                    <textarea id="translation" name="translation" rows="25" cols="50" readonly class="input__target__area"></textarea>
+                    <textarea id="translation" name="translation" rows="25" cols="50" readonly class="input_target_area"></textarea>
                     <a id="target_copy" class="target_copy"></a>
                     <div id="post_edit" class="post_edit"><input type="checkbox" id="check_edit" onchange="post_edit_click()" />允许编辑</div>
                 </div>
                 <script>
-                    document.getElementById("target_copy").addEventListener("click", copy_func);
+                    document.getElementById("target_copy").addEventListener("click", copyTranslation);
 
-                    function copy_func()
+                    function copyTranslation()
                     { 
                         translation.select();
                         document.execCommand("Copy");
@@ -217,7 +217,7 @@
 
     </div>
 
-    <div class="bottom_block">
+    <div class="ad_block">
         <div class="ad_area" id="ad_area">
             <a class="ad_url" id="ad_url" target="_blank"></a>
         </div>
