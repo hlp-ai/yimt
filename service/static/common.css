@@ -381,11 +381,26 @@ body {
     //visibility: hidden;
 }
 
-.fanyi__input_file {
+.input_file {
     position: relative;
     margin: 0 auto;
     max-width: 1400px;
     min-width: 960px;
+
+    border: 1px solid rgba(102,102,102,.3);
+    border-radius: 5px;
+    background: #f4f4f4;
+
+    text-align: center;
+}
+
+.file_type {
+    margin-left: 12px;
+    margin-right: 12px;
+    font-size: 26pt;
+    font-weight:bold;
+    margin-top: 28px;
+    color: #330099;
 }
 
 .input__original_file {
@@ -442,10 +457,10 @@ body {
 .showProgress{
     height: 40px;
     margin-top: 16px;
-    display:none;
-    font-size:19px;
-    color:#357aa1;
-    z-index:6;
+    display: none;
+    font-size: 19px;
+    color: #357aa1;
+    z-index: 6;
 }
 
 .img_show{
