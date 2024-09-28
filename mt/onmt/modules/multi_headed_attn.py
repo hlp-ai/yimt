@@ -64,17 +64,13 @@ class MultiHeadedAttention(torch.nn.Module):
         use_ckpting=[],
         parallel_gpu=1,
     ) -> None:
-        assert (
-            model_dim % head_count == 0
-        ), "Model dimension must be divisible by the number of heads"
+        assert (model_dim % head_count == 0), "Model dimension must be divisible by the number of heads"
         self.dim_per_head = model_dim // head_count
         super(MultiHeadedAttention, self).__init__()
         self.head_count = head_count
         self.parallel_gpu = parallel_gpu
 
-        assert (
-                model_dim % parallel_gpu == 0
-        ), "Model dimension must be divisible by the number of partitions"
+        assert (model_dim % parallel_gpu == 0), "Model dimension must be divisible by the number of partitions"
         self.linear_keys = skip_init(
             nn.Linear,
             in_features=model_dim,
@@ -173,11 +169,7 @@ class MultiHeadedAttention(torch.nn.Module):
         if self.layer_cache[0]:
             # Retrieve keys and values from the KV cache (decoding mode only).
             if self.attn_type == "self":
-                query, key, value = (
-                    self.linear_query(query),
-                    self.linear_keys(query),
-                    self.linear_values(query),
-                )
+                query, key, value = (self.linear_query(query), self.linear_keys(query), self.linear_values(query),)
 
                 query = shape(query, self.dim_per_head)
                 key = shape(key, self.dim_per_head)
@@ -304,9 +296,7 @@ class MultiHeadedAttention(torch.nn.Module):
             causal = self.is_decoder and self.attn_type == "self" and mask is not None
             if self.is_decoder and self.attn_type == "self" and flash2:
                 if causal:
-                    window_size = (
-                        (-1, -1) if sliding_window == 0 else (sliding_window, 0)
-                    )
+                    window_size = ((-1, -1) if sliding_window == 0 else (sliding_window, 0))
                 else:
                     window_size = (-1, -1)
                 attn_output = self.flash_attn_func(
