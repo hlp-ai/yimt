@@ -107,8 +107,8 @@ class MultiHeadedAttention(torch.nn.Module):
             {"keys": torch.tensor([]), "values": torch.tensor([])},
         )
 
-        self.cos = None
-        self.sin = None
+        # self.cos = None
+        # self.sin = None
         self.rotary_interleave = None
 
         self.maybe_ckpt = checkpoint if "mha" in use_ckpting else lambda f, x: f(x)
@@ -231,8 +231,8 @@ class MultiHeadedAttention(torch.nn.Module):
                         self.layer_cache[1]["values"].transpose(1, 2),
                         key.transpose(1, 2),
                         value.transpose(1, 2),
-                        rotary_cos=self.cos,
-                        rotary_sin=self.sin,
+                        rotary_cos=None,
+                        rotary_sin=None,
                         cache_seqlens=step,
                         rotary_interleaved=self.rotary_interleave,
                     ).transpose(1, 2)
@@ -294,7 +294,7 @@ class MultiHeadedAttention(torch.nn.Module):
         ):
             # Apply flash2 attention.
             causal = self.is_decoder and self.attn_type == "self" and mask is not None
-            if self.is_decoder and self.attn_type == "self" and flash2:
+            if self.is_decoder and self.attn_type == "self" and flash2:  # 使用flash-attn
                 if causal:
                     window_size = ((-1, -1) if sliding_window == 0 else (sliding_window, 0))
                 else:
@@ -308,7 +308,7 @@ class MultiHeadedAttention(torch.nn.Module):
                     window_size=window_size,
                 ).transpose(1, 2)
             else:
-                # Apply scaled dot product attention.
+                # 使用nn.scaled-dot-flash/scaled_dot_product_attention
                 with torch.backends.cuda.sdp_kernel(enable_flash=False, enable_math=True, enable_mem_efficient=True):
                     attn_output = scaled_dot_product_attention(
                         query,
@@ -320,7 +320,7 @@ class MultiHeadedAttention(torch.nn.Module):
                     )
             attn = None
 
-        else:
+        else:  # 自定义scaled-dot attn
             query /= sqrt(self.dim_per_head)
             # batch x num_heads x query_len x key_len
             scores = torch.matmul(query, key.transpose(2, 3))
