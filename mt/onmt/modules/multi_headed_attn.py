@@ -166,9 +166,9 @@ class MultiHeadedAttention(torch.nn.Module):
         # 1) Project key, value, and query.
         # as a reminder at training layer_cache[0] remains False
         key_pad_mask = self.layer_cache[1].get("key_pad_mask", None)
-        if self.layer_cache[0]:
+        if self.layer_cache[0]:  # 有层KV缓存，推理模式
             # Retrieve keys and values from the KV cache (decoding mode only).
-            if self.attn_type == "self":
+            if self.attn_type == "self":  # 自注意力
                 query, key, value = (self.linear_query(query), self.linear_keys(query), self.linear_values(query),)
 
                 query = shape(query, self.dim_per_head)
@@ -241,7 +241,7 @@ class MultiHeadedAttention(torch.nn.Module):
                         all_reduce(attn_output)
                     return attn_output, None
 
-            elif self.attn_type == "context":
+            elif self.attn_type == "context":  # 上下文注意力
                 query = self.linear_query(query)
                 query = shape(query, self.dim_per_head)
                 if self.layer_cache[1]["keys"].numel() == 0:
@@ -264,7 +264,7 @@ class MultiHeadedAttention(torch.nn.Module):
                     )
                     self.layer_cache[1]["key_pad_mask"] = torch.cat((key_pad_mask, y), 2)
                     key_pad_mask = self.layer_cache[1]["key_pad_mask"]
-        else:
+        else:  # 无层KV缓存，训练模式
             # Retrieve keys and values from linear layers (training mode).
             key = self.maybe_ckpt(self.linear_keys, key)
             value = self.maybe_ckpt(self.linear_values, value)
