@@ -253,7 +253,6 @@ def create_app(args):
         """Translate text from a language to another"""
         if request.is_json:  # json data in body of POST method
             json = get_json_dict(request)
-            log_service.info("/translate: {}".format(json))
             q = json.get("q")
             source_lang = json.get("source")
             target_lang = json.get("target")
@@ -265,6 +264,9 @@ def create_app(args):
             target_lang = request.values.get("target")
             text_format = request.values.get("format")
             api_key = request.values.get("api_key")
+
+        log_service.info("/translate: q={}, sl={}, tl={}, format={}, token={}".format(
+            q, source_lang, target_lang, text_format, api_key))
 
         if not q:
             abort(400, description="Invalid request: missing q parameter")
@@ -284,6 +286,9 @@ def create_app(args):
 
         if isinstance(q, list):  # 浏览器插件元素列表翻译
             translations = translate_tag_list(q, source_lang, target_lang)
+
+            log_service.debug("Translation: {}".format(translations))
+
             resp = {
                 'translatedText': translations
             }
@@ -321,8 +326,7 @@ def create_app(args):
             src = may_combine_paragraph(src)
             translation = translator.translate_paragraph(src, source_lang, target_lang)
 
-        log_service.info("/translate: " + "&source=" + source_lang + "&target=" + target_lang
-                         + "&format=" + text_format + "&api_key=" + api_key)
+        log_service.debug("Translation: " + translation)
 
         resp = {
             'translatedText': translation
