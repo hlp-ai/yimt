@@ -29,6 +29,7 @@ def aug(in_path, conf_file):
     os.remove(x_file)
     os.remove(en_file)
     os.remove(out_zh_path)
+    os.remove(in_path)
 
 
 def aug_dir(in_dir, conf_file):
