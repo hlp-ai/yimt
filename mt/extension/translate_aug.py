@@ -33,7 +33,7 @@ def aug_dir(in_dir, conf_file):
 
     in_files = []
     for f in files:
-        if re.match(r"\d+$", f):
+        if re.match(r".+\d+$", f):
             in_files.append(f)
     print(in_files)
 
