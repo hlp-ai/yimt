@@ -26,6 +26,10 @@ def aug(in_path, conf_file):
 
     single_to_pair(x_file, out_zh_path, x_zh_tsv)
 
+    os.remove(x_file)
+    os.remove(en_file)
+    os.remove(out_zh_path)
+
 
 def aug_dir(in_dir, conf_file):
     fils = os.listdir(in_dir)
