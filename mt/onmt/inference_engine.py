@@ -206,7 +206,7 @@ class InferenceEngineCT2(InferenceEngine):
             beam_size=opt.beam_size,
             num_hypotheses=opt.n_best,
             max_decoding_length=opt.max_length,
-            return_scores=True,
+            return_scores=False,
             #sampling_topk=opt.random_sampling_topk,
             #sampling_topp=opt.random_sampling_topp,
             #sampling_temperature=opt.random_sampling_temp,

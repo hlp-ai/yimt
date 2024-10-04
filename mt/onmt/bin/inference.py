@@ -97,20 +97,12 @@ def main():
     set_random_seed(opt.seed, use_gpu(opt))
     opt.models = opt.models
 
-    # evaluate(
-    #     opt,
-    #     inference_mode=args.inference_mode,
-    #     input_file=args.input_file,
-    #     out=args.out,
-    #     method="file",
-    # )
-
     evaluate(
         opt,
         inference_mode=args.inference_mode,
         input_file=args.input_file,
         out=args.out,
-        method="list",
+        method="file",
     )
 
 
