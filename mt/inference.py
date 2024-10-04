@@ -24,7 +24,7 @@ def evaluate(opt, inference_mode, input_file, out, method):
         print("Inference with ct2 ...")
         from onmt.inference_engine import InferenceEngineCT2
 
-        opt.src_subword_vocab = opt.models[0] + "/vocabulary.json"
+        opt.src_subword_vocab = opt.models[0] + "/source_vocabulary.json"
         engine = InferenceEngineCT2(opt)
 
     start = time.time()
@@ -47,9 +47,12 @@ def evaluate(opt, inference_mode, input_file, out, method):
         ]
     run_results = {"pred_answers": preds, "score": scores, "duration": dur}
 
-    output_filename = out + f"_{method}.json"
-    with open(output_filename, "w",  encoding="utf-8") as f:
-        json.dump(run_results, f, ensure_ascii=False, indent=2)
+    # output_filename = out + f"_{method}.json"
+    # with open(output_filename, "w",  encoding="utf-8") as f:
+    #     json.dump(run_results, f, ensure_ascii=False, indent=2)
+    with open(out, "w", encoding="utf-8") as f:
+        for p in preds:
+            f.write(p[0] + "\n")
 
 
 def main():

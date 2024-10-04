@@ -207,9 +207,9 @@ class InferenceEngineCT2(InferenceEngine):
             num_hypotheses=opt.n_best,
             max_decoding_length=opt.max_length,
             return_scores=True,
-            sampling_topk=opt.random_sampling_topk,
-            sampling_topp=opt.random_sampling_topp,
-            sampling_temperature=opt.random_sampling_temp,
+            #sampling_topk=opt.random_sampling_topk,
+            #sampling_topp=opt.random_sampling_topp,
+            #sampling_temperature=opt.random_sampling_temp,
         )
         preds = [
             [self.transform.apply_reverse(tokens) for tokens in out.hypotheses]
