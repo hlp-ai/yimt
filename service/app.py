@@ -1,4 +1,5 @@
 import io
+import logging
 import os
 import random
 import tempfile
@@ -26,6 +27,9 @@ from service.tts import AudioGenerators
 from service.utils import get_logger, path_traversal_check, SuspiciousFileOperation, detect_lang, get_page
 
 log_service = get_logger(log_filename="service.log", name="service")
+
+logger = logging.getLogger('numba.core')
+logger.setLevel(logging.ERROR)
 
 
 def get_upload_dir():
