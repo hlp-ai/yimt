@@ -11,7 +11,7 @@ def aug(in_path, conf_file):
     en_file = in_path + ".en"
     pair_to_single(in_path, x_file, en_file)
     out_zh_path = en_file + ".tozh"
-    x_zh_tsv = in_path + ".aug2zh"
+    x_zh_tsv = in_path + ".aug2zh.tsv"
 
     if os.path.exists(x_zh_tsv):
         print("扩展文件已存在")
@@ -26,10 +26,10 @@ def aug(in_path, conf_file):
 
     single_to_pair(x_file, out_zh_path, x_zh_tsv)
 
-    os.remove(x_file)
-    os.remove(en_file)
-    os.remove(out_zh_path)
-    os.remove(in_path)
+    # os.remove(x_file)
+    # os.remove(en_file)
+    # os.remove(out_zh_path)
+    # os.remove(in_path)
 
 
 def aug_dir(in_dir, conf_file):

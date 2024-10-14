@@ -25,6 +25,7 @@ def evaluate(opt, inference_mode, input_file, out, method):
         from onmt.inference_engine import InferenceEngineCT2
 
         opt.src_subword_vocab = opt.models[0] + "/source_vocabulary.json"
+        opt.tgt_subword_vocab = opt.models[0] + "/target_vocabulary.json"
         engine = InferenceEngineCT2(opt)
 
     start = time.time()

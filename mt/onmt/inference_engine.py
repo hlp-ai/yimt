@@ -25,6 +25,7 @@ class InferenceEngine(object):
     def infer_file(self):
         """File inference. Source file must be the opt.src argument"""
         if self.opt.world_size <= 1:
+            # 分批桶
             infer_iter = build_dynamic_dataset_iter(
                 self.opt,
                 self.transforms_cls,
@@ -32,14 +33,17 @@ class InferenceEngine(object):
                 task=CorpusTask.INFER,
                 device_id=self.device_id,
             )
+
             scores, preds = self._translate(infer_iter)
         else:
             scores, preds = self.infer_file_parallel()
+
         return scores, preds
 
     def infer_list(self, src):
         """List of strings inference `src`"""
         if self.opt.world_size <= 1:
+            # 分批桶
             infer_iter = build_dynamic_dataset_iter(
                 self.opt,
                 self.transforms_cls,
@@ -48,9 +52,11 @@ class InferenceEngine(object):
                 src=src,
                 device_id=self.device_id,
             )
+
             scores, preds = self._translate(infer_iter)
         else:
             scores, preds = self.infer_list_parallel(src)
+
         return scores, preds
 
     def infer_file_parallel(self):
@@ -174,14 +180,21 @@ class InferenceEngineCT2(InferenceEngine):
                 self.opt.models[0], device=self.device, device_index=self.device_index
             )
         # Build vocab
-        vocab_path = opt.src_subword_vocab
-        with open(vocab_path, "r") as f:
-            vocab = json.load(f)
         vocabs = {}
+
+        src_vocab_path = opt.src_subword_vocab
+        with open(src_vocab_path, "r") as f:
+            vocab = json.load(f)
         src_vocab = pyonmttok.build_vocab_from_tokens(vocab)
+
+        tgt_vocab_path = opt.tgt_subword_vocab
+        with open(tgt_vocab_path, "r") as f:
+            vocab = json.load(f)
+        tgt_vocab = pyonmttok.build_vocab_from_tokens(vocab)
+
         vocabs["src"] = src_vocab
-        vocabs["tgt"] = src_vocab
-        vocabs["data_task"] = "lm"
+        vocabs["tgt"] = tgt_vocab
+        vocabs["data_task"] = "seq2seq"
         vocabs["decoder_start_token"] = "<s>"
         self.vocabs = vocabs
         # Build transform pipe
