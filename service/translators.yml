@@ -1,13 +1,21 @@
 translators:
-  zh-x-test:
-    model_or_config_dir: D:\kidden\github\yimt\service\infer.yaml
-    sp_src_path: D:\dataset\mnmt\sp\en-zh.tsv.zh-sp-32000.model
+  vizh:
+    model_or_config_dir: D:\dataset\vi-zh\train\vizh-infer.yaml
+    sp_src_path: D:\dataset\vi-zh\train\opus-vi-zh-all-new.sf.tsv.vi-sp-36000.model
     batch_size: 128
     pretok_src: false
     pretok_tgt: false
     directions:
-      - zh-ja
-      - zh-ar
+      - vi-zh
+
+  zhvi:
+    model_or_config_dir: D:\dataset\vi-zh\train\zhvi-infer.yaml
+    sp_src_path: D:\dataset\en-zh\040607\train\en-zh-all-new-0.66.sf.tsv.zh-10000000-sp-36000.model
+    batch_size: 128
+    pretok_src: false
+    pretok_tgt: false
+    directions:
+      - vi-zh
 
   enzh:
     model_or_config_dir: D:\dataset\en-zh\040607\train\infer.yaml
@@ -30,3 +38,4 @@ translators:
 languages:
   - {code: en, name: English, cname: 英语}
   - {code: zh, name: Chinese, cname: 汉语}
+  - {code: vi, name: Vietnamese, cname: 越南语}
