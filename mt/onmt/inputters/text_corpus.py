@@ -95,8 +95,7 @@ class ParallelCorpus(object):
     """A parallel corpus file pair that can be loaded to iterate."""
 
     def __init__(
-        self, name, src, tgt, align=None, n_src_feats=0, src_feats_defaults=None
-    ):
+        self, name, src, tgt, align=None):
         """Initialize src & tgt side file path."""
         self.id = name
         self.src = src
@@ -130,9 +129,7 @@ class ParallelCorpus(object):
             fs = self.src
             ft = [] if self.tgt is None else self.tgt
             fa = [] if self.align is None else self.align
-            for i, (sline, tline, align) in enumerate(
-                itertools.zip_longest(fs, ft, fa)
-            ):
+            for i, (sline, tline, align) in enumerate(itertools.zip_longest(fs, ft, fa)):
                 if (i // stride) % stride == offset:
                     yield make_ex(sline, tline, align)
         else:
@@ -167,7 +164,7 @@ def get_corpora(opts, task=CorpusTask.TRAIN, src=None, tgt=None, align=None):
                         corpus_dict["path_tgt"],
                         # corpus_dict["path_align"],
                     )
-                else:
+                else:  # LM训练的单个成块读取
                     corpora_dict[corpus_id] = BlockwiseCorpus(
                         corpus_id,
                         corpus_dict["path_txt"],
@@ -218,7 +215,7 @@ class ParallelCorpusIterator(object):
 
     def _process(self, stream):
         for i, example in enumerate(stream):
-            example["src"] = example["src"].strip().split(" ")
+            example["src"] = example["src"].strip().split(" ")  # 按空格切分！！！
             example["src_original"] = example["src_original"].strip().split(" ")
 
             line_number = i * self.stride + self.offset
@@ -253,6 +250,7 @@ class ParallelCorpusIterator(object):
             )
 
     def __iter__(self):
+        """每个记录由字典类型的样本、转换和语料ID组成"""
         corpus_stream = self.corpus.load(stride=self.stride, offset=self.offset)
         corpus = self._process(corpus_stream)
         yield from corpus
@@ -265,9 +263,7 @@ def build_corpora_iters(
     corpora_iters = dict()
     for c_id, corpus in corpora.items():
         transform_names = corpora_info[c_id].get("transforms", [])
-        corpus_transform = [
-            transforms[name] for name in transform_names if name in transforms
-        ]
+        corpus_transform = [transforms[name] for name in transform_names if name in transforms]
         transform_pipe = TransformPipe.build_from(corpus_transform)
         corpus_iter = ParallelCorpusIterator(
             corpus,
