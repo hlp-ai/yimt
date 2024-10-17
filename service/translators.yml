@@ -15,7 +15,7 @@ translators:
     pretok_src: false
     pretok_tgt: false
     directions:
-      - vi-zh
+      - zh-vi
 
   enzh:
     model_or_config_dir: D:\dataset\en-zh\040607\train\infer.yaml
