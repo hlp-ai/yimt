@@ -473,10 +473,11 @@ def create_app(args):
         if not lang:
             abort(400, description="Invalid request: missing language parameter")
 
-        if lang == "en":
-            lang = "eng"
-        elif lang == "zh":
-            lang = "zho"
+        # if lang == "en":
+        #     lang = "eng"
+        # elif lang == "zh":
+        #     lang = "zho"
+        lang = AudioGenerators.to3letter(lang)
 
         print(lang, text)
 

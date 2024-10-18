@@ -3,6 +3,12 @@ import os
 from vits.api import TTS
 from vits.infer_zh import TTS_ZH
 
+langcode_map = {
+    "vi": "vie",
+    "en": "eng",
+    "zh": "zho"
+}
+
 
 class AudioGenerators:
 
@@ -33,7 +39,11 @@ class AudioGenerators:
 
     @staticmethod
     def supported_languages():
-        return ["eng", "zho", "fra", "kor", "rus"]
+        return ["eng", "zho", "vie"]
+
+    @staticmethod
+    def to3letter(lang_code2letter):
+        return langcode_map[lang_code2letter]
 
 
 if __name__ == '__main__':
