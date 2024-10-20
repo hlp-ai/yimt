@@ -30,16 +30,9 @@ class TranslationBuilder(object):
                     phrase_src, phrase_trg = line.rstrip("\n").split(DefaultTokens.PHRASE_TABLE_SEPARATOR)
                     self.phrase_table_dict[phrase_src] = phrase_trg
 
-    def _build_target_tokens(self, src, srclen, pred, attn, voc, dyn_voc):
-        if dyn_voc is None:
-            tokens = [voc[tok] for tok in pred.tolist()]
-        else:
-            tokens = [
-                voc[tok]
-                if tok < len(voc)
-                else dyn_voc.ids_to_tokens[tok - len(self.vocabs["src"].ids_to_tokens)]
-                for tok in pred.tolist()
-            ]
+    def _build_target_tokens(self, src, srclen, pred, attn, voc):
+        tokens = [voc[tok] for tok in pred.tolist()]
+
         if tokens[-1] == DefaultTokens.EOS:
             tokens = tokens[:-1]
 
@@ -56,10 +49,6 @@ class TranslationBuilder(object):
 
     def from_batch(self, translation_batch):
         batch = translation_batch["batch"]
-        if "src_ex_vocab" in batch.keys():
-            dyn_voc_batch = batch["src_ex_vocab"]
-        else:
-            dyn_voc_batch = None
 
         assert len(translation_batch["gold_score"]) == len(translation_batch["predictions"])
 
@@ -89,10 +78,6 @@ class TranslationBuilder(object):
 
         # These comp lists are costy but less than for loops
         for b in range(batch_size):
-            if dyn_voc_batch is not None:
-                dyn_voc = dyn_voc_batch[b]
-            else:
-                dyn_voc = None
             pred_sents = [
                 self._build_target_tokens(
                     src[b, :] if src is not None else None,
@@ -100,7 +85,6 @@ class TranslationBuilder(object):
                     preds[b][n],
                     align[b][n] if align[b] is not None else attn[b][n],
                     voc_tgt,
-                    dyn_voc,
                 )
                 for n in range(self.n_best)
             ]
@@ -113,7 +97,6 @@ class TranslationBuilder(object):
                     tgt[b, 1:] if tgt is not None else None,
                     None,
                     voc_tgt,
-                    dyn_voc,
                 )
 
             translation = Translation(

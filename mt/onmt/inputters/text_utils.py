@@ -146,9 +146,6 @@ def tensorify(vocabs, minibatch, device, left_pad=False):
             tensor_batch["tgt"] = tbatchtgt
         tensor_batch["tgtlen"] = tbatchtgtlen
 
-    if "src_ex_vocab" in minibatch[0][0].keys():
-        tensor_batch["src_ex_vocab"] = [ex["src_ex_vocab"] for ex, indice in minibatch]
-
     tensor_batch["ind_in_bucket"] = [indice for ex, indice in minibatch]  # 桶内序号
 
     tensor_batch["cid"] = [ex["cid"] for ex, indice in minibatch]  # 语料编号
