@@ -227,9 +227,7 @@ class TransformPipe(Transform):
 
         """
         for transform in self.transforms:
-            batch = transform.batch_apply(
-                batch, is_train=is_train, stats=self.statistics, **kwargs
-            )
+            batch = transform.batch_apply(batch, is_train=is_train, stats=self.statistics, **kwargs)
             if batch is None:
                 break
         return batch

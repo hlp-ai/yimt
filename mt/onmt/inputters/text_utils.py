@@ -31,11 +31,9 @@ def process(task, bucket, **kwargs):
     # careful below it will return a bucket sorted by corpora
     # but we sort by length later and shuffle batches
     for (transform, cid), sub_bucket in transform_cid_to_examples.items():
-        transf_bucket = transform.batch_apply(
-            sub_bucket, is_train=(task == CorpusTask.TRAIN), corpus_name=cid
-        )
+        transf_bucket = transform.batch_apply(sub_bucket, is_train=(task == CorpusTask.TRAIN), corpus_name=cid)
         for example, transform, cid in transf_bucket:
-            example = clean_example(example)
+            example = clean_example(example)  # 增加原始文本属性
             if len(example["src"]["src"]) > 0:
                 processed_bucket.append(example)
 
@@ -59,14 +57,13 @@ def numericalize(vocabs, example):
     decoder_start_token = vocabs["decoder_start_token"]
     numeric = example
     numeric["src"]["src_ids"] = []
-    src_text = example["src"]["src"].split(" ")
+    src_text = example["src"]["src"].split(" ")  # XXX: 切分-合并-切分，多此一举
     numeric["src"]["src_ids"] = vocabs["src"](src_text)
     if example["tgt"] is not None:
         numeric["tgt"]["tgt_ids"] = []
         tgt_text = example["tgt"]["tgt"].split(" ")
-        numeric["tgt"]["tgt_ids"] = vocabs["tgt"](
-            [decoder_start_token] + tgt_text + [DefaultTokens.EOS]
-        )
+        # 目标部分增加开始符和结束符
+        numeric["tgt"]["tgt_ids"] = vocabs["tgt"]([decoder_start_token] + tgt_text + [DefaultTokens.EOS])
 
     return numeric
 
@@ -98,9 +95,7 @@ def tensorify(vocabs, minibatch, device, left_pad=False):
     tensor_batch = {}
     if left_pad:
         tbatchsrc = [
-            torch.tensor(ex["src"]["src_ids"], dtype=torch.long, device=device).flip(
-                dims=[0]
-            )
+            torch.tensor(ex["src"]["src_ids"], dtype=torch.long, device=device).flip(dims=[0])
             for ex, indice in minibatch
         ]
     else:
@@ -108,6 +103,8 @@ def tensorify(vocabs, minibatch, device, left_pad=False):
             torch.tensor(ex["src"]["src_ids"], dtype=torch.long, device=device)
             for ex, indice in minibatch
         ]
+
+    # 填充
     padidx = vocabs["src"][DefaultTokens.PAD]
     tbatchsrc = pad_sequence(tbatchsrc, batch_first=True, padding_value=padidx)
     tbatchsrc = tbatchsrc[:, :, None]
@@ -126,9 +123,7 @@ def tensorify(vocabs, minibatch, device, left_pad=False):
     if minibatch[0][0]["tgt"] is not None:
         if left_pad:
             tbatchtgt = [
-                torch.tensor(
-                    ex["tgt"]["tgt_ids"], dtype=torch.long, device=device
-                ).flip(dims=[0])
+                torch.tensor(ex["tgt"]["tgt_ids"], dtype=torch.long, device=device).flip(dims=[0])
                 for ex, indice in minibatch
             ]
         else:
@@ -154,30 +149,9 @@ def tensorify(vocabs, minibatch, device, left_pad=False):
     if "src_ex_vocab" in minibatch[0][0].keys():
         tensor_batch["src_ex_vocab"] = [ex["src_ex_vocab"] for ex, indice in minibatch]
 
-    tensor_batch["ind_in_bucket"] = [indice for ex, indice in minibatch]
+    tensor_batch["ind_in_bucket"] = [indice for ex, indice in minibatch]  # 桶内序号
 
-    tensor_batch["cid"] = [ex["cid"] for ex, indice in minibatch]
-    tensor_batch["cid_line_number"] = [
-        ex["cid_line_number"] for ex, indice in minibatch
-    ]
+    tensor_batch["cid"] = [ex["cid"] for ex, indice in minibatch]  # 语料编号
+    tensor_batch["cid_line_number"] = [ex["cid_line_number"] for ex, indice in minibatch]  # 语料中序号
 
     return tensor_batch
-
-
-def textbatch_to_tensor(vocabs, batch, device, is_train=False):
-    """
-    This is a hack to transform a simple batch of texts
-    into a tensored batch to pass through _translate()
-    """
-    numeric = []
-    infer_iter = []
-    for i, ex in enumerate(batch):
-        # Keep it consistent with dynamic data
-        ex["srclen"] = len(ex["src"]["src"].split(" "))
-        ex["in_in_bucket"] = i
-        ex["cid"] = "text"
-        ex["cid_line_number"] = i
-        ex["align"] = None
-        numeric.append((numericalize(vocabs, ex), i))
-    infer_iter = [(tensorify(vocabs, numeric, device), 0)]  # force bucket_idx to 0
-    return infer_iter

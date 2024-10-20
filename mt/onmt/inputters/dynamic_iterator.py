@@ -19,10 +19,9 @@ class MixingStrategy(object):
     """Mixing strategy that should be used in Data Iterator."""
 
     def __init__(self, iterables, weights):
-        """Initilize neccessary attr."""
         self._valid_iterable(iterables, weights)
-        self.iterables = iterables
-        self.weights = weights
+        self.iterables = iterables  # 数据集名 -> 数据集
+        self.weights = weights  # 数据集名 -> 权重
 
     def _valid_iterable(self, iterables, weights):
         iter_keys = iterables.keys()
@@ -39,11 +38,11 @@ class SequentialMixer(MixingStrategy):
 
     def _iter_datasets(self):
         for ds_name, ds_weight in self.weights.items():
-            for _ in range(ds_weight):
+            for _ in range(ds_weight):  # 权重是迭代次数?!
                 yield ds_name
 
     def __iter__(self):
-        for ds_name in self._iter_datasets():
+        for ds_name in self._iter_datasets():  # 依次迭代数据集
             iterable = self.iterables[ds_name]
             yield from iterable
 
@@ -54,7 +53,7 @@ class WeightedMixer(MixingStrategy):
     def __init__(self, iterables, weights):
         super().__init__(iterables, weights)
         self._iterators = {}
-        self._counts = {}
+        self._counts = {}  # 没有数据集计数信息？
         for ds_name in self.iterables.keys():
             self._reset_iter(ds_name)
 
@@ -78,12 +77,12 @@ class WeightedMixer(MixingStrategy):
                 yield ds_name
 
     def __iter__(self):
-        for ds_name in cycle(self._iter_datasets()):
+        for ds_name in cycle(self._iter_datasets()):  # 循环迭代数据集
             iterator = self._iterators[ds_name]
             try:
                 item = next(iterator)
             except StopIteration:
-                self._reset_iter(ds_name)
+                self._reset_iter(ds_name)  # 重置数据集迭代器
                 iterator = self._iterators[ds_name]
                 item = next(iterator)
             finally:
@@ -167,10 +166,8 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
     ):
         """Initilize `DynamicDatasetIter` with options parsed from `opt`."""
         corpora_info = {}
-        batch_size = (
-            opt.valid_batch_size if (task == CorpusTask.VALID) else opt.batch_size
-        )
-        if task != CorpusTask.INFER:
+        batch_size = (opt.valid_batch_size if (task == CorpusTask.VALID) else opt.batch_size)
+        if task != CorpusTask.INFER:  # 训练和验证数据集
             if opt.batch_size_multiple is not None:
                 batch_size_multiple = opt.batch_size_multiple
             else:
@@ -180,7 +177,7 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
             bucket_size_init = opt.bucket_size_init
             bucket_size_increment = opt.bucket_size_increment
             skip_empty_level = opt.skip_empty_level
-        else:
+        else:  # 推理数据集
             batch_size_multiple = 1
             corpora_info[CorpusTask.INFER] = {"transforms": opt.transforms}
             corpora_info[CorpusTask.INFER]["weight"] = 1
@@ -237,7 +234,7 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
         tuple_bucket = process(self.task, tuple_bucket)
         for example in tuple_bucket:
             if example is not None:
-                bucket.append(numericalize(self.vocabs, example))
+                bucket.append(numericalize(self.vocabs, example))  # 文本向量化
         return bucket
 
     def _add_indice(self, bucket):
@@ -255,18 +252,18 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
         tokens numericalized.
         """
         bucket = []
-        if self.bucket_size_init > 0:
+        if self.bucket_size_init > 0:  # 初始桶大小
             _bucket_size = self.bucket_size_init
         else:
             _bucket_size = self.bucket_size
 
         for ex in self.mixer:
             bucket.append(ex)
-            if len(bucket) == _bucket_size:
+            if len(bucket) == _bucket_size:  # 桶满
                 yield (self._tuple_to_json_with_tokIDs(bucket), self.bucket_idx)
                 self.bucket_idx += 1
                 bucket = []
-                if _bucket_size < self.bucket_size:
+                if _bucket_size < self.bucket_size:  # 增长桶
                     _bucket_size += self.bucket_size_increment
                 else:
                     _bucket_size = self.bucket_size
@@ -293,7 +290,7 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
             return len(ex["src"]["src_ids"])
 
         minibatch, maxlen, size_so_far, seen = [], 0, 0, set()
-        for ex, indice in data:
+        for ex, indice in data:  # data已按长度排序
             src = ex["src"]["src"]
             if src not in seen or (self.task != CorpusTask.TRAIN):
                 seen.add(src)
@@ -327,8 +324,8 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
 
     def __iter__(self):
         for bucket, bucket_idx in self._bucketing():
-            bucket = self._add_indice(bucket)
-            bucket = sorted(bucket, key=lambda x: self.sort_key(x[0]))
+            bucket = self._add_indice(bucket)  # 给样本添加序号
+            bucket = sorted(bucket, key=lambda x: self.sort_key(x[0]))  # 按照源文本或和目标文本长度排序
             p_batch = list(
                 self.batch_iter(
                     bucket,
@@ -337,18 +334,19 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
                     batch_size_multiple=self.batch_size_multiple,
                 )
             )
-            # For TRAIN we shuffle batches within the bucket
-            # otherwise sequential
+
+            # 训练语料混洗
             if self.task == CorpusTask.TRAIN:
                 p_batch = self.random_shuffler(p_batch)
+
             for i, minibatch in enumerate(p_batch):
-                # for specific case of rnn_packed need to be sorted
-                # within the batch
+                # for specific case of rnn_packed need to be sorted within the batch
                 if self.task == CorpusTask.TRAIN:
-                    minibatch.sort(key=lambda x: self.sort_key(x[0]), reverse=True)
-                tensor_batch = tensorify(
-                    self.vocabs, minibatch, self.device, self.left_pad
-                )
+                    minibatch.sort(key=lambda x: self.sort_key(x[0]), reverse=True)  # XXX: 有必要吗？
+
+                # 张量化
+                tensor_batch = tensorify(self.vocabs, minibatch, self.device, self.left_pad)
+
                 yield (tensor_batch, bucket_idx)
 
 
@@ -366,7 +364,7 @@ class OnDeviceDatasetIter:
                     "ind_in_bucket",
                     "cid_line_number",
                 ]:
-                    tensor_batch[key] = tensor_batch[key].to(self.device)
+                    tensor_batch[key] = tensor_batch[key].to(self.device)  # 移动数据到设备
             yield (tensor_batch, bucket_idx)
 
 
