@@ -273,17 +273,17 @@ def create_app(args):
             q, source_lang, target_lang, text_format, api_key))
 
         if not q:
-            abort(400, description="Invalid request: missing q parameter")
+            abort(400, description="无效请求: 缺失参数q")
         if not source_lang:
-            abort(400, description="Invalid request: missing source parameter")
+            abort(400, description="无效请求: 缺失参数source")
         if not target_lang:
-            abort(400, description="Invalid request: missing target parameter")
+            abort(400, description="无效请求: 缺失参数target")
 
         if not text_format:
             text_format = "text"
 
         if text_format not in ["text", "html"]:
-            abort(400, description="%s format is not supported" % text_format)
+            abort(400, description="%s 格式不支持" % text_format)
 
         if not api_key:
             api_key = ""
@@ -310,7 +310,7 @@ def create_app(args):
             if args.char_limit < chars:
                 abort(
                     400,
-                    description="Invalid request: Request (%d) exceeds character limit (%d)"
+                    description="无效请求: 请求 (%d) 超过翻译字符数限制 (%d)"
                                 % (chars, args.char_limit),
                 )
 
@@ -322,7 +322,7 @@ def create_app(args):
 
         translator = translators.get_translator(source_lang, target_lang)
         if translator is None:
-            abort(400, description="Language pair %s is not supported" % lang_pair)
+            abort(400, description="语言对 %s 不支持" % lang_pair)
 
         if text_format == "html":  # TODO: 没有调用，可以删除？
             translation = str(translate_html(translator, src))
