@@ -24,8 +24,8 @@ class ADDB:
 
     def log_ad(self, platform, ad_id, where=None, action="P"):
         """记录广告播放情况"""
-        where = where + ": " if where else "";
-        self.logger_ad.info(platform + " " + where + ad_id + " " + action)
+        ad_msg = "|||".join([platform, where, ad_id, action])
+        self.logger_ad.info(ad_msg)
 
 
 class ADList(ADDB):
