@@ -1264,14 +1264,14 @@ def translate_opts(parser):
         type=str,
         default="scaled-dot-flash",
         help="Self attention type in Transformer decoder "
-        'layer -- currently "scaled-dot", "scaled-dot-flash" or "average" ',
+        'layer -- currently "scaled-dot", "scaled-dot-flash" ',
     )
     group = parser.add_argument_group("Data")
     group.add(
         "--src",
         "-src",
         required=True,
-        help="Source sequence to decode (one line per " "sequence)",
+        help="Source sequence to decode (one line per sequence)",
     )
     group.add("--tgt", "-tgt", help="True target sequence (optional)")
     group.add(

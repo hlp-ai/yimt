@@ -38,9 +38,7 @@ def register_transform(name):
         if name in AVAILABLE_TRANSFORMS:
             raise ValueError("Cannot register duplicate transform ({})".format(name))
         if not issubclass(cls, Transform):
-            raise ValueError(
-                "transform ({}: {}) must extend Transform".format(name, cls.__name__)
-            )
+            raise ValueError("transform ({}: {}) must extend Transform".format(name, cls.__name__))
         AVAILABLE_TRANSFORMS[name] = cls
         return cls
 
