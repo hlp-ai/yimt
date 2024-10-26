@@ -99,26 +99,24 @@ class ParallelCorpus(object):
 
 def get_corpora(opts, task=CorpusTask.TRAIN, src=None, tgt=None, align=None):
     corpora_dict = {}
-    if task == CorpusTask.TRAIN:
-        for corpus_id, corpus_dict in opts.data.items():
+    if task == CorpusTask.TRAIN:  # 训练数据集
+        for corpus_id, corpus_dict in opts.data.items():  # 多个训练数据集
             if corpus_id != CorpusName.VALID:  # 跳过data下的验证数据集
                 corpora_dict[corpus_id] = ParallelCorpus(
                         corpus_id,
                         corpus_dict["path_src"],
                         corpus_dict["path_tgt"],
-                        # corpus_dict["path_align"],
                     )
-    elif task == CorpusTask.VALID:
+    elif task == CorpusTask.VALID:  # 验证数据集
         if CorpusName.VALID in opts.data.keys():
             corpora_dict[CorpusName.VALID] = ParallelCorpus(
                 CorpusName.VALID,
                 opts.data[CorpusName.VALID]["path_src"],
                 opts.data[CorpusName.VALID]["path_tgt"] if tgt is None else None,
-                # opts.data[CorpusName.VALID]["path_align"],
             )
         else:
             return None
-    else:
+    else:  # 推理数据集
         corpora_dict[CorpusName.INFER] = ParallelCorpus(
             CorpusName.INFER,
             src if src else opts.src,

@@ -64,7 +64,7 @@ class Transform(object):
             is_train (bool): Indicate if src/tgt is training data;bject.
         """
         transformed_batch = []
-        for example, _, cid in batch:
+        for example, _, cid in batch:  # 样本，转换，语料ID
             example = self.apply(example, is_train=is_train, **kwargs)
             if example is not None:
                 transformed_batch.append((example, self, cid))
@@ -84,7 +84,7 @@ class Transform(object):
         return transformed_batch
 
     def __getstate__(self):
-        """Pickling following for rebuild."""
+        """序列化"""
         state = {"opts": self.opts}
         if hasattr(self, "vocabs"):
             state["vocabs"] = self.vocabs
@@ -101,7 +101,7 @@ class Transform(object):
         pass
 
     def __setstate__(self, state):
-        """Reload when unpickling from save file."""
+        """反序列化"""
         self.opts = state["opts"]
         self._parse_opts()
         vocabs = state.get("vocabs", None)
@@ -181,9 +181,7 @@ class TransformPipe(Transform):
     def build_from(cls, transform_list):
         """Return a `TransformPipe` instance build from `transform_list`."""
         for transform in transform_list:
-            assert isinstance(
-                transform, Transform
-            ), "transform should be a instance of Transform."
+            assert isinstance(transform, Transform), "transform should be a instance of Transform."
         transform_pipe = cls(None, transform_list)
         return transform_pipe
 
@@ -212,9 +210,7 @@ class TransformPipe(Transform):
 
         """
         for transform in self.transforms:
-            example = transform.apply(
-                example, is_train=is_train, stats=self.statistics, **kwargs
-            )
+            example = transform.apply(example, is_train=is_train, stats=self.statistics, **kwargs)
             if example is None:
                 break
         return example

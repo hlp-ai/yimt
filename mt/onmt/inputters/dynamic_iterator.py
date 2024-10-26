@@ -186,6 +186,7 @@ class DynamicDatasetIter(torch.utils.data.IterableDataset):
             bucket_size_init = -1
             bucket_size_increment = 0
             skip_empty_level = "warning"
+
         return cls(
             corpora,
             corpora_info,
