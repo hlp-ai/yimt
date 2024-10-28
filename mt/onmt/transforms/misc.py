@@ -116,6 +116,7 @@ class PrefixTransform(Transform):
                 if prefix is not None:
                     logger.debug(f"Get prefix for {c_name}: {prefix}")
                     prefix_dict[c_name] = prefix
+
         # prefix as general option for inference
         if hasattr(opts, "src_prefix"):
             if "infer" not in prefix_dict.keys():

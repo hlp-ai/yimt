@@ -158,19 +158,19 @@ class TokenizerTransform(Transform):
         sentence = " ".join(tokens).replace(DefaultTokens.SEP, "\n")
         # Locate the end-of-sentence placeholders.
         sent_list = sentence.split(DefaultTokens.EOS)
+
         # Tokenize each sentence separately.
         segmented = []
         for _sentence in sent_list:
             # Locate the mask-before placeholders
             # (to zero-out the prompt loss during LM finetuning).
             _sentence_chunks = _sentence.split(DefaultTokens.MASK_BEFORE)
+
             # Tokenize each chunk separately and insert the padding token.
             # between each sequence of tokens.
             _sentence_tokens = []
             for _chunk in _sentence_chunks:
-                _sentence_tokens += self.tokenize_string(_chunk, side, is_train) + [
-                    DefaultTokens.PAD
-                ]
+                _sentence_tokens += self.tokenize_string(_chunk, side, is_train) + [DefaultTokens.PAD]
             # Re-insert the eos token.
             segmented += _sentence_tokens[:-1] + [DefaultTokens.EOS]
         return segmented[:-1]
@@ -178,6 +178,7 @@ class TokenizerTransform(Transform):
     def apply(self, example, is_train=False, stats=None, **kwargs):
         """Apply subword-based tokenenization to src & tgt."""
         src_out = self._tokenize(example["src"], "src", is_train)
+
         if example["tgt"] is not None:
             tgt_out = self._tokenize(example["tgt"], "tgt", is_train)
             if stats is not None:
@@ -190,6 +191,7 @@ class TokenizerTransform(Transform):
                 n_words = len(example["src"])
                 n_subwords = len(src_out)
                 stats.update(SubwordStats(n_subwords, n_words))
+
         example["src"], example["tgt"] = src_out, tgt_out
         return example
 
@@ -232,23 +234,22 @@ class SentencePieceTransform(TokenizerTransform):
 
         load_src_model = spm.SentencePieceProcessor()
         load_src_model.Load(self.src_subword_model)
+
         _diff_vocab = (
             self.src_subword_vocab != self.tgt_subword_vocab
             or self.src_vocab_threshold != self.tgt_vocab_threshold
         )
+
         if self.src_subword_vocab != "" and self.src_vocab_threshold > 0:
-            load_src_model.LoadVocabulary(
-                self.src_subword_vocab, self.src_vocab_threshold
-            )
+            load_src_model.LoadVocabulary(self.src_subword_vocab, self.src_vocab_threshold)
+
         if self.share_vocab and not _diff_vocab:
             self.load_models = {"src": load_src_model, "tgt": load_src_model}
         else:
             load_tgt_model = spm.SentencePieceProcessor()
             load_tgt_model.Load(self.tgt_subword_model)
             if self.tgt_subword_vocab != "" and self.tgt_vocab_threshold > 0:
-                load_tgt_model.LoadVocabulary(
-                    self.tgt_subword_vocab, self.tgt_vocab_threshold
-                )
+                load_tgt_model.LoadVocabulary(self.tgt_subword_vocab, self.tgt_vocab_threshold)
             self.load_models = {"src": load_src_model, "tgt": load_tgt_model}
 
     def tokenize_string(self, string, side="src", is_train=False):
