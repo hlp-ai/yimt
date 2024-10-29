@@ -1,4 +1,5 @@
 import os
+import sys
 import tempfile
 import fitz
 
@@ -69,7 +70,7 @@ def copy_images(page, outpage, in_pdf):
 
 
 if __name__ == "__main__":
-    doc = fitz.open(r"D:/kidden/vits2021.pdf")
+    doc = fitz.open(sys.argv[1])
     outpdf = fitz.open()
 
     for page in doc:

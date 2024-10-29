@@ -1,3 +1,5 @@
+import sys
+
 import pymupdf
 
 
@@ -57,7 +59,7 @@ def copy_drawings(page, outpage):
 
 
 if __name__ == "__main__":
-    doc = pymupdf.open(r"D:/kidden/GKBM.pdf")
+    doc = pymupdf.open(sys.argv[1])
     outpdf = pymupdf.open()
     for page in doc:
         outpage = outpdf.new_page(width=page.rect.width, height=page.rect.height)
