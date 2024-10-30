@@ -390,34 +390,6 @@ class Inference(object):
 
         return all_scores, all_predictions
 
-    def _align_pad_prediction(self, predictions, bos, pad):
-        """
-        Padding predictions in batch and add BOS.
-
-        Args:
-            predictions (List[List[Tensor]]): `(batch, n_best,)`, for each src
-                sequence contain n_best tgt predictions all of which ended with
-                eos id.
-            bos (int): bos index to be used.
-            pad (int): pad index to be used.
-
-        Return:
-            batched_nbest_predict (torch.LongTensor): `(batch, n_best, tgt_l)`
-        """
-        dtype, device = predictions[0][0].dtype, predictions[0][0].device
-        flatten_tgt = [best.tolist() for bests in predictions for best in bests]
-        paded_tgt = torch.tensor(
-            list(zip_longest(*flatten_tgt, fillvalue=pad)),
-            dtype=dtype,
-            device=device,
-        ).T
-        bos_tensor = torch.full([paded_tgt.size(0), 1], bos, dtype=dtype, device=device)
-        full_tgt = torch.cat((bos_tensor, paded_tgt), dim=-1)
-        batched_nbest_predict = full_tgt.view(
-            len(predictions), -1, full_tgt.size(-1)
-        )  # (batch, n_best, tgt_l)
-        return batched_nbest_predict
-
     def _report_score(self, name, score_total, nb_sentences):
         # In the case of length_penalty = none we report the total logprobs
         # divided by the number of sentence to get an approximation of the
