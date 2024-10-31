@@ -1,3 +1,4 @@
+import sys
 from pprint import pprint
 
 import pymupdf
@@ -54,7 +55,7 @@ def copy_text(page, outpage):
 
 
 if __name__ == "__main__":
-    doc = pymupdf.open(r"D:/kidden/Conformer2020.pdf")
+    doc = pymupdf.open(sys.argv[1])
     outpdf = pymupdf.open()
     for page in doc:
         outpage = outpdf.new_page(width=page.rect.width, height=page.rect.height)

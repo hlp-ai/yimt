@@ -1,6 +1,8 @@
 """PDF file translation"""
 import argparse
 import os
+from pprint import pprint
+
 import pymupdf
 
 from extension.files.pdf.copy_drawings import copy_drawings
@@ -31,6 +33,10 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
         blocks = page.get_text("dict")["blocks"]
         candidates = []
         for block in blocks:
+            pprint(block)
+            if block["type"] != 0:  # XXX:为什么这里有图片？
+                continue
+
             cb = get_candidate_block(block)
             candidates.extend(cb)
 
@@ -54,11 +60,16 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
                 c["font"] = "china-ss"
 
             print(c)
-            shape.insert_textbox(c["bbox"], c["text"],
-                                 fontsize=c["size"] * 0.75,
-                                 fontname=c["font"],
-                                 rotate=0, lineheight=c["size"]*0.2)
-            # shape.draw_rect(pymupdf.Rect(c["bbox"]))
+            # shape.insert_textbox(c["bbox"], c["text"],
+            #                      fontsize=c["size"] * 0.75,
+            #                      fontname=c["font"],
+            #                      rotate=0, lineheight=c["size"]*0.2)
+            outpage.insert_htmlbox(c["bbox"], c["text"],
+                                   css="* {text-align: justify;}")
+
+            outpage.draw_rect(pymupdf.Rect(c["bbox"]),
+                              color=(1, 0, 0),
+                              dashes="[3] 0")
 
         shape.finish()
         shape.commit()
