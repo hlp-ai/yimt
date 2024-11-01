@@ -1,36 +1,8 @@
-from math import floor
 from pprint import pprint
 
 import pymupdf
 
-
-def flags_decomposer(flags):
-    """Make font flags human readable."""
-    l = []
-    if flags & 2 ** 0:
-        l.append("superscript")
-    if flags & 2 ** 1:
-        l.append("italic")
-    if flags & 2 ** 2:
-        l.append("serifed")
-    else:
-        l.append("sans")
-    if flags & 2 ** 3:
-        l.append("monospaced")
-    else:
-        l.append("proportional")
-    if flags & 2 ** 4:
-        l.append("bold")
-    return ", ".join(l)
-
-
-def simplify_float(n):
-    f = float("{:.2f}".format(n))
-    return f
-
-
-def simplify_floats(ns):
-    return [simplify_float(n) for n in ns]
+from extension.files.pdf.utils import flags_decomposer, simplify_float, simplify_floats
 
 
 def dump_span(span):
@@ -77,7 +49,7 @@ def dump_page(page):
                 simplify_float(page.mediabox.x1), simplify_float(page.mediabox.y1))
 
     rect = (simplify_float(page.rect.x0), simplify_float(page.rect.y0),
-                simplify_float(page.rect.x1), simplify_float(page.rect.y1))
+            simplify_float(page.rect.x1), simplify_float(page.rect.y1))
 
     return f"<page mediabox='{mediabox}' rect='{rect}' rotation='{page.rotation}' number='{page.number}'>\n{blocks}\n</page>"
 
