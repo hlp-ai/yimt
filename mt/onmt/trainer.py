@@ -359,9 +359,7 @@ class Trainer(object):
                     stats.update(batch_stats)
             logger.info(
                 """valid stats calculation
-                           took: {} s.""".format(
-                    time.time() - start
-                )
+                           took: {} s.""".format(time.time() - start)
             )
 
             # Compute validation metrics (at batch.dataset level)
@@ -375,9 +373,7 @@ class Trainer(object):
                 )
                 logger.info(
                     """The translation of the valid dataset for dynamic scoring
-                               took : {} s.""".format(
-                        time.time() - start
-                    )
+                               took : {} s.""".format(time.time() - start)
                 )
                 for i, metric in enumerate(self.valid_scorers):
                     logger.info("UPDATING VALIDATION {}".format(metric))

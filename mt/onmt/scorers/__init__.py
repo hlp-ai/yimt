@@ -8,8 +8,7 @@ AVAILABLE_SCORERS = {}
 
 
 def get_scorers_cls(metric_names):
-    """Returns a dict with scorers related to the metrics
-    indicated in `metric_names`."""
+    """Returns a dict with scorers related to the metrics indicated in `metric_names`."""
     scorers_cls = {}
     for name in metric_names:
         if name not in AVAILABLE_SCORERS.keys():
@@ -26,13 +25,9 @@ def register_scorer(metric):
 
     def register_scorer_cls(cls):
         if metric in AVAILABLE_SCORERS.keys():
-            raise ValueError(
-                "Cannot register duplicate scorer for metric ({})".format(metric)
-            )
+            raise ValueError("Cannot register duplicate scorer for metric ({})".format(metric))
         if not issubclass(cls, Scorer):
-            raise ValueError(
-                "scorer ({}: {}) must extend Scorer".format(metric, cls.__name__)
-            )
+            raise ValueError("scorer ({}: {}) must extend Scorer".format(metric, cls.__name__))
         AVAILABLE_SCORERS[metric] = cls
         return cls
 
