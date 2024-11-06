@@ -1,3 +1,4 @@
+import sys
 from pprint import pprint
 
 import pymupdf
@@ -16,7 +17,7 @@ def dump_span(span):
     ascender = simplify_float(span["ascender"])
     descender = simplify_float(span["descender"])
 
-    return f"\t\t\t<span bbox='{bbox}' origin='{origin}' size='{size}' color='{color}' font='{font}' style='{flags}' ascender='{ascender}' descender='{descender}'>{text}</span>"
+    return f"\t\t\t<span bbox='{bbox}' size='{size}' color='{color}' style='{flags}'>{text}</span>"
 
 
 def dump_line(line):
@@ -107,7 +108,7 @@ def parse_shape(page):
         pprint(d)
 
 
-def parse_pdf(fn):
+def parse_pdf(fn, pn):
     doc = pymupdf.open(fn)
     pprint(doc.metadata)
     print()
@@ -127,11 +128,11 @@ def parse_pdf(fn):
     print()
 
     # parse_page(doc[0])
-    print(dump_page(doc[0]))
+    print(dump_page(doc[pn]))
 
     # parse_shape(doc[0])
 
 
-parse_pdf(r"D:\kidden\Conformer2020.pdf")
+parse_pdf(sys.argv[1], int(sys.argv[2]))
 
 

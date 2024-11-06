@@ -28,6 +28,9 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
     outpdf = pymupdf.open()
 
     for i, page in enumerate(doc):
+        if debug:
+            print("***Page{}***".format(i))
+
         outpage = outpdf.new_page(width=page.rect.width, height=page.rect.height)
 
         # 拷贝绘制形状
@@ -39,9 +42,11 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
         blocks = page.get_text("dict")["blocks"]
         candidates = []
         for block in blocks:
-            pprint(block)
             if block["type"] != 0:  # 忽略图形块，inline图形不包含在get_images返回中
                 continue
+
+            if debug:
+                pprint(block)
 
             cb = get_candidate_block(block)
             candidates.extend(cb)
@@ -63,13 +68,7 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
             avg_len = sum([len(t) for t in toks]) / len(toks)
             if avg_len > 3 and len(toks) > 1:
                 c["text"] = translator.translate_paragraph(text, source_lang, target_lang)
-                c["font"] = "china-ss"
 
-            print(c)
-            # shape.insert_textbox(c["bbox"], c["text"],
-            #                      fontsize=c["size"] * 0.75,
-            #                      fontname=c["font"],
-            #                      rotate=0, lineheight=c["size"]*0.2)
             outpage.insert_htmlbox(c["bbox"], c["text"],
                                    css="* {text-align: justify;}")
 
@@ -91,14 +90,17 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
 
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser("PDF File Translator")
-    arg_parser.add_argument("--to_lang", type=str, default="zh", help="target language")
-    arg_parser.add_argument("--input_file", type=str, required=True, help="file to be translated")
-    arg_parser.add_argument("--output_file", type=str, default=None, help="translation file")
+    arg_parser.add_argument("-tl", "--to_lang", type=str, default="zh", help="target language")
+    arg_parser.add_argument("-i", "--input_file", type=str, required=True, help="file to be translated")
+    arg_parser.add_argument("-o", "--output_file", type=str, default=None, help="translation file")
+    arg_parser.add_argument("-d", "--debug", action="store_true", help="debug or not")
     args = arg_parser.parse_args()
 
     to_lang = args.to_lang
     in_file = args.input_file
     out_file = args.output_file
+
+    debug = args.debug
 
     callback = None
 
