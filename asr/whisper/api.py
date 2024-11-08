@@ -31,25 +31,6 @@ class ASR:
 
 if __name__ == '__main__':
     asr = ASR()
-    # start = time.time()
-    # lang, txt = asr.recognize_file(r"D:\dataset\LJSpeech-1.1\wavs\LJ001-0001.wav")
-    # print(time.time() - start)
-    # print(lang)
-    # print(txt)
-    #
-    # start = time.time()
-    # lang, txt = asr.recognize_file(r"D:\dataset\LJSpeech-1.1\wavs\LJ001-0002.wav")
-    # print(time.time() - start)
-    # print(lang)
-    # print(txt)
-    #
-    # audio = whisper.load_audio(r"D:\dataset\LJSpeech-1.1\wavs\LJ001-0003.wav")
-    #
-    # start = time.time()
-    # lang, txt = asr.recognize(audio)
-    # print(time.time() - start)
-    # print(lang)
-    # print(txt)
 
     audio_file = input("输入WAV文件路径：")
     start = time.time()
