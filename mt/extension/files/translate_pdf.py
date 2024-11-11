@@ -60,6 +60,7 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
         shape = outpage.new_shape()
 
         for c in candidates:
+            print(c)
             text = c["text"]
             text = text.replace("-\n", "").replace("\n", " ").replace("<", "&lt;").strip()
             if len(text) == 0:

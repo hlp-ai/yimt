@@ -3,7 +3,8 @@ from pprint import pprint
 
 import pymupdf
 
-from extension.files.pdf.utils import flags_decomposer, simplify_float, simplify_floats
+from extension.files.pdf.utils import flags_decomposer, simplify_float, simplify_floats, simplify_page, merge_spans, \
+    merge_lines
 
 
 def dump_span(span):
@@ -110,25 +111,47 @@ def parse_shape(page):
 
 def parse_pdf(fn, pn):
     doc = pymupdf.open(fn)
-    pprint(doc.metadata)
-    print()
-
-    print(doc.language)
-    print(doc.outline)
-    print(doc.page_count)
-    print(doc.name)
-    print(doc.pagemode)
-    print(doc.pagelayout)
-    print(doc.is_encrypted)
-    print(doc.chapter_count)
-    print(doc.is_reflowable)
-    print(doc.FormFonts)
-    print(doc.FontInfos)
-
-    print()
+    # pprint(doc.metadata)
+    # print()
+    #
+    # print(doc.language)
+    # print(doc.outline)
+    # print(doc.page_count)
+    # print(doc.name)
+    # print(doc.pagemode)
+    # print(doc.pagelayout)
+    # print(doc.is_encrypted)
+    # print(doc.chapter_count)
+    # print(doc.is_reflowable)
+    # print(doc.FormFonts)
+    # print(doc.FontInfos)
+    #
+    # print()
 
     # parse_page(doc[0])
+    print("===原始页面===")
     print(dump_page(doc[pn]))
+
+    print("===简化页面===")
+    blocks = simplify_page(doc[pn])
+    pprint(blocks)
+
+    for block in blocks:
+        for line in block["lines"]:
+            spans = line["spans"]
+            new_spans = merge_spans(spans)
+            line["spans"] = new_spans
+
+    print("===合并SPAN页面===")
+    pprint(blocks)
+
+    for block in blocks:
+        lines = block["lines"]
+        new_lines = merge_lines(lines)
+        block["lines"] = new_lines
+
+    print("===合并LINE页面===")
+    pprint(blocks)
 
     # parse_shape(doc[0])
 
