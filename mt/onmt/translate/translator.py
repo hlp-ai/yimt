@@ -261,7 +261,10 @@ class Inference(object):
             bucket_gold_score = 0
             bucket_gold_words = 0
             voc_src = self.vocabs["src"].ids_to_tokens
+
+            # 恢复样本位置
             bucket_translations = sorted(bucket_translations, key=lambda x: x.ind_in_bucket)
+
             for trans in bucket_translations:
                 bucket_scores += [trans.pred_scores[: self.n_best]]
                 bucket_score += trans.pred_scores[0]
@@ -331,12 +334,12 @@ class Inference(object):
             bucket_translations += translations
 
             if (
-                not isinstance(infer_iter, list)
-                and len(bucket_translations) >= infer_iter.bucket_size
+                not isinstance(infer_iter, list)  # 不是list，为什么判断？
+                and len(bucket_translations) >= infer_iter.bucket_size  # 完成一个桶中所有batch
             ):
                 bucket_idx += 1
 
-            if bucket_idx != prev_idx:
+            if bucket_idx != prev_idx:  # 下一个桶
                 prev_idx = bucket_idx
                 (
                     bucket_scores,
@@ -488,7 +491,7 @@ class Translator(Inference):
 
         with torch.no_grad():
             if self.sample_from_topk != 0 or self.sample_from_topp != 0:
-                self._log("Decoding using GreedySearch")
+                # self._log("Decoding using GreedySearch")
                 decode_strategy = GreedySearch(
                     pad=self._tgt_pad_idx,
                     bos=self._tgt_bos_idx,
@@ -508,7 +511,7 @@ class Translator(Inference):
                     ban_unk_token=self.ban_unk_token,
                 )
             else:
-                self._log("Decoding using BeamSearch")
+                # self._log("Decoding using BeamSearch")
                 decode_strategy = BeamSearch(
                     self.beam_size,
                     batch_size=len(batch["srclen"]),

@@ -88,13 +88,9 @@ class ScoringPreparator:
         model_opt.tgt = None
 
         # Retrieve raw references and sources
-        with codecs.open(
-            model_opt.data["valid"]["path_tgt"], "r", encoding="utf-8"
-        ) as f:
+        with codecs.open(model_opt.data["valid"]["path_tgt"], "r", encoding="utf-8") as f:
             raw_refs = [line.strip("\n") for line in f if line.strip("\n")]
-        with codecs.open(
-            model_opt.data["valid"]["path_src"], "r", encoding="utf-8"
-        ) as f:
+        with codecs.open(model_opt.data["valid"]["path_src"], "r", encoding="utf-8") as f:
             raw_srcs = [line.strip("\n") for line in f if line.strip("\n")]
 
         valid_iter = build_dynamic_dataset_iter(
