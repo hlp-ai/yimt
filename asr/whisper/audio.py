@@ -10,16 +10,16 @@ import torch.nn.functional as F
 
 from .utils import exact_div
 
-# hard-coded audio hyperparameters
-SAMPLE_RATE = 16000
+# 硬编码声音参数
+SAMPLE_RATE = 16000  # 采样率16K
 N_FFT = 400
-HOP_LENGTH = 160
-CHUNK_LENGTH = 30
-N_SAMPLES = CHUNK_LENGTH * SAMPLE_RATE  # 480000 samples in a 30-second chunk
-N_FRAMES = exact_div(N_SAMPLES, HOP_LENGTH)  # 3000 frames in a mel spectrogram input
+HOP_LENGTH = 160  # 帧移
+CHUNK_LENGTH = 30  # 30秒长度
+N_SAMPLES = CHUNK_LENGTH * SAMPLE_RATE  # 480000样本点
+N_FRAMES = exact_div(N_SAMPLES, HOP_LENGTH)  # 3000帧
 
 N_SAMPLES_PER_TOKEN = HOP_LENGTH * 2  # the initial convolutions has stride 2
-FRAMES_PER_SECOND = exact_div(SAMPLE_RATE, HOP_LENGTH)  # 10ms per audio frame
+FRAMES_PER_SECOND = exact_div(SAMPLE_RATE, HOP_LENGTH)  # 每帧10ms
 TOKENS_PER_SECOND = exact_div(SAMPLE_RATE, N_SAMPLES_PER_TOKEN)  # 20ms per audio token
 
 
@@ -166,12 +166,19 @@ def log_mel_spectrogram(
     if padding > 0:
         audio = F.pad(audio, (0, padding))
     window = torch.hann_window(N_FFT).to(audio.device)
+    # STFT变换
     stft = torch.stft(audio, N_FFT, HOP_LENGTH, window=window, return_complex=True)
+
+    #幅度
     magnitudes = stft[..., :-1].abs() ** 2
 
+    # MEL过滤器
     filters = mel_filters(audio.device, n_mels)
+
+    # MEL谱
     mel_spec = filters @ magnitudes
 
+    # log MEL谱
     log_spec = torch.clamp(mel_spec, min=1e-10).log10()
     log_spec = torch.maximum(log_spec, log_spec.max() - 8.0)
     log_spec = (log_spec + 4.0) / 4.0
