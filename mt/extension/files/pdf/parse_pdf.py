@@ -4,7 +4,7 @@ from pprint import pprint
 import pymupdf
 
 from extension.files.pdf.utils import flags_decomposer, simplify_float, simplify_floats, simplify_page, merge_spans, \
-    merge_lines
+    merge_lines, to_paragraph
 
 
 def dump_span(span):
@@ -152,6 +152,12 @@ def parse_pdf(fn, pn):
 
     print("===合并LINE页面===")
     pprint(blocks)
+
+    print("===翻译段落===")
+    for block in blocks:
+        paragraphs = to_paragraph(block)
+        pprint(paragraphs)
+
 
     # parse_shape(doc[0])
 

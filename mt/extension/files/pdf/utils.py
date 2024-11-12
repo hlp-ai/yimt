@@ -6,8 +6,8 @@ font_dict = {
 }
 
 
-def close_to(n1, n2):
-    return abs(n1-n2) < 3.0
+def close_to(n1, n2, eps=3.0):
+    return abs(n1-n2) < eps
 
 
 def span_len(span):
@@ -22,9 +22,13 @@ def block_width(b):
     return b[2] - b[0]
 
 
-def in_line(b1, b2):
+def in_line(b1, b2, eps=3.0):
     # 两个bbox的y1和y2足够接近，则它们在一行内
-    return close_to(b1[1], b2[1]) and close_to(b1[3], b2[3])
+    return close_to(b1[1], b2[1], eps) and close_to(b1[3], b2[3], eps)
+
+
+def left_align(b1, b2, eps=16.0):
+    return abs(b1[0]-b2[0]) < eps
 
 
 def near_to(b1, b2, eps=9.9):
@@ -109,7 +113,7 @@ def merge_lines(lines):
             lines.remove(line2)
             continue
 
-        if in_line(line1["bbox"], line2["bbox"]) and near_to(line1["bbox"], line2["bbox"], 11.0):  # 在同一行，且足够靠近
+        if in_line(line1["bbox"], line2["bbox"], 6.5) and near_to(line1["bbox"], line2["bbox"], 12.0):  # 在同一行，且足够靠近
             new_span = merge(line1["spans"][0], line2["spans"][0])
             lines.remove(line1)
             lines.remove(line2)
@@ -125,6 +129,42 @@ def merge_lines(lines):
     result.append(lines[0])
 
     return result
+
+
+def to_paragraph(block):
+    blocks = []
+    lines = block["lines"]
+
+    if len(lines) == 1:
+        for span in lines[0]["spans"]:
+            blocks.append(span)
+        return blocks
+    else:
+        while len(lines) > 1:
+            line1 = lines[0]
+            line2 = lines[1]
+            if in_line(line1["bbox"], line2["bbox"], 6.5):  # 同一行未合并段
+                blocks.append(line1["spans"][0])
+                # for span in line1["spans"]:
+                #    blocks.append(span)
+                lines.remove(line1)
+            elif left_align(line1["bbox"], line2["bbox"], 19.0):  # 不同行，左对齐，合并
+                new_line = merge(line1["spans"][0], line2["spans"][0])
+                # blocks.append(new_line)
+
+                lines.remove(line1)
+                lines.remove(line2)
+                lines.insert(0, {
+                    "bbox": new_line["bbox"],
+                    "spans": [new_line]
+                })
+            else:  # 不同行，不对齐
+                blocks.append(line1["spans"][0])
+                lines.remove(line1)
+
+    blocks.append(lines[0]["spans"][0])
+
+    return blocks
 
 
 def get_candidate_block(block):
