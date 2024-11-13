@@ -243,6 +243,9 @@ def simplify_page(page):
 
     simple_page = []
     for block in blocks:
+        if block["type"] != 0:  # XXX:为什么这里有图片？
+            continue
+
         lines = block["lines"]
         slines = []
         for line in lines:
@@ -262,3 +265,36 @@ def simplify_page(page):
         simple_page.append(sblock)
 
     return simple_page
+
+
+def blocks_for_translation(page):
+    # print("===简化页面===")
+    blocks = simplify_page(page)
+    # pprint(blocks)
+
+    for block in blocks:
+        for line in block["lines"]:
+            spans = line["spans"]
+            new_spans = merge_spans(spans)
+            line["spans"] = new_spans
+
+    # print("===合并SPAN页面===")
+    # pprint(blocks)
+
+    for block in blocks:
+        lines = block["lines"]
+        new_lines = merge_lines(lines)
+        block["lines"] = new_lines
+
+    # print("===合并LINE页面===")
+    # pprint(blocks)
+
+    result = []
+
+    # print("===翻译段落===")
+    for block in blocks:
+        paragraphs = to_paragraph(block)
+        #pprint(paragraphs)
+        result.extend(paragraphs)
+
+    return result

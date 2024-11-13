@@ -7,7 +7,7 @@ import pymupdf
 
 from extension.files.pdf.copy_drawings import copy_drawings
 from extension.files.pdf.copy_image import copy_images
-from extension.files.pdf.utils import get_candidate_block
+from extension.files.pdf.utils import get_candidate_block, blocks_for_translation
 from service.mt import translator_factory
 
 
@@ -39,17 +39,18 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
         # 拷贝图形
         copy_images(page, outpage, doc)
 
-        blocks = page.get_text("dict")["blocks"]
-        candidates = []
-        for block in blocks:
-            if block["type"] != 0:  # 忽略图形块，inline图形不包含在get_images返回中
-                continue
-
-            if debug:
-                pprint(block)
-
-            cb = get_candidate_block(block)
-            candidates.extend(cb)
+        # blocks = page.get_text("dict")["blocks"]
+        # candidates = []
+        # for block in blocks:
+        #     if block["type"] != 0:  # 忽略图形块，inline图形不包含在get_images返回中
+        #         continue
+        #
+        #     if debug:
+        #         pprint(block)
+        #
+        #     cb = get_candidate_block(block)
+        #     candidates.extend(cb)
+        candidates = blocks_for_translation(page)
 
         if translator is None:
             translator = translator_factory.get_translator(source_lang, target_lang)
@@ -62,7 +63,8 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
         for c in candidates:
             print(c)
             text = c["text"]
-            text = text.replace("-\n", "").replace("\n", " ").replace("<", "&lt;").strip()
+            # text = text.replace("-\n", "").replace("\n", " ").replace("<", "&lt;").strip()
+            text = text.replace("- ", "").replace("<", "&lt;").strip()
             if len(text) == 0:
                 continue
             toks = text.split()

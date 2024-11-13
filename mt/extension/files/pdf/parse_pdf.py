@@ -32,6 +32,8 @@ def dump_line(line):
 
 
 def dump_block(block):
+    if block["type"] != 0:
+        return ""
     bbox = simplify_floats(block["bbox"])
     type = block["type"]
     number = block["number"]
