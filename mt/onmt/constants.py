@@ -27,14 +27,6 @@ class CorpusTask(object):
     INFER = "infer"
 
 
-class SubwordMarker(object):
-    SPACER = "▁"
-    JOINER = "￭"
-    BEGIN_UPPERCASE = "｟mrk_begin_case_region_U｠"
-    END_UPPERCASE = "｟mrk_end_case_region_U｠"
-    BEGIN_CASED = "｟mrk_case_modifier_C｠"
-
-
 class ModelTask(object):
     LANGUAGE_MODEL = "lm"
     SEQ2SEQ = "seq2seq"
