@@ -7,6 +7,7 @@ from typing import Dict, List, Optional, Tuple
 
 import tiktoken
 
+# 代码 -> 语言名字
 LANGUAGES = {
     "en": "english",
     "zh": "chinese",
@@ -110,7 +111,7 @@ LANGUAGES = {
     "yue": "cantonese",
 }
 
-# language code lookup by name, with a few language aliases
+# 语言名字 -> 代码
 TO_LANGUAGE_CODE = {
     **{language: code for code, language in LANGUAGES.items()},
     "burmese": "my",
@@ -149,12 +150,12 @@ class Tokenizer:
         transcribe: int = self.special_tokens["<|transcribe|>"]
 
         langs = tuple(LANGUAGES.keys())[: self.num_languages]
-        sot_sequence = [sot]
+        sot_sequence = [sot]  # 开始转述编码
         if self.language is not None:
-            sot_sequence.append(sot + 1 + langs.index(self.language))
+            sot_sequence.append(sot + 1 + langs.index(self.language))  # 语言编码
         if self.task is not None:
             task_token: int = transcribe if self.task == "transcribe" else translate
-            sot_sequence.append(task_token)
+            sot_sequence.append(task_token)  # 任务编码
 
         self.sot_sequence = tuple(sot_sequence)
 
@@ -281,7 +282,7 @@ def get_encoding(name: str = "gpt2", num_languages: int = 99):
     ranks = {
         base64.b64decode(token): int(rank)
         for token, rank in (line.split() for line in open(vocab_path) if line)
-    }
+    }  # token -> ID
     n_vocab = len(ranks)
     special_tokens = {}
 
