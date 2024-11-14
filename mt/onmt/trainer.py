@@ -37,8 +37,6 @@ def build_trainer(opt, device_id, model, vocabs, optim, model_saver=None):
     accum_steps = opt.accum_steps
     n_gpu = opt.world_size
     parallel_mode = opt.parallel_mode
-    average_decay = opt.average_decay
-    average_every = opt.average_every
     dropout = opt.dropout
     attention_dropout = opt.attention_dropout
     dropout_steps = opt.dropout_steps
@@ -73,8 +71,6 @@ def build_trainer(opt, device_id, model, vocabs, optim, model_saver=None):
         parallel_mode,
         report_manager,
         model_saver=model_saver,
-        average_decay=average_decay,
-        average_every=average_every,
         model_dtype=opt.model_dtype,
         earlystopper=earlystopper,
         dropout=dropout,
@@ -111,8 +107,6 @@ class Trainer(object):
         model_saver(:obj:`onmt.models.ModelSaverBase`): the saver is
           used to save a checkpoint.
           Thus nothing will be saved if this parameter is None.
-        average_decay (float): cf opt.average_decay
-        average_every (int): average model every x steps.
         model_dtype (str): fp32 or fp16.
         earlystopper (:obj:`onmt.utils.EarlyStopping`): add early
           stopping mecanism
@@ -137,8 +131,6 @@ class Trainer(object):
         parallel_mode="data_parallel",
         report_manager=None,
         model_saver=None,
-        average_decay=0,
-        average_every=1,
         model_dtype="fp32",
         earlystopper=None,
         dropout=[0.3],
@@ -162,8 +154,6 @@ class Trainer(object):
         self.parallel_mode = parallel_mode
         self.report_manager = report_manager
         self.model_saver = model_saver
-        self.average_decay = average_decay
-        self.average_every = average_every
         self.model_dtype = model_dtype
         self.earlystopper = earlystopper
         self.dropout = dropout
@@ -223,12 +213,6 @@ class Trainer(object):
         if batches:
             yield batches, normalization
 
-    def _update_average(self, step):
-        pass
-        # if self.moving_average is None:
-        #     copy_params = [params.detach().float() for params in self.model.parameters()]
-        #     self.moving_average = copy_params
-
     def train(
         self,
         train_iter,
@@ -274,9 +258,6 @@ class Trainer(object):
                 normalization = sum(onmt.utils.distributed.all_gather_list(normalization))
 
             self._gradient_accumulation(batches, normalization, total_stats, report_stats)
-
-            if self.average_decay > 0 and i % self.average_every == 0:
-                self._update_average(step)
 
             report_stats = self._maybe_report_training(step, train_steps, self.optim.learning_rate(), report_stats)
 
