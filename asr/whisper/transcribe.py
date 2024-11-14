@@ -115,8 +115,7 @@ def transcribe(
             decode_options["language"] = "en"
         else:
             if verbose:
-                print("Detecting language using up to the first 30 seconds. Use `--language` to specify the language"
-                      )
+                print("Detecting language using up to the first 30 seconds. Use `--language` to specify the language")
             mel_segment = pad_or_trim(mel, N_FRAMES).to(model.device).to(dtype)
             _, probs = model.detect_language(mel_segment)
 
@@ -143,9 +142,7 @@ def transcribe(
     seek_clips: List[Tuple[int, int]] = list(zip(seek_points[::2], seek_points[1::2]))
 
     def decode_with_fallback(segment: torch.Tensor) -> DecodingResult:
-        temperatures = (
-            [temperature] if isinstance(temperature, (int, float)) else temperature
-        )
+        temperatures = ([temperature] if isinstance(temperature, (int, float)) else temperature)
         decode_result = None
 
         for t in temperatures:
@@ -158,6 +155,7 @@ def transcribe(
                 # disable best_of when t == 0
                 kwargs.pop("best_of", None)
 
+            # 解码
             options = DecodingOptions(**kwargs, temperature=t)
             decode_result = model.decode(segment, options)
 
@@ -196,9 +194,7 @@ def transcribe(
     else:
         initial_prompt_tokens = []
 
-    def new_segment(
-        *, start: float, end: float, tokens: torch.Tensor, result: DecodingResult
-    ):
+    def new_segment(*, start: float, end: float, tokens: torch.Tensor, result: DecodingResult):
         tokens = tokens.tolist()
         text_tokens = [token for token in tokens if token < tokenizer.eot]
         return {
@@ -346,9 +342,7 @@ def cli():
     def valid_model_name(name):
         if name in available_models() or os.path.exists(name):
             return name
-        raise ValueError(
-            f"model should be one of {available_models()} or path to a model checkpoint"
-        )
+        raise ValueError(f"model should be one of {available_models()} or path to a model checkpoint")
 
     # fmt: off
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -378,7 +372,6 @@ def cli():
     parser.add_argument("--no_speech_threshold", type=optional_float, default=0.6, help="if the probability of the <|nospeech|> token is higher than this value AND the decoding has failed due to `logprob_threshold`, consider the segment as silence")
     parser.add_argument("--threads", type=optional_int, default=0, help="number of threads used by torch for CPU inference; supercedes MKL_NUM_THREADS/OMP_NUM_THREADS")
     parser.add_argument("--clip_timestamps", type=str, default="0", help="comma-separated list start,end,start,end,... timestamps (in seconds) of clips to process, where the last end timestamp defaults to the end of the file")
-    parser.add_argument("--hallucination_silence_threshold", type=optional_float, help="(requires --word_timestamps True) skip silent periods longer than this threshold (in seconds) when a possible hallucination is detected")
     # fmt: on
 
     args = parser.parse_args().__dict__
