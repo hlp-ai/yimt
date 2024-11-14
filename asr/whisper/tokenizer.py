@@ -266,10 +266,7 @@ class Tokenizer:
         # allow hyphens "-" and single quotes "'" between words, but not at the beginning of a word
         result = {self.encoding.encode(" -")[0], self.encoding.encode(" '")[0]}
         for symbol in symbols + list(miscellaneous):
-            for tokens in [
-                self.encoding.encode(symbol),
-                self.encoding.encode(" " + symbol),
-            ]:
+            for tokens in [self.encoding.encode(symbol), self.encoding.encode(" " + symbol),]:
                 if len(tokens) == 1 or symbol in miscellaneous:
                     result.add(tokens[0])
 
@@ -347,9 +344,7 @@ def get_tokenizer(
 
     encoding = get_encoding(name=encoding_name, num_languages=num_languages)
 
-    return Tokenizer(
-        encoding=encoding, num_languages=num_languages, language=language, task=task
-    )
+    return Tokenizer(encoding=encoding, num_languages=num_languages, language=language, task=task)
 
 
 if __name__ == "__main__":
