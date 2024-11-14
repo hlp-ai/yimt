@@ -34,17 +34,11 @@ def load_checkpoint(ckpt_path):
         if "model" in checkpoint.keys():
             # This preserves backward-compat for models using customed layernorm
             def fix_key(s):
-                s = re.sub(
-                    r"(.*)\.layer_norm((_\d+)?)\.b_2", r"\1.layer_norm\2.bias", s
-                )
-                s = re.sub(
-                    r"(.*)\.layer_norm((_\d+)?)\.a_2", r"\1.layer_norm\2.weight", s
-                )
+                s = re.sub(r"(.*)\.layer_norm((_\d+)?)\.b_2", r"\1.layer_norm\2.bias", s)
+                s = re.sub(r"(.*)\.layer_norm((_\d+)?)\.a_2", r"\1.layer_norm\2.weight", s)
                 return s
 
-            checkpoint["model"] = {
-                fix_key(k): v for k, v in checkpoint["model"].items()
-            }
+            checkpoint["model"] = {fix_key(k): v for k, v in checkpoint["model"].items()}
             # Force add_ffnbias to True if bias found in model w_1 keys
             for key in checkpoint["model"].keys():
                 if "w_1.bias" in key:
@@ -97,8 +91,6 @@ class ModelSaverBase(object):
 
         if keep_checkpoint > 0:
             self.checkpoint_queue = deque([], maxlen=keep_checkpoint)
-            if save_format == "safetensors":
-                self.model_queue = deque([], maxlen=keep_checkpoint)
 
     def save(self, step, moving_average=None):
         """Main entry point for model saver
@@ -117,10 +109,7 @@ class ModelSaverBase(object):
                 model_params_data.append(param.data)
                 param.data = avg.data
 
-        if self.save_format == "pytorch":
-            ckpt_path, _ = self._save(step, save_model)
-        elif self.save_format == "safetensors":
-            ckpt_path, model_path = self._st_save(step, save_model)
+        ckpt_path, _ = self._save(step, save_model)
 
         self.last_saved_step = step
 
@@ -133,12 +122,8 @@ class ModelSaverBase(object):
                 if len(self.checkpoint_queue) == self.checkpoint_queue.maxlen:
                     todel = self.checkpoint_queue.popleft()
                     self._rm_checkpoint(todel)
-                    if self.save_format == "safetensors":
-                        todel = self.model_queue.popleft()
-                        self._rm_checkpoint(todel)
+
                 self.checkpoint_queue.append(ckpt_path)
-                if self.save_format == "safetensors":
-                    self.model_queue.append(model_path)
 
     def _save(self, step, model):
         """Save a resumable checkpoint.
@@ -153,7 +138,6 @@ class ModelSaverBase(object):
             * checkpoint_name: name (or path) of the saved checkpoint
             * model_name: name (or path) of the saved safetensors weights if applicable
         """
-
         raise NotImplementedError()
 
     def _rm_checkpoint(self, name):
@@ -163,7 +147,6 @@ class ModelSaverBase(object):
             name(str): name that indentifies the checkpoint
                 (it may be a filepath)
         """
-
         raise NotImplementedError()
 
 
@@ -172,9 +155,7 @@ class ModelSaver(ModelSaverBase):
 
     def _save(self, step, model):
         model_state_dict = model.state_dict()
-        model_state_dict = {
-            k: v for k, v in model_state_dict.items() if "generator" not in k
-        }
+        model_state_dict = {k: v for k, v in model_state_dict.items() if "generator" not in k}
         generator_state_dict = model.generator.state_dict()
 
         if torch.distributed.is_initialized():
@@ -218,60 +199,6 @@ class ModelSaver(ModelSaverBase):
         if torch.distributed.is_initialized():
             torch.distributed.barrier()
         return ckpt_path, None
-
-    def _st_save(self, step, model):
-        try:
-            from safetensors.torch import save_file
-        except ImportError:
-            raise ImportError("run: pip install safetensors, to use safetensors")
-
-        model_state_dict = model.state_dict()
-
-        if torch.distributed.is_initialized():
-            ws = torch.distributed.get_world_size()
-        else:
-            ws = 1
-        if ws > 1:
-            full_model = [None for _ in range(ws)]
-            for key, value in model_state_dict.items():
-                model_state_dict[key] = value.cpu()
-            torch.distributed.all_gather_object(full_model, model_state_dict)
-            fm_sd = {}
-            for key in full_model[0].keys():
-                if key.split(".")[-1] in [
-                    "linear_keys",
-                    "linear_values",
-                    "linear_query",
-                    "w_1",
-                    "w_3",
-                ]:
-                    fm_sd[key] = torch.cat([full_model[i][key].cpu() for i in range(ws)], 0)
-                elif key.split(".")[-1] in ["final_linear", "w_2"]:
-                    fm_sd[key] = torch.cat([full_model[i][key].cpu() for i in range(ws)], 1)
-                else:
-                    fm_sd[key] = full_model[0][key]
-            model_state_dict = fm_sd
-
-        checkpoint = {
-            "vocab": vocabs_to_dict(self.vocabs),
-            "opt": self.model_opt,
-            "optim": self.optim.state_dict(),
-        }
-
-        if not torch.distributed.is_initialized() or torch.distributed.get_rank() == 0:
-            logger.info("Saving checkpoint %s_step_%d.pt" % (self.base_path, step))
-            ckpt_path = "%s_step_%d.pt" % (self.base_path, step)
-            torch.save(checkpoint, ckpt_path)
-            logger.info("Saving safetensors %s_step_%d.pt" % (self.base_path, step))
-            model_path = "%s_step_%d.safetensors" % (self.base_path, step)
-            save_file(model_state_dict, model_path)
-        else:
-            ckpt_path = None
-            model_path = None
-        if torch.distributed.is_initialized():
-            torch.distributed.barrier()
-
-        return ckpt_path, model_path
 
     def _rm_checkpoint(self, name):
         if os.path.exists(name):
