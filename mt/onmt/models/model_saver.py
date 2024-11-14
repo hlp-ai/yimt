@@ -92,7 +92,7 @@ class ModelSaverBase(object):
         if keep_checkpoint > 0:
             self.checkpoint_queue = deque([], maxlen=keep_checkpoint)
 
-    def save(self, step, moving_average=None):
+    def save(self, step):
         """Main entry point for model saver
 
         It wraps the `_save` method with checks and apply `keep_checkpoint`
@@ -103,19 +103,9 @@ class ModelSaverBase(object):
             return
 
         save_model = self.model
-        if moving_average:
-            model_params_data = []
-            for avg, param in zip(moving_average, save_model.parameters()):
-                model_params_data.append(param.data)
-                param.data = avg.data
-
         ckpt_path, _ = self._save(step, save_model)
 
         self.last_saved_step = step
-
-        if moving_average:
-            for param_data, param in zip(model_params_data, save_model.parameters()):
-                param.data = param_data
 
         if ckpt_path is not None:  # not None when process id 0
             if self.keep_checkpoint > 0:

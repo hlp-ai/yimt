@@ -163,7 +163,6 @@ class Trainer(object):
         self.report_manager = report_manager
         self.model_saver = model_saver
         self.average_decay = average_decay
-        self.moving_average = None
         self.average_every = average_every
         self.model_dtype = model_dtype
         self.earlystopper = earlystopper
@@ -225,15 +224,10 @@ class Trainer(object):
             yield batches, normalization
 
     def _update_average(self, step):
-        if self.moving_average is None:
-            copy_params = [params.detach().float() for params in self.model.parameters()]
-            self.moving_average = copy_params
-        else:
-            average_decay = max(self.average_decay, 1 - (step + 1) / (step + 10))
-            for (i, avg), cpt in zip(enumerate(self.moving_average), self.model.parameters()):
-                self.moving_average[i] = (
-                    1 - average_decay
-                ) * avg + cpt.detach().float() * average_decay
+        pass
+        # if self.moving_average is None:
+        #     copy_params = [params.detach().float() for params in self.model.parameters()]
+        #     self.moving_average = copy_params
 
     def train(
         self,
@@ -288,7 +282,7 @@ class Trainer(object):
 
             if valid_iter is not None and step % valid_steps == 0:
                 if self.parallel_mode == "tensor_parallel" or self.gpu_rank <= 0:
-                    valid_stats = self.validate(valid_iter, moving_average=self.moving_average)
+                    valid_stats = self.validate(valid_iter)
 
             if step % valid_steps == 0 and self.gpu_rank <= 0:
                 self._report_step(
@@ -309,16 +303,16 @@ class Trainer(object):
             if self.model_saver is not None and (
                 save_checkpoint_steps != 0 and step % save_checkpoint_steps == 0
             ):
-                self.model_saver.save(step, moving_average=self.moving_average)
+                self.model_saver.save(step)
 
             if train_steps > 0 and step >= train_steps:
                 break
 
         if self.model_saver is not None:
-            self.model_saver.save(step, moving_average=self.moving_average)
+            self.model_saver.save(step)
         return total_stats
 
-    def validate(self, valid_iter, moving_average=None):
+    def validate(self, valid_iter):
         """Validate model.
 
         Args:
@@ -328,13 +322,6 @@ class Trainer(object):
             :obj:``nmt.Statistics``: validation loss statistics"""
 
         valid_model = self.model
-        if moving_average:
-            # swap model params w/ moving average
-            # (and keep the original parameters)
-            model_params_data = []
-            for avg, param in zip(self.moving_average, valid_model.parameters()):
-                model_params_data.append(param.data)
-                param.data = (avg.data.half() if param.dtype == torch.float16 else avg.data)
 
         # Set model in validating mode.
         valid_model.eval()
@@ -391,10 +378,6 @@ class Trainer(object):
 
                 # Update statistics.
                 stats.update(metric_stats)
-
-        if moving_average:
-            for param_data, param in zip(model_params_data, self.model.parameters()):
-                param.data = param_data
 
         # Set model back to training mode.
         valid_model.train()
