@@ -22,7 +22,6 @@ class TransformerDecoderLayerBase(nn.Module):
         dropout,
         attention_dropout,
         self_attn_type="scaled_dot",
-        aan_useffn=False,
         pos_ffn_activation_fn=ActivationFunction.relu,
         add_qkvbias=False,
         add_ffnbias=True,
@@ -48,7 +47,6 @@ class TransformerDecoderLayerBase(nn.Module):
                 self-attn(avg))
             self_attn_type (string): type of self-attention scaled-dot,
                 flash-scaled-dot
-            aan_useffn (bool): Turn on the FFN layer in the AAN decoder
             pos_ffn_activation_fn (ActivationFunction):
                 activation function choice for PositionwiseFeedForward layer
             add_qkvbias (bool): whether to add bias to the Key/Value nn.Linear
@@ -193,7 +191,6 @@ class TransformerDecoderLayer(TransformerDecoderLayerBase):
         dropout,
         attention_dropout,
         self_attn_type="scaled-dot",
-        aan_useffn=False,
         pos_ffn_activation_fn=ActivationFunction.relu,
         add_qkvbias=False,
         add_ffnbias=True,
@@ -216,7 +213,6 @@ class TransformerDecoderLayer(TransformerDecoderLayerBase):
             dropout,
             attention_dropout,
             self_attn_type,
-            aan_useffn,
             pos_ffn_activation_fn=pos_ffn_activation_fn,
             add_qkvbias=add_qkvbias,
             add_ffnbias=add_ffnbias,
@@ -335,7 +331,6 @@ class TransformerDecoderBase(DecoderBase):
             if type(opt.attention_dropout) is list
             else opt.attention_dropout,
             embeddings,
-            opt.aan_useffn,
             pos_ffn_activation_fn=opt.pos_ffn_activation_fn,
             add_qkvbias=opt.add_qkvbias,
             add_ffnbias=opt.add_ffnbias,
@@ -406,7 +401,6 @@ class TransformerDecoder(TransformerDecoderBase):
         attention_dropout (float): dropout in context_attn (and self-attn(avg))
         embeddings (onmt.modules.Embeddings):
             embeddings to use, should have positional encodings
-        aan_useffn (bool): Turn on the FFN layer in the AAN decoder
         pos_ffn_activation_fn (ActivationFunction):
             activation function choice for PositionwiseFeedForward layer
         add_qkvbias (bool): whether to add bias to the Key/Value nn.Linear
@@ -430,7 +424,6 @@ class TransformerDecoder(TransformerDecoderBase):
         dropout,
         attention_dropout,
         embeddings,
-        aan_useffn,
         pos_ffn_activation_fn=ActivationFunction.relu,
         add_qkvbias=False,
         add_ffnbias=True,
@@ -455,7 +448,6 @@ class TransformerDecoder(TransformerDecoderBase):
                     dropout,
                     attention_dropout,
                     self_attn_type=self_attn_type,
-                    aan_useffn=aan_useffn,
                     pos_ffn_activation_fn=pos_ffn_activation_fn,
                     add_qkvbias=add_qkvbias,
                     add_ffnbias=add_ffnbias,

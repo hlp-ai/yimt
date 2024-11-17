@@ -612,12 +612,6 @@ def model_opts(parser):
         help="Number of experts per token",
     )
     group.add(
-        "--aan_useffn",
-        "-aan_useffn",
-        action="store_true",
-        help="Turn on the FFN layer in the AAN decoder",
-    )
-    group.add(
         "--add_qkvbias",
         "-add_qkvbias",
         action="store_true",
