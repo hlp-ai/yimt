@@ -49,8 +49,7 @@ class EnsembleDecoder(DecoderBase):
 
     def __init__(self, model_decoders):
         model_decoders = nn.ModuleList(model_decoders)
-        attentional = any([dec.attentional for dec in model_decoders])
-        super(EnsembleDecoder, self).__init__(attentional)
+        super(EnsembleDecoder, self).__init__()
         self.model_decoders = model_decoders
 
     def forward(self, tgt, enc_out, src_len=None, step=None, **kwargs):

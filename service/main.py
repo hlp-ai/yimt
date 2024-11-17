@@ -65,7 +65,7 @@ def get_args():
 def main():
     args = get_args()
     app = create_app(args)
-    app.run(host="0.0.0.0", port=args.port)
+    app.run(host=args.host, port=args.port)
 
 
 if __name__ == "__main__":

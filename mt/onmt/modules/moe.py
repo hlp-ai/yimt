@@ -48,9 +48,7 @@ class MoE(nn.Module):
         scores = self.gate(x)
         if self.parallel_gpu > 1:
             all_reduce(scores)
-        expert_weights, expert_indices = torch.topk(
-            scores, self.num_experts_per_tok, dim=-1
-        )
+        expert_weights, expert_indices = torch.topk(scores, self.num_experts_per_tok, dim=-1)
         expert_weights = expert_weights.softmax(dim=-1)
         flat_expert_indices = expert_indices.view(-1)
 
@@ -59,7 +57,5 @@ class MoE(nn.Module):
         for i, expert in enumerate(self.experts):
             if torch.any(flat_expert_indices == i):
                 y[flat_expert_indices == i] = expert(x[flat_expert_indices == i])
-        y = (y.view(*expert_weights.shape, -1) * expert_weights.unsqueeze(-1)).sum(
-            dim=1
-        )
+        y = (y.view(*expert_weights.shape, -1) * expert_weights.unsqueeze(-1)).sum(dim=1)
         return y.view(*orig_shape)

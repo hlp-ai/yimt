@@ -127,8 +127,7 @@ class Inference(object):
         self.ban_unk_token = ban_unk_token
         self.ratio = ratio
         self.replace_unk = replace_unk
-        if self.replace_unk and not self.model.decoder.attentional:
-            raise ValueError("replace_unk requires an attentional decoder.")
+
         self.tgt_file_prefix = tgt_file_prefix
         self.phrase_table = phrase_table
         self.verbose = verbose
