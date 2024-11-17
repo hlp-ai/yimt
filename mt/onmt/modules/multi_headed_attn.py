@@ -127,7 +127,7 @@ class MultiHeadedAttention(torch.nn.Module):
         except ImportError:
             self.flash2 = False
 
-        print("flash-attn:", self.flash2)
+        # print("flash-attn:", self.flash2)
 
     def update_dropout(self, dropout: float) -> None:
         self.dropout.p = dropout

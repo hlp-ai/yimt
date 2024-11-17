@@ -131,16 +131,6 @@ def load_test_model(opt, device_id=0, model_path=None):
             strict=True,
             offset=offset,
         )
-    else:
-        # weights are not in the .pt checkpoint but stored in the safetensors file
-        base_name = model_path[:-3] if model_path[-3:] == ".pt" else model_path
-        model.load_safe_state_dict(
-            base_name,
-            precision=precision,
-            device=device,
-            strict=True,
-            offset=offset,
-        )
 
     if opt.precision == torch.int8:
         torch.quantization.quantize_dynamic(model, dtype=torch.qint8, inplace=True)
@@ -337,18 +327,6 @@ def build_model(model_opt, opt, vocabs, checkpoint, device_id):
             # weights are in the .pt file
             model.load_state_dict(
                 checkpoint,
-                precision=precision,
-                device=device,
-                strict=strict,
-                offset=offset,
-            )
-        else:
-            # weights are not in the .pt checkpoint but stored in the safetensors file
-            model_path = (
-                opt.train_from[:-3] if opt.train_from[-3:] == ".pt" else opt.train_from
-            )
-            model.load_safe_state_dict(
-                model_path,
                 precision=precision,
                 device=device,
                 strict=strict,
