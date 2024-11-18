@@ -473,18 +473,16 @@ def model_opts(parser):
         "-encoder_type",
         type=str,
         default="transformer",
-        help="Type of encoder layer to use. Non-RNN layers "
-        "are experimental. Default options are "
-        "[mean|transformer|cnn|transformer_lm].",
+        help="Type of encoder layer to use."
+        "Default options are [transformer].",
     )
     group.add(
         "--decoder_type",
         "-decoder_type",
         type=str,
         default="transformer",
-        help="Type of decoder layer to use. Non-RNN layers "
-        "are experimental. Default options are "
-        "[transformer|transformer].",
+        help="Type of decoder layer to use. "
+        "Default options are [transformer].",
     )
 
     # Freeze Encoder and/or Decoder
@@ -501,9 +499,7 @@ def model_opts(parser):
         help="Freeze parameters in decoder.",
     )
 
-    group.add(
-        "--layers", "-layers", type=int, default=-1, help="Number of layers in enc/dec."
-    )
+    group.add("--layers", "-layers", type=int, default=-1, help="Number of layers in enc/dec.")
     group.add(
         "--enc_layers",
         "-enc_layers",
@@ -523,21 +519,21 @@ def model_opts(parser):
         "-hidden_size",
         type=int,
         default=-1,
-        help="Size of rnn hidden states. Overwrites " "enc_hid_size and dec_hid_size",
+        help="Size of hidden states. Overwrites " "enc_hid_size and dec_hid_size",
     )
     group.add(
         "--enc_hid_size",
         "-enc_hid_size",
         type=int,
         default=500,
-        help="Size of encoder rnn hidden states.",
+        help="Size of encoder hidden states.",
     )
     group.add(
         "--dec_hid_size",
         "-dec_hid_size",
         type=int,
         default=500,
-        help="Size of decoder rnn hidden states.",
+        help="Size of decoder hidden states.",
     )
 
     group.add(
@@ -658,7 +654,7 @@ def model_opts(parser):
         "-use_ckpting",
         default=[],
         nargs="+",
-        choices=["ffn", "mha", "lora"],
+        choices=["ffn", "mha"],
         type=str,
         help="use gradient checkpointing those modules",
     )

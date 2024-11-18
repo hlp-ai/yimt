@@ -199,7 +199,7 @@ class TransformerEncoder(EncoderBase):
 
         for layer in self.transformer:
             enc_out = layer(enc_out, mask)
-        enc_out = self.layer_norm(enc_out)
+        enc_out = self.layer_norm(enc_out)  # postnorm，和层的prenorm是否重叠?
         return enc_out, src_len
 
     def update_dropout(self, dropout, attention_dropout):
