@@ -7,7 +7,6 @@ class EncoderBase(nn.Module):
     """
     Base encoder class. Specifies the interface used by different encoder types
     and required by :class:`onmt.Models.NMTModel`.
-
     """
 
     @classmethod
@@ -22,11 +21,10 @@ class EncoderBase(nn.Module):
             src_len (LongTensor): length of each sequence ``(batch,)``
 
         Returns:
-            (FloatTensor, FloatTensor, FloatTensor):
+            (FloatTensor, FloatTensor):
 
             * enc_out (encoder output used for attention),
               ``(batch, src_len, hidden_size)``
-              for bidirectional rnn last dimension is 2x hidden_size
             * src_len ``(batch)``
         """
 

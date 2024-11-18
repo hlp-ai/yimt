@@ -84,10 +84,8 @@ class TransformerEncoderLayer(nn.Module):
             (FloatTensor):
             * layer_out ``(batch_size, src_len, model_dim)``
         """
-        norm_layer_in = self.layer_norm(layer_in)
-        context, _ = self.self_attn(
-            norm_layer_in, norm_layer_in, norm_layer_in, mask=mask
-        )
+        norm_layer_in = self.layer_norm(layer_in)  # prenorm
+        context, _ = self.self_attn(norm_layer_in, norm_layer_in, norm_layer_in, mask=mask)
         if self.dropout_p > 0:
             context = self.dropout(context)
         layer_out = context + layer_in
@@ -120,7 +118,6 @@ class TransformerEncoder(EncoderBase):
         (torch.FloatTensor, torch.FloatTensor):
 
         * enc_out ``(batch_size, src_len, model_dim)``
-        * encoder final state: None in the case of Transformer
         * src_len ``(batch_size)``
     """
 
@@ -192,6 +189,8 @@ class TransformerEncoder(EncoderBase):
     def forward(self, src, src_len=None):
         """See :func:`EncoderBase.forward()`"""
         enc_out = self.embeddings(src)
+
+        # 输入长度掩码
         mask = sequence_mask(src_len).unsqueeze(1).unsqueeze(1)
         mask = mask.expand(-1, -1, mask.size(3), -1)
         # Padding mask is now (batch x 1 x slen x slen)
