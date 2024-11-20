@@ -302,9 +302,7 @@ class TransformerDecoderLayer(TransformerDecoderLayerBase):
 
 
 class TransformerDecoderBase(DecoderBase):
-    def __init__(
-        self, d_model, embeddings, layer_norm, norm_eps
-    ):
+    def __init__(self, d_model, embeddings, layer_norm, norm_eps):
         super(TransformerDecoderBase, self).__init__()
 
         self.embeddings = embeddings
@@ -351,9 +349,10 @@ class TransformerDecoderBase(DecoderBase):
 
     def map_state(self, fn):
         if self.state["src"] is not None:
-            self.state["src"] = fn(self.state["src"], 0)
+            self.state["src"] = fn(self.state["src"], 0)  # fn: state, dim -> tensor
+
         for layer in self.transformer_layers:
-            if hasattr(layer, "context_attn"):
+            if hasattr(layer, "context_attn"):  # 有上下文注意力，解码器层
                 if layer.context_attn.layer_cache[1]["keys"].numel() != 0:
                     x = fn(layer.context_attn.layer_cache[1]["keys"], 0)
                     y = fn(layer.context_attn.layer_cache[1]["values"], 0)
@@ -362,13 +361,11 @@ class TransformerDecoderBase(DecoderBase):
             if layer.self_attn.layer_cache[1]["keys"].numel() != 0:
                 x = fn(layer.self_attn.layer_cache[1]["keys"], 0)
                 y = fn(layer.self_attn.layer_cache[1]["values"], 0)
-                if (
-                        layer.self_attn.layer_cache[1].get("key_pad_mask", None)
-                        is not None
-                ):
+                if (layer.self_attn.layer_cache[1].get("key_pad_mask", None) is not None):
                     z = fn(layer.self_attn.layer_cache[1]["key_pad_mask"], 0)
                 else:
                     z = None
+
                 layer.self_attn.layer_cache = True, {
                     "keys": x,
                     "values": y,
@@ -435,9 +432,7 @@ class TransformerDecoder(TransformerDecoderBase):
         num_experts=0,
         num_experts_per_tok=2,
     ):
-        super(TransformerDecoder, self).__init__(
-            d_model, embeddings, layer_norm, norm_eps
-        )
+        super(TransformerDecoder, self).__init__(d_model, embeddings, layer_norm, norm_eps)
 
         self.transformer_layers = nn.ModuleList(
             [
@@ -473,17 +468,20 @@ class TransformerDecoder(TransformerDecoderBase):
         tgt (Tensor): batch x tlen x feats
         enc_out (Tensor): encoder output (batch x slen x model_dim)
         """
-        if enc_out is None:
+        if enc_out is None:  # LM，无编码器输出
             enc_out = self.embeddings(tgt)
-        if step == 0:
+
+        if step == 0:  # 开始推理解码，初始化注意力cache
             self._init_cache(enc_out)
-        elif step is None:
+        elif step is None:  # 训练状态，不使用cache
             for layer in self.transformer_layers:
+                # 自注意力cache
                 layer.self_attn.layer_cache = (
                     False,
                     {"keys": torch.tensor([]), "values": torch.tensor([])},
                 )
 
+                # 上下文注意力cache
                 layer.context_attn.layer_cache = (
                     False,
                     {"keys": torch.tensor([]), "values": torch.tensor([])},
@@ -494,9 +492,7 @@ class TransformerDecoder(TransformerDecoderBase):
         pad_idx = self.embeddings.word_padding_idx
         src_len = kwargs["src_len"]
         src_max_len = self.state["src"].shape[1]
-        src_pad_mask = sequence_mask(src_len, src_max_len).unsqueeze(
-            1
-        )  # [B x 1 x slen]
+        src_pad_mask = sequence_mask(src_len, src_max_len).unsqueeze(1)  # [B x 1 x slen]
         tgt_pad_mask = tgt[:, :, 0].eq(pad_idx).unsqueeze(1)  # [B, 1, T_tgt]
 
         return_attn = kwargs.pop("return_attn", False)
