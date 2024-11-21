@@ -1,0 +1,55 @@
+<html>
+<head>
+    <title>TM File</title>
+
+    <script>
+        async function update(index){
+            source = document.getElementById('src_' + index).value;
+            target = document.getElementById('tgt_' + index).value;
+
+            // 发送翻译请求
+            const res = await fetch("/tm/update", {
+                method: "POST",
+                body: JSON.stringify({source: source, target: target, index: index}),
+                headers: { "Content-Type": "application/json" }}
+            );
+
+            trans_json = await res.json();
+            if(res.ok){
+                alert("OK");
+            }
+            else{
+                alert(trans_json.error)
+            }
+        }
+    </script>
+</head>
+
+<body>
+
+<div style="text-align: center;">
+    <h2>翻译记忆文件{{file}}共包含{{records | length}}条记录</h2>
+    <div><a href="/tm/save/{{file}}">保存更改</a> | <a href="/tm">返回首页</a></div>
+</div>
+
+<div>
+<table border="1"width="100%">
+    <tr>
+        <th>语言对</th>
+        <th>源语言文本</th>
+        <th>目标语言文本</th>
+        <th></th>
+    </tr>
+    {% for record in records %}
+    <tr>
+        <td>{{record.direction}}</td>
+        <td><textarea rows="3" style="width: 99%;" id="src_{{loop.index0}}">{{record.source}}</textarea></td>
+        <td><textarea rows="3" style="width: 99%;" id="tgt_{{loop.index0}}">{{record.target}}</textarea></td>
+        <td><span style="margin-right: 4px;"><a href="/tm/delete/{{loop.index0}}/{{file}}">删除</a></span><span style="margin-right: 4px;"><a href="#" onclick="update({{loop.index0}});">更新</a></span></td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+
+</body>
+</html>
