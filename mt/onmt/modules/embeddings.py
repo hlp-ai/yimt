@@ -38,7 +38,6 @@ class Elementwise(nn.ModuleList):
         return emb_out[0]
 
 
-
 class PositionalEncoding(nn.Module):
     """Sinusoidal positional encoding for non-recurrent neural networks.
 
@@ -73,13 +72,11 @@ class PositionalEncoding(nn.Module):
             pe = torch.arange(max_len, dtype=torch.float).unsqueeze(1) * pe.unsqueeze(0)
             pe = torch.cat([torch.sin(pe), torch.cos(pe)], dim=1).view(max_len, -1)
         else:
-            raise ValueError(
-                "Choice of Position encoding is SinusoidalInterleaved or"
-                " SinusoidalConcat."
-            )
+            raise ValueError("Choice of Position encoding is SinusoidalInterleaved or SinusoidalConcat.")
+
         pe = pe.unsqueeze(1)  # we keep pe (len x batch x dim) for back comp
         super(PositionalEncoding, self).__init__()
-        self.register_buffer("pe", pe)
+        self.register_buffer("pe", pe)  # 位置嵌入作为模块buffer
         self.dim = dim
 
     def forward(self, emb, step=None):
@@ -185,7 +182,6 @@ class Embeddings(nn.Module):
         Args:
           emb_file (str) : path to torch serialized embeddings
         """
-
         if emb_file:
             pretrained = torch.load(emb_file)
             pretrained_vec_size = pretrained.size(1)
@@ -205,7 +201,6 @@ class Embeddings(nn.Module):
         Returns:
             FloatTensor: Word embeddings ``(batch, len, embedding_size)``
         """
-
         if self.position_encoding:
             for i, module in enumerate(self.make_embedding._modules.values()):
                 if i == len(self.make_embedding._modules.values()) - 1:
@@ -269,19 +264,10 @@ def convert_to_torch_tensor(word_to_float_list_dict, vocab):
 
 
 def prepare_pretrained_embeddings(opt, vocabs):
-    if all(
-        [
-            opt.both_embeddings is None,
-            opt.src_embeddings is None,
-            opt.tgt_embeddings is None,
-        ]
-    ):
+    if all([opt.both_embeddings is None, opt.src_embeddings is None, opt.tgt_embeddings is None,]):
         return
 
-    assert (
-        opt.save_data
-    ), "-save_data is required when using \
-        pretrained embeddings."
+    assert (opt.save_data), "-save_data is required when using pretrained embeddings."
 
     vocs = []
     for side in ["src", "tgt"]:
@@ -291,15 +277,9 @@ def prepare_pretrained_embeddings(opt, vocabs):
 
     skip_lines = 1 if opt.embeddings_type == "word2vec" else 0
     if opt.both_embeddings is not None:
-        set_of_src_and_tgt_vocab = set(enc_vocab.ids_to_tokens) | set(
-            dec_vocab.ids_to_tokens
-        )
-        logger.info(
-            "Reading encoder and decoder embeddings from {}".format(opt.both_embeddings)
-        )
-        src_vectors, total_vec_count = read_embeddings(
-            opt.both_embeddings, skip_lines, set_of_src_and_tgt_vocab
-        )
+        set_of_src_and_tgt_vocab = set(enc_vocab.ids_to_tokens) | set(dec_vocab.ids_to_tokens)
+        logger.info("Reading encoder and decoder embeddings from {}".format(opt.both_embeddings))
+        src_vectors, total_vec_count = read_embeddings(opt.both_embeddings, skip_lines, set_of_src_and_tgt_vocab)
         tgt_vectors = src_vectors
         logger.info("\tFound {} total vectors in file".format(total_vec_count))
     else:
@@ -311,6 +291,7 @@ def prepare_pretrained_embeddings(opt, vocabs):
             logger.info("\tFound {} total vectors in file.".format(total_vec_count))
         else:
             src_vectors = None
+
         if opt.tgt_embeddings is not None:
             logger.info("Reading decoder embeddings from {}".format(opt.tgt_embeddings))
             tgt_vectors, total_vec_count = read_embeddings(
@@ -319,6 +300,7 @@ def prepare_pretrained_embeddings(opt, vocabs):
             logger.info("\tFound {} total vectors in file".format(total_vec_count))
         else:
             tgt_vectors = None
+
     logger.info("After filtering to vectors in vocab:")
     if opt.src_embeddings is not None or opt.both_embeddings is not None:
         logger.info(
