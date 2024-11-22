@@ -4,13 +4,14 @@
 
     <script>
         async function update(index){
+            direction = document.getElementById('dir_' + index).value;
             source = document.getElementById('src_' + index).value;
             target = document.getElementById('tgt_' + index).value;
 
             // 发送翻译请求
             const res = await fetch("/tm/update", {
                 method: "POST",
-                body: JSON.stringify({source: source, target: target, index: index}),
+                body: JSON.stringify({direction: direction, source: source, target: target, index: index}),
                 headers: { "Content-Type": "application/json" }}
             );
 
@@ -42,7 +43,7 @@
     </tr>
     {% for record in records %}
     <tr>
-        <td>{{record.direction}}</td>
+        <td><span id="dir_{{loop.index0}}">{{record.direction}}</span></td>
         <td><textarea rows="3" style="width: 99%;" id="src_{{loop.index0}}">{{record.source}}</textarea></td>
         <td><textarea rows="3" style="width: 99%;" id="tgt_{{loop.index0}}">{{record.target}}</textarea></td>
         <td><span style="margin-right: 4px;"><a href="/tm/delete/{{loop.index0}}/{{file}}">删除</a></span><span style="margin-right: 4px;"><a href="#" onclick="update({{loop.index0}});">更新</a></span></td>

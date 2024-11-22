@@ -61,9 +61,16 @@ def save(file):
 @app.post("/tm/update")
 def update():
     r = request.get_json()
+    direction = r.get("direction")
     source = r.get("source")
     target = r.get("target")
     index = r.get("index")
+
+    TM_RECORDS[index] = {
+        "direction": direction,
+        "source": source,
+        "target": target
+    }
 
     print("UPDATE", source, target, index)
 
