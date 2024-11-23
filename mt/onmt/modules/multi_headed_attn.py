@@ -107,8 +107,6 @@ class MultiHeadedAttention(torch.nn.Module):
             {"keys": torch.tensor([]), "values": torch.tensor([])},
         )
 
-        # self.cos = None
-        # self.sin = None
         self.rotary_interleave = None
 
         self.maybe_ckpt = checkpoint if "mha" in use_ckpting else lambda f, x: f(x)
@@ -181,7 +179,6 @@ class MultiHeadedAttention(torch.nn.Module):
                     step == 0
                     or not self.flash2
                     or self.self_attn_type != "scaled-dot-flash"
-                    # or self.max_relative_positions not in [0, -1]
                     or query.size(0) > 128
                     or query.dtype != torch.float16
                 ):
@@ -291,8 +288,7 @@ class MultiHeadedAttention(torch.nn.Module):
             not return_attn
             and query.device != torch.device("cpu")
             and self.self_attn_type == "scaled-dot-flash"
-        ):
-            # Apply flash2 attention.
+        ):  # 使用高速的flash2功能
             causal = self.is_decoder and self.attn_type == "self" and mask is not None
             if self.is_decoder and self.attn_type == "self" and flash2:  # 使用flash-attn
                 if causal:
@@ -347,7 +343,7 @@ class MultiHeadedAttention(torch.nn.Module):
                 x = key_pad_mask.squeeze(1).unsqueeze(2).expand(-1, -1, context.size(2))
                 context = context.masked_fill(x, 0)
 
-        if self.layer_cache[0]:
+        if self.layer_cache[0]:  # 推理模式
             attn_output = self.final_linear(context)
         else:
             attn_output = self.maybe_ckpt(self.final_linear, context)
