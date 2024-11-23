@@ -58,6 +58,26 @@ def save(file):
     return redirect(url_for("tm", file=file))
 
 
+@app.route("/tm/dedup/<string:file>")
+def dedup(file):
+    print("DEDUP", file)
+    ids = set()
+
+    i = 0
+    while i < len(TM_RECORDS):
+        r = TM_RECORDS[i]
+        h = hash(r["direction"] + "\t" + r["source"] + "\t" + r["target"])
+        if h in ids:
+            TM_RECORDS.pop(i)
+        else:
+            ids.add(h)
+            i = i + 1
+
+    print(file, len(ids), len(TM_RECORDS))
+
+    return redirect(url_for("tm", file=file))
+
+
 @app.post("/tm/update")
 def update():
     r = request.get_json()

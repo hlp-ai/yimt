@@ -30,7 +30,7 @@
 
 <div style="text-align: center;">
     <h2>翻译记忆文件{{file}}共包含{{records | length}}条记录</h2>
-    <div><a href="/tm/save/{{file}}">保存更改</a> | <a href="/tm">返回首页</a></div>
+    <div><a href="/tm/save/{{file}}">保存更改</a> | <a href="/tm/dedup/{{file}}">去掉重复</a> | <a href="/tm">返回首页</a></div>
 </div>
 
 <div>
@@ -43,10 +43,10 @@
     </tr>
     {% for record in records %}
     <tr>
-        <td><span id="dir_{{loop.index0}}">{{record.direction}}</span></td>
+        <td width="60"><span id="dir_{{loop.index0}}">{{record.direction}}</span></td>
         <td><textarea rows="3" style="width: 99%;" id="src_{{loop.index0}}">{{record.source}}</textarea></td>
         <td><textarea rows="3" style="width: 99%;" id="tgt_{{loop.index0}}">{{record.target}}</textarea></td>
-        <td><span style="margin-right: 4px;"><a href="/tm/delete/{{loop.index0}}/{{file}}">删除</a></span><span style="margin-right: 4px;"><a href="#" onclick="update({{loop.index0}});">更新</a></span></td>
+        <td width="120"><span style="margin-right: 4px;"><a href="/tm/delete/{{loop.index0}}/{{file}}">删除</a></span><span style="margin-right: 4px;"><a href="#" onclick="update({{loop.index0}});">更新</a></span></td>
     </tr>
     {% endfor %}
 </table>
