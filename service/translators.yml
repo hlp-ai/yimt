@@ -35,7 +35,26 @@ translators:
     directions:
       - zh-en
 
+  jazh:
+    model_or_config_dir: D:\dataset\ja-zh\aug-train\jazh-infer.yaml
+    sp_src_path: D:\dataset\ja-zh\opus-ja-zh-all.sf.tsv.deduped.filtered.ja-sp-36000.model
+    batch_size: 128
+    pretok_src: false
+    pretok_tgt: false
+    directions:
+      - ja-zh
+
+  zhja:
+    model_or_config_dir: D:\dataset\ja-zh\zhja-train\models\zhja-infer.yaml
+    sp_src_path: D:\dataset\en-zh\040607\train\en-zh-all-new-0.66.sf.tsv.zh-10000000-sp-36000.model
+    batch_size: 128
+    pretok_src: false
+    pretok_tgt: false
+    directions:
+        - zh-ja
+
 languages:
   - {code: en, name: English, cname: 英语}
   - {code: zh, name: Chinese, cname: 汉语}
   - {code: vi, name: Vietnamese, cname: 越南语}
+  - {code: ja, name: Japanese, cname: 日语}
