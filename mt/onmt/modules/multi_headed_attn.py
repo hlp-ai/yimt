@@ -161,6 +161,7 @@ class MultiHeadedAttention(torch.nn.Module):
            * output context vectors ``(batch, query_len, dim)``
            * Attention vector in heads ``(batch, head, query_len, key_len)``.
         """
+
         # 1) Project key, value, and query.
         # as a reminder at training layer_cache[0] remains False
         key_pad_mask = self.layer_cache[1].get("key_pad_mask", None)
@@ -170,7 +171,7 @@ class MultiHeadedAttention(torch.nn.Module):
                 query, key, value = (self.linear_query(query), self.linear_keys(query), self.linear_values(query),)
 
                 query = shape(query, self.dim_per_head)
-                key = shape(key, self.dim_per_head)
+                key = shape(key, self.dim_per_head)  # (B,H,L,D)
                 value = shape(value, self.dim_per_head)
                 start_pos = step
                 seqlen = query.size(2)
@@ -182,7 +183,7 @@ class MultiHeadedAttention(torch.nn.Module):
                     or query.size(0) > 128
                     or query.dtype != torch.float16
                 ):
-                    if self.layer_cache[1]["keys"].numel() != 0:
+                    if self.layer_cache[1]["keys"].numel() != 0:  # 拼接key和value缓存
                         key = torch.cat((self.layer_cache[1]["keys"], key), dim=2)
                         value = torch.cat((self.layer_cache[1]["values"], value), dim=2)
                         if sliding_window > 0 and key.size(2) > sliding_window:
@@ -222,6 +223,7 @@ class MultiHeadedAttention(torch.nn.Module):
                     if sliding_window > 0 and key.size(2) > sliding_window:
                         self.layer_cache[1]["keys"] = self.layer_cache[1]["keys"][:, :, 1:, :]
                         self.layer_cache[1]["values"] = self.layer_cache[1]["values"][:, :, 1:, :]
+
                     context = self.flash_attn_with_kvcache(
                         query.transpose(1, 2),
                         self.layer_cache[1]["keys"].transpose(1, 2),
@@ -233,6 +235,7 @@ class MultiHeadedAttention(torch.nn.Module):
                         cache_seqlens=step,
                         rotary_interleaved=self.rotary_interleave,
                     ).transpose(1, 2)
+
                     attn_output = self.final_linear(unshape(context))
                     if self.parallel_gpu > 1:
                         all_reduce(attn_output)
@@ -284,7 +287,6 @@ class MultiHeadedAttention(torch.nn.Module):
         )
 
         if (
-            # self.max_relative_positions in [-1, 0]
             not return_attn
             and query.device != torch.device("cpu")
             and self.self_attn_type == "scaled-dot-flash"
