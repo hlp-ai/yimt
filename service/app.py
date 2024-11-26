@@ -254,15 +254,15 @@ def create_app(args):
     @app.post("/translate")
     @access_check
     def translate():
-        """Translate text from a language to another"""
-        if request.is_json:  # json data in body of POST method
+        """文本翻译接口"""
+        if request.is_json:  # POST方法中JSON数据体
             json = get_json_dict(request)
             q = json.get("q")
             source_lang = json.get("source")
             target_lang = json.get("target")
             text_format = json.get("format")
             api_key = json.get("api_key")
-        else:  # url data in body of POST method
+        else:  # GET方法中URL参数
             q = request.values.get("q")
             source_lang = request.values.get("source")
             target_lang = request.values.get("target")

@@ -22,7 +22,7 @@ def collect_tag(markup_str, no_translatable_tags=['style', 'script', 'head', 'me
                 continue
 
             t = element.string
-            if not should_translate(t, lang):
+            if not should_translate(t, lang):  # 过滤不需要翻译的
                 continue
 
             to_translated_elements.append(element)
@@ -95,7 +95,7 @@ def translate_ml_auto(in_fn, source_lang="auto", target_lang="zh", translation_f
                 continue
 
             t = element.string
-            if not should_translate(t):
+            if not should_translate(t):  # 过滤掉不需要翻译的
                 continue
 
             to_translated_elements.append(element)

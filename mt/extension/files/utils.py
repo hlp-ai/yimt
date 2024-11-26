@@ -566,6 +566,9 @@ def should_translate(txt, lang="en"):
     if lang == "en" and has_no_en_letter(txt):
         return False
 
+    if len(txt) <=3:
+        return False
+
     return True
 
 
