@@ -5,7 +5,6 @@ import torch
 import whisper
 from tqdm import tqdm
 from whisper.tokenizer import LANGUAGES, TO_LANGUAGE_CODE
-from whisper.utils import get_writer
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -55,11 +54,10 @@ def main():
     args = get_parser().parse_args()
     Path(args.save_dir).mkdir(parents=True, exist_ok=True)
     model = whisper.load_model(args.model, args.device)
-    writer = get_writer("srt", args.save_dir)
 
     for audio_path in tqdm(list(Path(args.audio_dir).iterdir())):
         result = model.transcribe(task=args.task, audio=str(audio_path), language=args.language)
-        writer(result, str(audio_path))
+        print(result, str(audio_path))
 
 
 if __name__ == "__main__":
