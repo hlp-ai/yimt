@@ -102,7 +102,7 @@ class DecodingOptions:
     suppress_blank: bool = True  # this will suppress blank outputs
 
     # timestamp sampling options
-    without_timestamps: bool = True  # use <|notimestamps|> to sample text tokens only
+    # without_timestamps: bool = True  # use <|notimestamps|> to sample text tokens only
 
     # implementation details
     fp16: bool = True  # use fp16 for most of the calculation
@@ -452,8 +452,8 @@ class DecodingTask:
         self.sample_len: int = options.sample_len or model.dims.n_text_ctx // 2
 
         self.sot_sequence: Tuple[int] = tokenizer.sot_sequence
-        if self.options.without_timestamps:
-            self.sot_sequence = tokenizer.sot_sequence_including_notimestamps
+        # if self.options.without_timestamps:
+        self.sot_sequence = tokenizer.sot_sequence_including_notimestamps
 
         self.initial_tokens: Tuple[int] = self._get_initial_tokens()
         self.sample_begin: int = len(self.initial_tokens)
