@@ -287,7 +287,7 @@ body {
 
 .input_source_area {
     display: block;
-    //font-family: ArialMT,"Microsoft YaHei",Arial,sans-serif,Helvetica,STHeiti;
+    font-family: ArialMT,"Microsoft YaHei",Arial,sans-serif,Helvetica,STHeiti;
     width: 100%;
     height: 450px;
     min-height: 256px;
@@ -304,7 +304,7 @@ body {
 }
 
 .input_source_area::placeholder {
-    //font-family: Arial-BoldMT;
+    font-family: Arial-BoldMT;
     font-weight: bold;
     font-size: 24px;
     color: rgba(102,102,102,.3)
@@ -340,7 +340,7 @@ body {
 
 .input_target_area {
     display: block;
-    //font-family: ArialMT,"Microsoft YaHei",Arial,sans-serif,Helvetica,STHeiti;
+    font-family: ArialMT,"Microsoft YaHei",Arial,sans-serif,Helvetica,STHeiti;
     width: 100%;
     height: 450px;
     min-height: 256px;
