@@ -64,12 +64,7 @@ def _init_train(opt):
         vocabs = dict_to_vocabs(checkpoint["vocab"])
         if (
             hasattr(checkpoint["opt"], "_all_transform")
-            and len(
-                opt._all_transform.symmetric_difference(
-                    checkpoint["opt"]._all_transform
-                )
-            )
-            != 0
+            and len(opt._all_transform.symmetric_difference(checkpoint["opt"]._all_transform))!= 0
         ):
             _msg = "configured transforms is different from checkpoint:"
             new_transf = opt._all_transform.difference(checkpoint["opt"]._all_transform)

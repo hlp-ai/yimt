@@ -312,8 +312,7 @@ def build_model(model_opt, opt, vocabs, checkpoint, device_id):
     if checkpoint is not None:
         if model_opt.update_vocab:
             if "model" in checkpoint.keys():
-                # Update model embeddings with those from the checkpoint
-                # after initialization
+                # Update model embeddings with those from the checkpoint after initialization
                 use_embeddings_from_checkpoint(vocabs, model, checkpoint)
                 # after this checkpoint contains no embeddings
             else:
