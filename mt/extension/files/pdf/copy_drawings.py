@@ -51,7 +51,7 @@ def copy_drawings(page, outpage):
             lineCap=lineCap,  # how line ends should look like
             width=path["width"],  # line width
             stroke_opacity=stroke_opacity,  # same value for both
-            fill_opacity=fill_opacity,  # opacity parameters
+            fill_opacity=0,  # opacity parameters
         )
 
     # all paths processed - commit the shape to its page

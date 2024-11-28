@@ -34,7 +34,7 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
         outpage = outpdf.new_page(width=page.rect.width, height=page.rect.height)
 
         # 拷贝绘制形状
-        copy_drawings(page, outpage)
+        # copy_drawings(page, outpage)
 
         # 拷贝图形
         copy_images(page, outpage, doc)
@@ -79,6 +79,8 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
                 outpage.draw_rect(pymupdf.Rect(c["bbox"]),
                               color=(1, 0, 0),
                               dashes="[3] 0")
+
+        copy_drawings(page, outpage)
 
         shape.finish()
         shape.commit()

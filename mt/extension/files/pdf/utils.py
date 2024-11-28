@@ -113,7 +113,7 @@ def merge_lines(lines):
             lines.remove(line2)
             continue
 
-        if in_line(line1["bbox"], line2["bbox"], 6.5) and near_to(line1["bbox"], line2["bbox"], 12.0):  # 在同一行，且足够靠近
+        if in_line(line1["bbox"], line2["bbox"], 7.5) and near_to(line1["bbox"], line2["bbox"], 13.0):  # 在同一行，且足够靠近
             new_span = merge(line1["spans"][0], line2["spans"][0])
             lines.remove(line1)
             lines.remove(line2)
