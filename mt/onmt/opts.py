@@ -903,9 +903,6 @@ def _add_train_general_opts(parser):
             "adam",
             "sparseadam",
             "fusedadam",
-            "adamw8bit",
-            "pagedadamw8bit",
-            "pagedadamw32bit",
         ],
         help="Optimization method.",
     )

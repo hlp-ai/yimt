@@ -101,9 +101,7 @@ def all_gather_list(data, max_size=4096):
         or max_size != all_gather_list._in_buffer.size()
     ):
         all_gather_list._in_buffer = torch.cuda.ByteTensor(max_size)
-        all_gather_list._out_buffers = [
-            torch.cuda.ByteTensor(max_size) for i in range(world_size)
-        ]
+        all_gather_list._out_buffers = [torch.cuda.ByteTensor(max_size) for i in range(world_size)]
     in_buffer = all_gather_list._in_buffer
     out_buffers = all_gather_list._out_buffers
 
