@@ -68,12 +68,12 @@ class TMSaver:
 class BasicTMSaver(TMSaver):
     RECORD_PATTERN = "<lang-pair>\n{}\n</lang-pair>\n<source>\n{}\n</source>\n<target>\n{}\n</target>\n\n"
 
-    def __init__(self, tm_dir=None):
+    def __init__(self, tm_dir=None, tm_file=None):
         if tm_dir is None:
-            tm_dir = "./tm"
+            tm_dir = os.path.join(os.path.dirname(__file__), "tm")
         if not os.path.exists(tm_dir):
             os.makedirs(tm_dir, exist_ok=True)
-        self.fn_prefix = os.path.join(tm_dir, strftime("%Y%m%d.tm", time.localtime()))
+        self.fn_prefix = os.path.join(tm_dir, strftime("%Y%m%d.tm", time.localtime()) if tm_file is None else tm_file)
         self.tm_f = open(self.fn_prefix, "a", encoding="utf-8")
 
     def save(self, tm):
@@ -100,12 +100,12 @@ class BasicTMSaver(TMSaver):
 tm_saver = None
 
 
-def get_tm_saver():
+def get_tm_saver(tm_dir=None, tm_file=None):
     global tm_saver
     if tm_saver is not None:
         return tm_saver
 
-    tm_saver = BasicTMSaver()
+    tm_saver = BasicTMSaver(tm_dir=tm_dir, tm_file=tm_file)
     return tm_saver
 
 

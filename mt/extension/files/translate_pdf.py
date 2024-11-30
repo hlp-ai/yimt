@@ -14,7 +14,8 @@ from service.mt import translator_factory
 debug = False
 
 
-def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation_file=None, callbacker=None):
+def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation_file=None, callbacker=None,
+                       tm_saver=None):
     if translation_file is None:
         paths = os.path.splitext(pdf_fn)
         translated_fn = paths[0] + "-translated" + paths[1]
@@ -72,6 +73,9 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
             if avg_len > 3 and len(toks) > 1:
                 c["text"] = translator.translate_paragraph(text, source_lang, target_lang)
 
+                if tm_saver:
+                    tm_saver.save_info(source_lang+"-"+target_lang, text, c["text"])
+
             outpage.insert_htmlbox(c["bbox"], c["text"],
                                    css="* {text-align: justify;}")
 
@@ -109,7 +113,13 @@ if __name__ == "__main__":
 
     callback = None
 
-    translated_fn = translate_pdf_auto(in_file, source_lang="en", target_lang=to_lang, translation_file=out_file, callbacker=callback)
+    from service.tm import BasicTMSaver
+    tm_saver = BasicTMSaver(tm_file=os.path.basename(in_file).replace(" ", "_")+".tm")
+
+    print(tm_saver.fn_prefix)
+
+    translated_fn = translate_pdf_auto(in_file, source_lang="en", target_lang=to_lang, translation_file=out_file,
+                                       callbacker=callback, tm_saver=tm_saver)
 
     import webbrowser
 
