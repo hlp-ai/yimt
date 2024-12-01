@@ -110,7 +110,7 @@ class Trainer(object):
         model_dtype (str): fp32 or fp16.
         earlystopper (:obj:`onmt.utils.EarlyStopping`): add early
           stopping mecanism
-        dropout (float): dropout value in RNN or FF layers.
+        dropout (float): dropout value in FF layers.
         attention_dropout (float): dropaout in attention layers.
         dropout_steps (list): dropout values scheduling in steps."""
 
@@ -167,24 +167,18 @@ class Trainer(object):
         self.model.train()
 
     def _eval_handler(self, scorer, preds, texts_ref):
-        """Trigger metrics calculations
-
-        Args:
-            scorer (:obj:``onmt.scorer.Scorer``): scorer.
-            preds, texts_ref: outputs of the scorer's `translate` method.
-
-        Returns:
-            The metric calculated by the scorer."""
-
+        """评价指标计算"""
         return scorer.compute_score(preds, texts_ref)
 
     def _accum_count(self, step):
+        """梯度累计次数"""
         for i in range(len(self.accum_steps)):
             if step > self.accum_steps[i]:
                 _accum = self.accum_count_l[i]
         return _accum
 
     def _maybe_update_dropout(self, step):
+        """按步更新dropout率"""
         for i in range(len(self.dropout_steps)):
             if step > 1 and step == self.dropout_steps[i] + 1:
                 self.model.update_dropout(self.dropout[i], self.attention_dropout[i])
@@ -194,6 +188,7 @@ class Trainer(object):
                 )
 
     def _accum_batches(self, iterator):
+        """获得累积批"""
         batches = []
         normalization = 0
         self.accum_count = self._accum_count(self.optim.training_step)
@@ -249,7 +244,6 @@ class Trainer(object):
         torch.cuda.empty_cache()
 
         for i, (batches, normalization) in enumerate(self._accum_batches(train_iter)):
-
             step = self.optim.training_step
             # UPDATE DROPOUT
             self._maybe_update_dropout(step)
@@ -374,7 +368,7 @@ class Trainer(object):
         if self.accum_count > 1:
             self.optim.zero_grad(set_to_none=True)
 
-        for k, batch in enumerate(true_batches):
+        for k, batch in enumerate(true_batches):  # 对累积批中每个小批
             target_size = batch["tgt"].size(1)
             # Truncated BPTT: reminder not compatible with accum > 1
             if self.trunc_size:
@@ -399,8 +393,10 @@ class Trainer(object):
                 # 2. F-prop all but generator.
                 if self.accum_count == 1:
                     self.optim.zero_grad(set_to_none=True)
+
                 try:
                     with torch.cuda.amp.autocast(enabled=self.optim.amp):
+                        # 模型前向
                         model_out, attns = self.model(src, tgt, src_len, bptt=bptt)
                         bptt = True
 
@@ -412,10 +408,13 @@ class Trainer(object):
                             trunc_start=j,
                             trunc_size=trunc_size,
                         )
+
+                    # 后向传播
                     if loss is not None:
                         loss /= normalization
                         self.optim.backward(loss)
 
+                    # 更新统计
                     total_stats.update(batch_stats)
                     report_stats.update(batch_stats)
 

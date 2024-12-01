@@ -930,7 +930,7 @@ def _add_train_general_opts(parser):
         type=float,
         default=[0.3],
         nargs="+",
-        help="Dropout probability; applied in LSTM stacks.",
+        help="Dropout probability.",
     )
     group.add(
         "--attention_dropout",
