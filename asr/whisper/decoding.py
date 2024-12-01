@@ -375,9 +375,7 @@ class BeamSearchDecoder(TokenDecoder):
         # collect all finished sequences, including patience, and add unfinished ones if not enough
         sum_logprobs = sum_logprobs.cpu()
         for i, sequences in enumerate(self.finished_sequences):
-            if (
-                len(sequences) < self.beam_size
-            ):  # when not enough sequences are finished
+            if (len(sequences) < self.beam_size):  # when not enough sequences are finished
                 for j in list(np.argsort(sum_logprobs[i]))[::-1]:
                     sequence = preceding_tokens[i, j].tolist() + [self.eot]
                     sequences[tuple(sequence)] = sum_logprobs[i][j].item()
@@ -388,9 +386,7 @@ class BeamSearchDecoder(TokenDecoder):
             [torch.tensor(seq) for seq in sequences.keys()]
             for sequences in self.finished_sequences
         ]
-        sum_logprobs: List[List[float]] = [
-            list(sequences.values()) for sequences in self.finished_sequences
-        ]
+        sum_logprobs: List[List[float]] = [list(sequences.values()) for sequences in self.finished_sequences]
         return tokens, sum_logprobs
 
 
@@ -467,9 +463,7 @@ class DecodingTask:
 
         # decoder: implements how to select the next tokens, given the autoregressive distribution
         if options.beam_size is not None:
-            self.decoder = BeamSearchDecoder(
-                options.beam_size, tokenizer.eot, self.inference, options.patience
-            )
+            self.decoder = BeamSearchDecoder(options.beam_size, tokenizer.eot, self.inference, options.patience)
         else:
             self.decoder = GreedyDecoder(options.temperature, tokenizer.eot)
 
@@ -554,10 +548,7 @@ class DecodingTask:
         if self.options.fp16:
             mel = mel.half()
 
-        if mel.shape[-2:] == (
-            self.model.dims.n_audio_ctx,
-            self.model.dims.n_audio_state,
-        ):
+        if mel.shape[-2:] == (self.model.dims.n_audio_ctx, self.model.dims.n_audio_state,):
             # encoded audio features are given; skip audio encoding
             audio_features = mel
         else:
@@ -678,9 +669,7 @@ class DecodingTask:
                 temperature=self.options.temperature,
                 # compression_ratio=compression_ratio(text),
             )
-            for text, language, tokens, features, avg_logprob, no_speech_prob in zip(
-                *fields
-            )
+            for text, language, tokens, features, avg_logprob, no_speech_prob in zip(*fields)
         ]
 
 
