@@ -1,6 +1,7 @@
 """PDF file translation"""
 import argparse
 import os
+import re
 from pprint import pprint
 
 import pymupdf
@@ -64,6 +65,7 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
         for c in candidates:
             print(c)
             text = c["text"]
+            text = re.sub(r"\s{2,}", " ", text)
             # text = text.replace("-\n", "").replace("\n", " ").replace("<", "&lt;").strip()
             text = text.replace("- ", "").replace("<", "&lt;").strip()
             if len(text) == 0:

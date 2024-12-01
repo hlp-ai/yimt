@@ -104,3 +104,10 @@ def may_combine_paragraph(text):
             txt = txt + " " + p
 
     return txt.strip()
+
+
+if __name__ == "__main__":
+    en1 = "1.   This is just a test."
+
+    sents, breaks = paragraph_tokenizer(en1)
+    print(sents)
