@@ -9,6 +9,7 @@ import pymupdf
 from extension.files.pdf.copy_drawings import copy_drawings
 from extension.files.pdf.copy_image import copy_images
 from extension.files.pdf.utils import get_candidate_block, blocks_for_translation
+from extension.files.utils import should_translate
 from service.mt import translator_factory
 
 
@@ -41,17 +42,6 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
         # 拷贝图形
         copy_images(page, outpage, doc)
 
-        # blocks = page.get_text("dict")["blocks"]
-        # candidates = []
-        # for block in blocks:
-        #     if block["type"] != 0:  # 忽略图形块，inline图形不包含在get_images返回中
-        #         continue
-        #
-        #     if debug:
-        #         pprint(block)
-        #
-        #     cb = get_candidate_block(block)
-        #     candidates.extend(cb)
         candidates = blocks_for_translation(page)
 
         if translator is None:
@@ -63,7 +53,7 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
         shape = outpage.new_shape()
 
         for c in candidates:
-            print(c)
+            # print(c)
             text = c["text"]
             text = re.sub(r"\s{2,}", " ", text)
             # text = text.replace("-\n", "").replace("\n", " ").replace("<", "&lt;").strip()
@@ -72,7 +62,7 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
                 continue
             toks = text.split()
             avg_len = sum([len(t) for t in toks]) / len(toks)
-            if avg_len > 3 and len(toks) > 1:
+            if should_translate(text) and avg_len > 3 and len(toks) > 1:
                 c["text"] = translator.translate_paragraph(text, source_lang, target_lang)
 
                 if tm_saver:
