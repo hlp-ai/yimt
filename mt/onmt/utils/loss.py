@@ -32,13 +32,11 @@ class LossCompute(nn.Module):
         criterion,
         generator,
         tgt_shift_index=1,
-        vocab=None,
     ):
         super(LossCompute, self).__init__()
         self.criterion = criterion
         self.generator = generator
         self.tgt_shift_index = tgt_shift_index
-        self.vocab = vocab  # target vocab for copy_attn need
 
     @classmethod
     def from_opts(cls, opt, model, vocab, train=True):
@@ -52,7 +50,6 @@ class LossCompute(nn.Module):
         device = torch.device("cuda" if onmt.utils.misc.use_gpu(opt) else "cpu")
 
         padding_idx = vocab[DefaultTokens.PAD]
-        unk_idx = vocab[DefaultTokens.UNK]
 
         tgt_shift_idx = 1 # if opt.model_task == ModelTask.SEQ2SEQ else 0
 
@@ -66,7 +63,6 @@ class LossCompute(nn.Module):
             criterion,
             model.generator,
             tgt_shift_index=tgt_shift_idx,
-            vocab=vocab,
         )
         compute.to(device)
 
