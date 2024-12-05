@@ -16,9 +16,7 @@ class Statistics(object):
     * elapsed time
     """
 
-    def __init__(
-        self, loss=0, n_batchs=0, n_sents=0, n_words=0, n_correct=0, computed_metrics={}
-    ):
+    def __init__(self, loss=0, n_batchs=0, n_sents=0, n_words=0, n_correct=0, computed_metrics={}):
         self.loss = loss
         self.n_batchs = n_batchs
         self.n_sents = n_sents
@@ -93,11 +91,11 @@ class Statistics(object):
             self.n_src_words += stat.n_src_words
 
     def accuracy(self):
-        """compute accuracy"""
+        """Token正确率"""
         return 100 * (self.n_correct / self.n_words)
 
     def xent(self):
-        """compute cross entropy"""
+        """每token损失"""
         return self.loss / self.n_words
 
     def ppl(self):

@@ -251,11 +251,12 @@ class Trainer(object):
             if self.n_gpu > 1 and self.parallel_mode == "data_parallel":
                 normalization = sum(onmt.utils.distributed.all_gather_list(normalization))
 
+            # 累积梯度
             self._gradient_accumulation(batches, normalization, total_stats, report_stats)
 
             report_stats = self._maybe_report_training(step, train_steps, self.optim.learning_rate(), report_stats)
 
-            if valid_iter is not None and step % valid_steps == 0:
+            if valid_iter is not None and step % valid_steps == 0:  # 验证
                 if self.parallel_mode == "tensor_parallel" or self.gpu_rank <= 0:
                     valid_stats = self.validate(valid_iter)
 
@@ -295,14 +296,11 @@ class Trainer(object):
 
         Returns:
             :obj:``nmt.Statistics``: validation loss statistics"""
-
         valid_model = self.model
 
         # Set model in validating mode.
         valid_model.eval()
 
-        # raw_srcs = []
-        # raw_refs = []
         with torch.no_grad():
             stats = onmt.utils.Statistics()
             start = time.time()
@@ -319,6 +317,7 @@ class Trainer(object):
                     _, batch_stats = self.valid_loss(batch, model_out, attns)
 
                     stats.update(batch_stats)
+
             logger.info(
                 """valid stats calculation
                            took: {} s.""".format(time.time() - start)
@@ -345,9 +344,7 @@ class Trainer(object):
                         texts_ref=texts_ref,
                     )
                     computed_metrics[metric] = self.valid_scorers[metric]["value"]
-                    logger.info(
-                        "validation {}: {}".format(metric, self.valid_scorers[metric]["value"])
-                    )
+                    logger.info("validation {}: {}".format(metric, self.valid_scorers[metric]["value"]))
                     # Compute stats
                     metric_stats = onmt.utils.Statistics(0, 0, 0, 0, 0, computed_metrics)
 
