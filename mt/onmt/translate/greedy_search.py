@@ -186,9 +186,7 @@ class GreedySearch(DecodeStrategy):
         """
         # maybe fix some prediction at this step by modifying log_probs
         log_probs = self.target_prefixing(log_probs)
-        topk_ids, topk_scores = sample_with_temperature(
-            log_probs, self.sampling_temp, self.keep_topk, self.keep_topp
-        )
+        topk_ids, topk_scores = sample_with_temperature(log_probs, self.sampling_temp, self.keep_topk, self.keep_topp)
 
         return topk_ids, topk_scores
 
@@ -243,11 +241,7 @@ class GreedySearch(DecodeStrategy):
             score = self.beams_scores[b, 0] / length_penalty
             pred = self.alive_seq[b, 1:]
             attention = (
-                self.alive_attn[
-                    b,
-                    :,
-                    : self.src_len[b],
-                ]
+                self.alive_attn[b, :, : self.src_len[b],]
                 if self.alive_attn is not None
                 else []
             )

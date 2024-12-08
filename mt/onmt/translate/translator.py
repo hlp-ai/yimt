@@ -538,12 +538,8 @@ class Translator(Inference):
         enc_out, src_len = self.model.encoder(src, src_len)
 
         if src_len is None:
-            assert not isinstance(
-                enc_out, tuple
-            ), "Ensemble decoding only supported for text data"
-            src_len = (
-                torch.Tensor(batch_size).type_as(enc_out).long().fill_(enc_out.size(1))
-            )
+            assert not isinstance(enc_out, tuple), "Ensemble decoding only supported for text data"
+            src_len = (torch.Tensor(batch_size).type_as(enc_out).long().fill_(enc_out.size(1)))
         return src, enc_out, src_len
 
     def _translate_batch_with_strategy(self, batch, decode_strategy):
