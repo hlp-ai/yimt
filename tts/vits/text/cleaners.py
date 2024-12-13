@@ -48,10 +48,6 @@ def expand_abbreviations(text):
     return text
 
 
-def expand_numbers(text):
-    return normalize_numbers(text)
-
-
 def lowercase(text):
     return text.lower()
 
