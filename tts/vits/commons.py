@@ -62,34 +62,6 @@ def rand_slice_segments(x, x_lengths=None, segment_size=4):
     return ret, ids_str
 
 
-def get_timing_signal_1d(
-        length, channels, min_timescale=1.0, max_timescale=1.0e4):
-    position = torch.arange(length, dtype=torch.float)
-    num_timescales = channels // 2
-    log_timescale_increment = (
-            math.log(float(max_timescale) / float(min_timescale)) /
-            (num_timescales - 1))
-    inv_timescales = min_timescale * torch.exp(
-        torch.arange(num_timescales, dtype=torch.float) * -log_timescale_increment)
-    scaled_time = position.unsqueeze(0) * inv_timescales.unsqueeze(1)
-    signal = torch.cat([torch.sin(scaled_time), torch.cos(scaled_time)], 0)
-    signal = F.pad(signal, [0, 0, 0, channels % 2])
-    signal = signal.view(1, channels, length)
-    return signal
-
-
-def add_timing_signal_1d(x, min_timescale=1.0, max_timescale=1.0e4):
-    b, channels, length = x.size()
-    signal = get_timing_signal_1d(length, channels, min_timescale, max_timescale)
-    return x + signal.to(dtype=x.dtype, device=x.device)
-
-
-def cat_timing_signal_1d(x, min_timescale=1.0, max_timescale=1.0e4, axis=1):
-    b, channels, length = x.size()
-    signal = get_timing_signal_1d(length, channels, min_timescale, max_timescale)
-    return torch.cat([x, signal.to(dtype=x.dtype, device=x.device)], axis)
-
-
 def subsequent_mask(length):
     mask = torch.tril(torch.ones(length, length)).unsqueeze(0).unsqueeze(0)
     return mask
@@ -103,17 +75,6 @@ def fused_add_tanh_sigmoid_multiply(input_a, input_b, n_channels):
     s_act = torch.sigmoid(in_act[:, n_channels_int:, :])
     acts = t_act * s_act
     return acts
-
-
-def convert_pad_shape(pad_shape):
-    l = pad_shape[::-1]
-    pad_shape = [item for sublist in l for item in sublist]
-    return pad_shape
-
-
-def shift_1d(x):
-    x = F.pad(x, convert_pad_shape([[0, 0], [0, 0], [1, 0]]))[:, :, :-1]
-    return x
 
 
 def sequence_mask(length, max_length=None):
