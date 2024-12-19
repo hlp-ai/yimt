@@ -53,10 +53,12 @@ def lowercase(text):
 
 
 def collapse_whitespace(text):
+    """多个连续空格压缩为1个空格"""
     return re.sub(_whitespace_re, ' ', text)
 
 
 def convert_to_ascii(text):
+    """文本音译ascii化"""
     return unidecode(text)
 
 
@@ -90,7 +92,7 @@ def english_cleaners2(text):
     text = convert_to_ascii(text)
     text = lowercase(text)
     text = expand_abbreviations(text)
-    phonemes = phonemize(text, language='en-us', backend='espeak', strip=True, preserve_punctuation=True,
-                         with_stress=True)
+    phonemes = phonemize(text, language='en-us', backend='espeak', strip=True,
+                         preserve_punctuation=True, with_stress=True)
     phonemes = collapse_whitespace(phonemes)
     return phonemes
