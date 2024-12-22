@@ -289,7 +289,10 @@ def create_app(args):
             api_key = ""
 
         if isinstance(q, list):  # 浏览器插件元素列表翻译
-            translations = translate_tag_list(q, source_lang, target_lang)
+            try:
+                translations = translate_tag_list(q, source_lang, target_lang)
+            except ValueError as e:
+                abort(400, description=e)
 
             log_service.debug("Translation: {}".format(translations))
 

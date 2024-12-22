@@ -34,25 +34,27 @@ def collect_tag(markup_str, no_translatable_tags=['style', 'script', 'head', 'me
 def translate_tag_list(markup_strs, source_lang="auto", target_lang="zh", callbacker=None):
     markups = []
     to_translated_tags = []
-    to_translated_strs = []
+    # to_translated_strs = []
     to_translated_list = []
     for s in markup_strs:
         m, es, ts = collect_tag(s, lang=source_lang)
         markups.append(m)
         to_translated_tags.append(es)
-        to_translated_strs.append(ts)
+        # to_translated_strs.append(ts)
         for s in ts:
             to_translated_list.append(s)
 
     if source_lang == "auto":
-        source_lang = detect_lang(to_translated_list[0])
+        source_lang = detect_lang(" ".join(to_translated_list))
 
     from service.mt import translator_factory
     translator = translator_factory.get_translator(source_lang, target_lang)
+    if translator is None:
+        raise ValueError("给定语言对不支持: {}".format(source_lang + "-" + target_lang))
 
     translations = translator.translate_list(to_translated_list, sl=source_lang, tl=target_lang, callbacker=callbacker)
 
-    idx  = 0
+    idx = 0
     for i in range(len(markups)):
         replace(to_translated_tags[i], translations[idx:idx+len(to_translated_tags[i])])
         idx += len(to_translated_tags[i])
