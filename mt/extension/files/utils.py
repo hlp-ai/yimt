@@ -539,6 +539,19 @@ def has_no_en_letter(s):
     return True
 
 
+def no_letter_ratio(s):
+    n_no_letter = 0.0
+    for c in s:
+        if c != " " and c not in en_letter_set:
+            n_no_letter += 1
+
+    return n_no_letter / len(s)
+
+
+def is_formula(s):
+    return no_letter_ratio(s) > 0.3
+
+
 def should_translate(txt, lang="en"):
     if is_empty(txt):
         return False
@@ -566,10 +579,18 @@ def should_translate(txt, lang="en"):
     if lang == "en" and has_no_en_letter(txt):
         return False
 
+    if lang == "en" and is_formula(txt):
+        return False
+
     if len(txt) <=3:
         return False
 
     return True
+
+
+from nltk.corpus import words
+def is_english_word(word):
+    return word.lower() in words.words()
 
 
 def doc2docx(doc_fn, docx_fn=None, keep_active=True):
@@ -643,5 +664,9 @@ if __name__ == "__main__":
     print(should_translate("ZH"))
     print(should_translate("cc"))
 
-    doc2docx(r"d:\kidden\test.doc")
-    ppt2pptx(r"d:\kidden\enzh1.ppt")
+    print(is_english_word("x"))
+    print(is_english_word("nSents"))
+    print(is_english_word("cos"))
+
+    # doc2docx(r"d:\kidden\test.doc")
+    # ppt2pptx(r"d:\kidden\enzh1.ppt")

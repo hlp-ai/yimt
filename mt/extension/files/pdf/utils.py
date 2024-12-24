@@ -6,11 +6,6 @@ font_dict = {
 }
 
 
-from nltk.corpus import words
-def is_english_word(word):
-    return word.lower() in words.words()
-
-
 def close_to(n1, n2, eps=3.0):
     return abs(n1-n2) < eps
 
@@ -250,6 +245,4 @@ def blocks_for_translation(page):
 
 
 if __name__ == "__main__":
-    print(is_english_word("x"))
-    print(is_english_word("nSents"))
-    print(is_english_word("cos"))
+    pass
