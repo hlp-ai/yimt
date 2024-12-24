@@ -2,13 +2,12 @@
 import argparse
 import os
 import re
-from pprint import pprint
 
 import pymupdf
 
 from extension.files.pdf.copy_drawings import copy_drawings
 from extension.files.pdf.copy_image import copy_images
-from extension.files.pdf.utils import get_candidate_block, blocks_for_translation
+from extension.files.pdf.utils import blocks_for_translation
 from extension.files.utils import should_translate
 from service.mt import translator_factory
 
