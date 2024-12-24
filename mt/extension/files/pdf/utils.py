@@ -33,7 +33,8 @@ def in_line(b1, b2, eps=3.0):
 
 
 def left_align(b1, b2, eps=16.0):
-    return abs(b1[0]-b2[0]) < eps
+    # 两行左边接近，并且第二行右边不超过第一行或者两行右边接近
+    return abs(b1[0]-b2[0]) < eps and (b1[2]>b2[2] or abs(b1[2]-b2[2])<3.0)
 
 
 def near_to(b1, b2, eps=9.9):
@@ -42,13 +43,18 @@ def near_to(b1, b2, eps=9.9):
 
 
 def merge(block1, block2, sep_char=" "):
+    """block结构为: bbox, size, text"""
+    # 两个bbox的最大外包bbox
     bbox = (min(block1["bbox"][0], block2["bbox"][0]),
             min(block1["bbox"][1], block2["bbox"][1]),
             max(block1["bbox"][2], block2["bbox"][2]),
             max(block1["bbox"][3], block2["bbox"][3])
             )
 
+    # 字体大小去小的
     size = min(block1["size"], block2["size"])
+
+    # 合并文本
     text = block1["text"] + sep_char + block2["text"]
 
     return {
@@ -67,7 +73,7 @@ def merge_spans(spans):
         block1 = spans[0]
         block2 = spans[1]
         if near_to(block1["bbox"], block2["bbox"]):  # 足够靠近，合并
-            new_span = merge(block1, block2)
+            new_span = merge(block1, block2, sep_char="")
             spans.remove(block1)
             spans.remove(block2)
             spans.insert(0, new_span)  # 合并span取代原来两个span
