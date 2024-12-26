@@ -58,12 +58,21 @@ def create_tm(parent):
     entry_lang.grid(row=0, column=1, padx=10, pady=5)
 
     tk.Label(parent, text="源文本").grid(row=1, column=0, padx=10, pady=5, sticky="e")
-    text_src = Text(parent, width=80, height=15, undo=True, autoseparators=False)
+    text_src = Text(parent, width=80, height=7, undo=True, autoseparators=False,
+                    spacing1=10, spacing2=10, spacing3=10)
     text_src.grid(row=1, column=1, padx=10, pady=5)
 
     tk.Label(parent, text="目标文本").grid(row=2, column=0, padx=10, pady=5, sticky="e")
-    text_tgt = Text(parent, width=80, height=15, undo=True, autoseparators=False)
+    text_tgt = Text(parent, width=80, height=7, undo=True, autoseparators=False,
+                    spacing1=10, spacing2=10, spacing3=10)
     text_tgt.grid(row=2, column=1, padx=10, pady=5)
+
+    label_stat = tk.Entry(parent, width=50)
+    label_stat.grid(row=3, column=1, padx=10, pady=5)
+
+    def update_stat():
+        label_stat.delete(0, tk.END)
+        label_stat.insert(0, "{}/{}".format(index, len(tms.records)))
 
     def open_tm():
         global tms
@@ -79,6 +88,8 @@ def create_tm(parent):
             text_tgt.delete("1.0", "end")
             text_tgt.insert(INSERT, tm["target"])
 
+            update_stat()
+
     def next_tm():
         global tms
         global index
@@ -91,6 +102,8 @@ def create_tm(parent):
             text_src.insert(INSERT, tm["source"])
             text_tgt.delete("1.0", "end")
             text_tgt.insert(INSERT, tm["target"])
+
+            update_stat()
 
     def prev_tm():
         global tms
@@ -105,14 +118,16 @@ def create_tm(parent):
             text_tgt.delete("1.0", "end")
             text_tgt.insert(INSERT, tm["target"])
 
+            update_stat()
+
     button_open = tk.Button(parent, text="打开翻译记忆文件", command=open_tm)
-    button_open.grid(padx=3, pady=10, row=3, column=0)
+    button_open.grid(padx=3, pady=10, row=4, column=1)
 
     button_next = tk.Button(parent, text="下一条", command=next_tm)
-    button_next.grid(padx=3, pady=10, row=3, column=1)
+    button_next.grid(padx=3, pady=10, row=5, column=1)
 
     button_prev = tk.Button(parent, text="上一条", command=prev_tm)
-    button_prev.grid(padx=3, pady=10, row=3, column=2)
+    button_prev.grid(padx=3, pady=10, row=5, column=2)
 
 
 def create_translate_file(parent):
