@@ -3,7 +3,7 @@ from functools import partial
 from tkinter import *
 import tkinter as tk
 
-from extension.gui.compare_frame import create_sarcebleu_trans, create_translate_file
+from extension.gui.app_frame import create_sarcebleu_trans, create_translate_file, create_translate_pdf
 from extension.gui.corpus_frame import create_sample_corpus, create_mono2tsv_corpus, \
     create_tsv2mono_corpus
 from extension.gui.train_frame import create_sp_tokenize, create_sp_train
@@ -61,6 +61,11 @@ if __name__ == "__main__":
     create_translate_file(trans_file_frame)
     frames.append(trans_file_frame)
 
+    trans_pdf_frame = tk.Frame(win_main)
+    trans_pdf_frame.pack()
+    create_translate_pdf(trans_pdf_frame)
+    frames.append(trans_pdf_frame)
+
 
     ####################################################################
 
@@ -83,6 +88,7 @@ if __name__ == "__main__":
     mainmenu.add_cascade(label="训练", menu=train_menu)
 
     app_menu = Menu(mainmenu, tearoff=False)
+    app_menu.add_command(label="PDF翻译", command=partial(on_menu, trans_pdf_frame))
     app_menu.add_command(label="翻译文件", command=partial(on_menu, trans_file_frame))
     app_menu.add_command(label="计算BLEU", command=partial(on_menu, bleu_frame))
 

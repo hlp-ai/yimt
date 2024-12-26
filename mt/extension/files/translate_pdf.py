@@ -12,11 +12,8 @@ from extension.files.utils import should_translate
 from service.mt import translator_factory
 
 
-debug = False
-
-
 def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation_file=None, callbacker=None,
-                       tm_saver=None):
+                       tm_saver=None, debug=False):
     if translation_file is None:
         paths = os.path.splitext(pdf_fn)
         translated_fn = paths[0] + "-translated" + paths[1]
@@ -88,6 +85,26 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
     return translated_fn
 
 
+def main(in_file, source_lang="auto", target_lang="zh", translation_file=None, debug=False):
+    callback = None
+
+    from service.tm import BasicTMSaver
+    tm_saver = BasicTMSaver(tm_file=os.path.join(os.path.dirname(in_file),
+                                                 os.path.basename(in_file).replace(" ", "_") + ".tm"))
+
+    print(tm_saver.fn_prefix)
+
+    translated_fn = translate_pdf_auto(in_file, source_lang=source_lang, target_lang=target_lang,
+                                       translation_file=translation_file,
+                                       callbacker=callback, tm_saver=tm_saver,
+                                       debug=debug)
+
+    import webbrowser
+
+    webbrowser.open(in_file)
+    webbrowser.open(translated_fn)
+
+
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser("PDF File Translator")
     arg_parser.add_argument("-tl", "--to_lang", type=str, default="zh", help="target language")
@@ -110,7 +127,7 @@ if __name__ == "__main__":
     print(tm_saver.fn_prefix)
 
     translated_fn = translate_pdf_auto(in_file, source_lang="en", target_lang=to_lang, translation_file=out_file,
-                                       callbacker=callback, tm_saver=tm_saver)
+                                       callbacker=callback, tm_saver=tm_saver, debug=debug)
 
     import webbrowser
 
