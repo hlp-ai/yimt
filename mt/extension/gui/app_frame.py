@@ -4,6 +4,7 @@ from tkinter import *
 from functools import partial
 
 from extension.gui.win_utils import ask_open_file, ask_save_file
+from web.tm_utils import TMList
 
 
 def create_translate_pdf(parent):
@@ -46,6 +47,72 @@ def create_translate_pdf(parent):
 
     button_start = tk.Button(parent, text="开始翻译", command=go)
     button_start.grid(padx=3, pady=10, row=4, column=1)
+
+
+tms = None
+index = 0
+
+def create_tm(parent):
+    tk.Label(parent, text="语言对").grid(row=0, column=0, padx=10, pady=5, sticky="e")
+    entry_lang = tk.Entry(parent, width=50)
+    entry_lang.grid(row=0, column=1, padx=10, pady=5)
+
+    tk.Label(parent, text="源文本").grid(row=1, column=0, padx=10, pady=5, sticky="e")
+    text_src = Text(parent, width=80, height=15, undo=True, autoseparators=False)
+    text_src.grid(row=1, column=1, padx=10, pady=5)
+
+    tk.Label(parent, text="目标文本").grid(row=2, column=0, padx=10, pady=5, sticky="e")
+    text_tgt = Text(parent, width=80, height=15, undo=True, autoseparators=False)
+    text_tgt.grid(row=2, column=1, padx=10, pady=5)
+
+    def open_tm():
+        global tms
+        global index
+        filename = tk.filedialog.askopenfilename()
+        tms = TMList(filename)
+        index = 0
+        if len(tms.records) > 0:
+            tm = tms.records[index]
+            entry_lang.insert(0, tm["direction"])
+            text_src.delete("1.0", "end")
+            text_src.insert(INSERT, tm["source"])
+            text_tgt.delete("1.0", "end")
+            text_tgt.insert(INSERT, tm["target"])
+
+    def next_tm():
+        global tms
+        global index
+        if len(tms.records) > index+1:
+            index += 1
+            tm = tms.records[index]
+            entry_lang.delete(0, tk.END)
+            entry_lang.insert(0, tm["direction"])
+            text_src.delete("1.0", "end")
+            text_src.insert(INSERT, tm["source"])
+            text_tgt.delete("1.0", "end")
+            text_tgt.insert(INSERT, tm["target"])
+
+    def prev_tm():
+        global tms
+        global index
+        if index > 0:
+            index -= 1
+            tm = tms.records[index]
+            entry_lang.delete(0, tk.END)
+            entry_lang.insert(0, tm["direction"])
+            text_src.delete("1.0", "end")
+            text_src.insert(INSERT, tm["source"])
+            text_tgt.delete("1.0", "end")
+            text_tgt.insert(INSERT, tm["target"])
+
+    button_open = tk.Button(parent, text="打开翻译记忆文件", command=open_tm)
+    button_open.grid(padx=3, pady=10, row=3, column=0)
+
+    button_next = tk.Button(parent, text="下一条", command=next_tm)
+    button_next.grid(padx=3, pady=10, row=3, column=1)
+
+    button_prev = tk.Button(parent, text="上一条", command=prev_tm)
+    button_prev.grid(padx=3, pady=10, row=3, column=2)
 
 
 def create_translate_file(parent):
