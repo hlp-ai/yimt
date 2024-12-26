@@ -90,7 +90,8 @@ def main(in_file, source_lang="auto", target_lang="zh", translation_file=None, d
 
     from service.tm import BasicTMSaver
     tm_saver = BasicTMSaver(tm_file=os.path.join(os.path.dirname(in_file),
-                                                 os.path.basename(in_file).replace(" ", "_") + ".tm"))
+                                                 os.path.basename(in_file).replace(" ", "_") + ".tm"),
+                            overwrite=True)
 
     print(tm_saver.fn_prefix)
 

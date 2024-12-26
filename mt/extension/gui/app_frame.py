@@ -15,24 +15,37 @@ def create_translate_pdf(parent):
     tk.Button(parent, text="...", command=partial(ask_open_file, entry=entry_source)).grid(row=0, column=2,
                                                                                           padx=10, pady=5)
 
+    tk.Label(parent, text="源语言").grid(row=1, column=0, padx=10, pady=5, sticky="e")
+    entry_sl = tk.Entry(parent, width=50)
+    entry_sl.grid(row=1, column=1, padx=10, pady=5)
+    entry_sl.insert(0, "en")
+
+    tk.Label(parent, text="目标语言").grid(row=2, column=0, padx=10, pady=5, sticky="e")
+    entry_tl = tk.Entry(parent, width=50)
+    entry_tl.grid(row=2, column=1, padx=10, pady=5)
+    entry_tl.insert(0, "zh")
+
     var_box = IntVar()
     check_ter = Checkbutton(parent, text="输出翻译框", variable=var_box, onvalue=1, offvalue=0)
-    check_ter.grid(row=1, column=0, padx=10, pady=5)
+    check_ter.grid(row=3, column=0, padx=10, pady=5)
 
     def go():
         source_path = entry_source.get().strip()
         debug_box = (var_box.get() == 1)
 
+        sl = entry_sl.get().strip()
+        tl = entry_tl.get().strip()
+
         if len(source_path) == 0:
             tk.messagebox.showwarning(title="Info", message="输入文件和不能为空.")
             return
 
-        main(source_path, debug=debug_box, source_lang="en", target_lang="zh")
+        main(source_path, debug=debug_box, source_lang=sl, target_lang=tl)
 
         tk.messagebox.showinfo(title="Info", message="翻译完成")
 
     button_start = tk.Button(parent, text="开始翻译", command=go)
-    button_start.grid(padx=3, pady=10, row=2, column=1)
+    button_start.grid(padx=3, pady=10, row=4, column=1)
 
 
 def create_translate_file(parent):
