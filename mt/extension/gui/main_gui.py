@@ -95,6 +95,7 @@ if __name__ == "__main__":
     app_menu = Menu(mainmenu, tearoff=False)
     app_menu.add_command(label="PDF翻译", command=partial(on_menu, trans_pdf_frame))
     app_menu.add_command(label="翻译记忆", command=partial(on_menu, tm_frame))
+    app_menu.add_separator()
     app_menu.add_command(label="翻译文件", command=partial(on_menu, trans_file_frame))
     app_menu.add_command(label="计算BLEU", command=partial(on_menu, bleu_frame))
 

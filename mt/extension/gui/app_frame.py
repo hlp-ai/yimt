@@ -1,4 +1,5 @@
 import os
+import tkinter.font as tkFont
 import tkinter as tk
 from tkinter import *
 from functools import partial
@@ -58,13 +59,20 @@ def create_tm(parent):
     entry_lang.grid(row=0, column=1, padx=10, pady=5)
 
     tk.Label(parent, text="源文本").grid(row=1, column=0, padx=10, pady=5, sticky="e")
-    text_src = Text(parent, width=80, height=7, undo=True, autoseparators=False,
+    text_src = Text(parent, width=50, height=6, undo=True, autoseparators=False,
                     spacing1=10, spacing2=10, spacing3=10)
+
+    fontExample = tkFont.Font(family="Arial", size=14)
+    text_src.configure(font=fontExample)
+
     text_src.grid(row=1, column=1, padx=10, pady=5)
 
     tk.Label(parent, text="目标文本").grid(row=2, column=0, padx=10, pady=5, sticky="e")
-    text_tgt = Text(parent, width=80, height=7, undo=True, autoseparators=False,
+    text_tgt = Text(parent, width=50, height=6, undo=True, autoseparators=False,
                     spacing1=10, spacing2=10, spacing3=10)
+
+    text_tgt.configure(font=fontExample)
+
     text_tgt.grid(row=2, column=1, padx=10, pady=5)
 
     label_stat = tk.Entry(parent, width=50)
