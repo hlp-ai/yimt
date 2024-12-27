@@ -1,3 +1,4 @@
+"""单人单卡训练"""
 import os
 import torch
 from torch.nn import functional as F

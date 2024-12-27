@@ -408,13 +408,12 @@ class BucketSampler(torch.utils.data.Sampler):
 
     def __init__(self, dataset, batch_size, boundaries):
         super().__init__(dataset)
-        self.lengths = dataset.lengths
+        self.lengths = dataset.lengths  # 每个音频的长度
         self.batch_size = batch_size
         self.boundaries = boundaries
 
         self.buckets, self.num_samples_per_bucket = self._create_buckets()
         self.total_size = sum(self.num_samples_per_bucket)
-        # self.num_samples = self.total_size // self.num_replicas
         self.num_samples = self.total_size
 
     def _create_buckets(self):
@@ -433,7 +432,6 @@ class BucketSampler(torch.utils.data.Sampler):
         num_samples_per_bucket = []
         for i in range(len(buckets)):
             len_bucket = len(buckets[i])
-            # total_batch_size = self.num_replicas * self.batch_size
             total_batch_size = self.batch_size
             rem = (total_batch_size - (len_bucket % total_batch_size)) % total_batch_size
             num_samples_per_bucket.append(len_bucket + rem)
