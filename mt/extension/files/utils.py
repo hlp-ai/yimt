@@ -588,6 +588,54 @@ def should_translate(txt, lang="en"):
     return True
 
 
+class TranslationFilter:
+    def __call__(self, txt):
+        pass
+
+
+class TranslationFilterEN(TranslationFilter):
+
+    def __call__(self, txt):
+        if is_empty(txt):
+            return False
+
+        txt = txt.strip()
+
+        if len(txt) == 1:
+            return False
+
+        if is_special_symbol(txt):
+            return False
+
+        if is_number(txt):
+            return False
+
+        if is_url(txt):
+            return False
+
+        if is_country_code(txt):
+            return False
+
+        if is_lang_code(txt):
+            return False
+
+        if has_no_en_letter(txt):
+            return False
+
+        if is_formula(txt):
+            return False
+
+        if len(txt) <= 3:
+            return False
+
+        toks = txt.split()
+        avg_w_len = sum([len(t) for t in toks]) / len(toks)
+        if avg_w_len <= 3 or len(toks) == 1:
+            return False
+
+        return True
+
+
 from nltk.corpus import words
 def is_english_word(word):
     return word.lower() in words.words()
