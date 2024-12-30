@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import filedialog
+from tkinter.font import Font
 
 from web.tm_utils import TMList
 
@@ -12,12 +13,16 @@ class TMFrame(Frame):
 
     def create_widgets(self):
         self.file_label = Label(self, text="TM文件(/)")
-        self.langs_label = Label(self, text="")
-        self.src_text = Text(self)
-        self.tgt_text = Text(self)
+        self.langs_entry = Entry(self)
 
-        self.file_label.pack()
-        self.langs_label.pack()
+        self.src_text = Text(self, height=6, spacing1=10, spacing2=10, spacing3=10)
+        self.tgt_text = Text(self, height=6, spacing1=10, spacing2=10, spacing3=10)
+        fontExample = Font(family="Arial", size=14)
+        self.src_text.configure(font=fontExample)
+        self.tgt_text.configure(font=fontExample)
+
+        self.file_label.pack(pady=5)
+        self.langs_entry.pack(pady=5)
         self.src_text.pack()
         self.tgt_text.pack()
 
@@ -27,20 +32,25 @@ class TMFrame(Frame):
         self.first_button = Button(self.nav_frame, text="第一个", command=self.first)
         self.last_button = Button(self.nav_frame, text="最后 一个", command=self.last)
 
-        self.next_button.grid(row=0, column=0)
-        self.prev_button.grid(row=0, column=1)
-        self.first_button.grid(row=0, column=2)
-        self.last_button.grid(row=0, column=3)
+        self.delete_button = Button(self.nav_frame, text="删除", command=self.delete_item)
+        self.save_item_button = Button(self.nav_frame, text="保存修改", command=self.save_item)
+
+        self.next_button.grid(row=0, column=0, padx=10, pady=5)
+        self.prev_button.grid(row=0, column=1, padx=10, pady=5)
+        self.first_button.grid(row=0, column=2, padx=10, pady=5)
+        self.last_button.grid(row=0, column=3, padx=10, pady=5)
+        self.delete_button.grid(row=0, column=4, padx=10, pady=5)
+        self.save_item_button.grid(row=0, column=5, padx=10, pady=5)
         self.nav_frame.pack()
 
         self.func_frame = Frame(self)
         self.open_button = Button(self.func_frame, text="打开文件", command=self.open_tm)
-        self.save_button = Button(self.func_frame, text="保存文件")
+        self.save_button = Button(self.func_frame, text="保存文件", command=self.save_tm)
         self.saveas_button = Button(self.func_frame, text="另存文件")
 
-        self.open_button.grid(row=0, column=0)
-        self.save_button.grid(row=0, column=1)
-        self.saveas_button.grid(row=0, column=2)
+        self.open_button.grid(row=0, column=0, padx=10, pady=5)
+        self.save_button.grid(row=0, column=1, padx=10, pady=5)
+        self.saveas_button.grid(row=0, column=2, padx=10, pady=5)
         self.func_frame.pack()
 
     def open_tm(self):
@@ -55,9 +65,27 @@ class TMFrame(Frame):
         if len(self.tms.records) > 0:
             self.display()
 
+    def save_tm(self):
+        self.tms.save()
+
+    def delete_item(self):
+        self.tms.records.pop(self.index)
+        self.index -= 1
+        if self.index < 0:
+            self.index = 0
+        self.display()
+
+    def save_item(self):
+        tm = self.tms.records[self.index]
+        tm["source"] = self.src_text.get('0.0','end')
+        tm["target"] = self.tgt_text.get('0.0','end')
+
     def display(self):
         tm = self.tms.records[self.index]
-        self.langs_label["text"] = tm["direction"]
+
+        self.langs_entry.delete(0, END)
+        self.langs_entry.insert(0, tm["direction"])
+
         info = "{}({}/{})".format(self.filename, self.index+1, len(self.tms.records))
         self.file_label["text"] = info
         self.src_text.delete("1.0", "end")
