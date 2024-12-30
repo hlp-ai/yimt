@@ -552,6 +552,14 @@ def is_formula(s):
     return no_letter_ratio(s) > 0.3
 
 
+def is_file_type(s):
+    return s[0]=="." and len(s)<10 and " " not in s
+
+
+def is_measure(s):
+    return " " not in s and any([True if d in s else False for d in '0123456789'])
+
+
 def should_translate(txt, lang="en"):
     if is_empty(txt):
         return False
