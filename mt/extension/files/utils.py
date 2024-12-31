@@ -553,7 +553,7 @@ def is_formula(s):
 
 
 def is_file_type(s):
-    return s[0]=="." and len(s)<10 and " " not in s
+    return s[0]=="." and len(s)<15 and " " not in s
 
 
 def is_measure(s):
@@ -573,6 +573,12 @@ def should_translate(txt, lang="en"):
         return False
 
     if is_number(txt):
+        return False
+
+    if is_file_type(txt):
+        return False
+
+    if is_measure(txt):
         return False
 
     if is_url(txt):
