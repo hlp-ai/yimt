@@ -80,7 +80,8 @@ def translate_pdf_auto(pdf_fn, source_lang="auto", target_lang="zh", translation
         if callbacker:
             callbacker.report(total_pages, i+1, fid=pdf_fn)
 
-    outpdf.save(translated_fn)
+    outpdf.subset_fonts()
+    outpdf.ez_save(translated_fn)
 
     return translated_fn
 
