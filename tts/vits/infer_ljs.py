@@ -25,12 +25,12 @@ net_g = SynthesizerTrn(
     **hps.model).cuda()
 _ = net_g.eval()
 
-_ = utils.load_checkpoint("/path/to/pretrained_ljs.pth", net_g, None)
+_ = utils.load_checkpoint("./logs/ljs_vits/G_8000.pth", net_g, None)
 
-stn_tst = get_text("VITS is Awesome!", hps)
+stn_tst = get_text("what are you doing?", hps)
 with torch.no_grad():
     x_tst = stn_tst.cuda().unsqueeze(0)
     x_tst_lengths = torch.LongTensor([stn_tst.size(0)]).cuda()
     audio = net_g.infer(x_tst, x_tst_lengths, noise_scale=.667, noise_scale_w=0.8, length_scale=1)[0][0,0].data.cpu().float().numpy()
 
-write("./eng1.wav", hps.data.sampling_rate, audio)
+write("./en-ljs.wav", hps.data.sampling_rate, audio)
