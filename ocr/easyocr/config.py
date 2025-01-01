@@ -4,12 +4,6 @@ import yaml
 
 os.environ["LRU_CACHE_CAPACITY"] = "1"
 
-BASE_PATH = os.path.dirname(__file__)
-MODULE_PATH = os.environ.get("EASYOCR_MODULE_PATH") or \
-              os.environ.get("MODULE_PATH") or \
-              os.path.expanduser("~/.EasyOCR/")
-
-
 with open(os.path.join(os.path.dirname(__file__), "config.yaml"), encoding="utf-8") as stream:
     conf = yaml.safe_load(stream)
 
