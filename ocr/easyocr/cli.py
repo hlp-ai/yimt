@@ -210,8 +210,6 @@ def main():
     reader = easyocr.Reader(lang_list=args.lang,
                             gpu=args.gpu,
                             model_storage_directory=args.model_storage_directory,
-                            user_network_directory=args.user_network_directory,
-                            recog_network=args.recog_network,
                             verbose=args.verbose,
                             quantize=args.quantize)
 

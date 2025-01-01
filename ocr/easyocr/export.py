@@ -10,7 +10,6 @@ def export_detector(detector_onnx_save_path,
                     in_shape=[1, 3, 608, 800],
                     lang_list=["en"],
                     model_storage_directory=None,
-                    user_network_directory=None,
                     dynamic=True,
                     device="cpu",
                     quantize=True,
@@ -20,11 +19,8 @@ def export_detector(detector_onnx_save_path,
         print('WARNING: it is recommended to use -d dynamic flag when exporting onnx')
     ocr_reader = easyocr.Reader(lang_list,
                                 gpu=False if device == "cpu" else True,
-                                detector=detector,
-                                recognizer=detector,
                                 quantize=quantize,
-                                model_storage_directory=model_storage_directory,
-                                user_network_directory=user_network_directory)
+                                model_storage_directory=model_storage_directory,)
 
     # exporting detector if selected
     if detector:

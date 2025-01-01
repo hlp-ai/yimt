@@ -5,19 +5,16 @@ from easyocr.config import *
 from bidi.algorithm import get_display
 import torch
 import os
-import sys
 from logging import getLogger
 import json
-from pathlib import Path
 
 LOGGER = getLogger(__name__)
 
 
 class Reader(object):
 
-    def __init__(self, lang_list, gpu=True,
-                 model_storage_directory=None,
-                 user_network_directory=None,
+    def __init__(self, lang_list,
+                 model_storage_directory,
                  verbose=True,
                  quantize=True, cudnn_benchmark=False):
         """Create an EasyOCR Reader
@@ -25,44 +22,19 @@ class Reader(object):
         Parameters:
             lang_list (list): Language codes (ISO 639) for languages to be recognized during analysis.
 
-            gpu (bool): Enable GPU support (default)
-
-            model_storage_directory (string): Path to directory for model data. If not specified,
-            models will be read from a directory as defined by the environment variable
-            EASYOCR_MODULE_PATH (preferred), MODULE_PATH (if defined), or ~/.EasyOCR/.
-
-            user_network_directory (string): Path to directory for custom network architecture.
-            If not specified, it is as defined by the environment variable
-            EASYOCR_MODULE_PATH (preferred), MODULE_PATH (if defined), or ~/.EasyOCR/.
-
-            download_enabled (bool): Enabled downloading of model data via HTTP (default).
+            model_storage_directory (string): Path to directory for model data.
         """
         self.verbose = verbose
 
-        self.model_storage_directory = MODULE_PATH + '/model'
-        if model_storage_directory:
-            self.model_storage_directory = model_storage_directory
-        Path(self.model_storage_directory).mkdir(parents=True, exist_ok=True)
+        self.model_storage_directory = model_storage_directory
 
-        self.user_network_directory = MODULE_PATH + '/user_network'
-        if user_network_directory:
-            self.user_network_directory = user_network_directory
-        Path(self.user_network_directory).mkdir(parents=True, exist_ok=True)
-        sys.path.append(self.user_network_directory)
-
-        if gpu is False:
-            self.device = 'cpu'
-            if verbose:
-                LOGGER.warning('Using CPU. Note: This module is much faster with a GPU.')
-        elif gpu is True:
-            if torch.cuda.is_available():
-                self.device = 'cuda'
-            else:
-                self.device = 'cpu'
-                if verbose:
-                    LOGGER.warning('Defaulting to CPU. Note: This module is much faster with a GPU.')
+        if torch.cuda.is_available():
+            self.device = 'cuda'
         else:
-            self.device = gpu
+            self.device = 'cpu'
+
+        LOGGER.warning('Using device {}'.format(self.device))
+
 
         self.detection_models = detection_models
         self.recognition_models = recognition_models
