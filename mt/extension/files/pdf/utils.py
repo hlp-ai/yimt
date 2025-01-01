@@ -87,6 +87,14 @@ def long_enough(t1, t2, threshold=2):
     return (n1+n2)/2 > threshold
 
 
+def all_char(t1, t2):
+    for d in '0123456789':
+        if d in t1 or d in t2:
+            return False
+
+    return True
+
+
 def merge_lines(lines):
     if len(lines) == 1:
         return lines
@@ -104,8 +112,9 @@ def merge_lines(lines):
             lines.remove(line2)
             continue
 
-        if in_line(line1["bbox"], line2["bbox"], 7.5) and near_to(line1["bbox"], line2["bbox"], 13.0) and long_enough(
-                line1["spans"][0]["text"], line2["spans"][0]["text"]):  # 在同一行，且足够靠近，且段包含足够数量单词
+        if in_line(line1["bbox"], line2["bbox"], 7.5) and near_to(line1["bbox"], line2["bbox"], 13.0) and (
+                long_enough(line1["spans"][0]["text"], line2["spans"][0]["text"])
+                or all_char(line1["spans"][0]["text"], line2["spans"][0]["text"])):  # 在同一行，且足够靠近，且段包含足够数量单词
             new_span = merge(line1["spans"][0], line2["spans"][0])
             lines.remove(line1)
             lines.remove(line2)
