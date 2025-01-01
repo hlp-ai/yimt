@@ -28,6 +28,19 @@ class TMList:
                 f.write(
                     f"<lang-pair>{r['direction']}</lang-pair>\n<source>{r['source']}</source>\n<target>{r['target']}</target>\n\n")
 
+    def dedup(self):
+        ids = set()
+
+        i = 0
+        while i < len(self.records):
+            r = self.records[i]
+            h = hash(r["direction"] + "\t" + r["source"] + "\t" + r["target"])
+            if h in ids:
+                self.records.pop(i)
+            else:
+                ids.add(h)
+                i = i + 1
+
 
 
 

@@ -45,12 +45,14 @@ class TMFrame(Frame):
 
         self.func_frame = Frame(self)
         self.open_button = Button(self.func_frame, text="打开文件", command=self.open_tm)
+        self.dedup_button = Button(self.func_frame, text="去重", command=self.dedup_tm)
         self.save_button = Button(self.func_frame, text="保存文件", command=self.save_tm)
         self.saveas_button = Button(self.func_frame, text="另存文件")
 
         self.open_button.grid(row=0, column=0, padx=10, pady=5)
-        self.save_button.grid(row=0, column=1, padx=10, pady=5)
-        self.saveas_button.grid(row=0, column=2, padx=10, pady=5)
+        self.dedup_button.grid(row=0, column=1, padx=10, pady=5)
+        self.save_button.grid(row=0, column=2, padx=10, pady=5)
+        self.saveas_button.grid(row=0, column=3, padx=10, pady=5)
         self.func_frame.pack()
 
     def open_tm(self):
@@ -64,6 +66,11 @@ class TMFrame(Frame):
         self.index = 0
         if len(self.tms.records) > 0:
             self.display()
+
+    def dedup_tm(self):
+        self.tms.dedup()
+        self.index = 0
+        self.display()
 
     def save_tm(self):
         self.tms.save()
