@@ -1,4 +1,4 @@
-"""基于ResNet的文本识别模型"""
+"""基于ResNet的文本识别模型（第一代）"""
 import torch.nn as nn
 from easyocr.model.modules import ResNet_FeatureExtractor, BidirectionalLSTM
 

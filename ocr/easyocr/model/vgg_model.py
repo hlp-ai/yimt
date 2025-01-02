@@ -1,4 +1,4 @@
-"""基于VGG的文本识别模型"""
+"""基于VGG的文本识别模型（第二代）"""
 import torch.nn as nn
 from easyocr.model.modules import VGG_FeatureExtractor, BidirectionalLSTM
 
