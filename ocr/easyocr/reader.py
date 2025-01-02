@@ -43,10 +43,10 @@ class Reader(object):
         self.quantize = quantize,
         self.cudnn_benchmark = cudnn_benchmark
 
-        detector_path = self.getDetectorPath()
-
         recog_network = ""
         recog_model = None
+
+        # 查找能识别给定语言列表的识别器
         for model in recognition_models['gen1']:
             if set(lang_list).issubset(set(recognition_models['gen1'][model]["languages"])):
                 recog_network = 'generation1'
@@ -63,13 +63,16 @@ class Reader(object):
                 self.character = recog_model['characters']
                 break
 
-        self.character = recog_model['characters']
+        # self.character = recog_model['characters']
+        if recog_model is None:
+            raise FileNotFoundError("Missing recognize for lang %s" % lang_list)
 
         model_path = os.path.join(self.model_storage_directory, recog_model['filename'])
         print(model_path)
         if not os.path.isfile(model_path):
             raise FileNotFoundError("Missing %s" % model_path)
 
+        detector_path = self.getDetectorPath()
         self.detector = self.initDetector(detector_path)
 
         if recog_network == 'generation1':
@@ -84,8 +87,7 @@ class Reader(object):
                 'output_channel': 256,
                 'hidden_size': 256
             }
-        # else:
-        #     network_params = recog_config['network_params']
+
         self.recognizer, self.converter = get_recognizer(recog_network, network_params,
                                                          self.character,
                                                          model_path, device=self.device, quantize=quantize)
