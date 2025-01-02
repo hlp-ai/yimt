@@ -31,6 +31,21 @@ def collect_tag(markup_str, no_translatable_tags=['style', 'script', 'head', 'me
     return markup, to_translated_elements, to_translated_txt
 
 
+def translate_txt_list(txt_list, source_lang="auto", target_lang="zh", callbacker=None):
+    if source_lang == "auto":
+        source_lang = detect_lang(" ".join(txt_list))
+        print("自动识别语言：" + source_lang)
+
+    from service.mt import translator_factory
+    translator = translator_factory.get_translator(source_lang, target_lang)
+    if translator is None:
+        raise ValueError("给定语言对不支持: {}".format(source_lang + "-" + target_lang))
+
+    translations = translator.translate_list(txt_list, sl=source_lang, tl=target_lang, callbacker=callbacker)
+
+    return translations
+
+
 def translate_tag_list(markup_strs, source_lang="auto", target_lang="zh", callbacker=None):
     markups = []
     to_translated_tags = []

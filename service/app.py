@@ -13,7 +13,7 @@ from scipy.io.wavfile import write
 from werkzeug.utils import secure_filename
 
 from extension.files.translate_files import translate_doc, support
-from extension.files.translate_html import translate_tag_list
+from extension.files.translate_html import translate_tag_list, translate_txt_list
 from extension.files.translate_tag import translate_html
 from extension.files.utils import TranslationProgress
 from service import remove_translated_files
@@ -294,7 +294,10 @@ def create_app(args):
 
         if isinstance(q, list):  # 浏览器插件元素列表翻译
             try:
-                translations = translate_tag_list(q, source_lang, target_lang)
+                if text_format == "html":
+                    translations = translate_tag_list(q, source_lang, target_lang)
+                else:
+                    translations = translate_txt_list(q, source_lang, target_lang)
             except ValueError as e:
                 abort(400, description=e)
 
