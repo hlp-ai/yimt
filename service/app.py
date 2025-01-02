@@ -154,18 +154,22 @@ def create_app(args):
 
     @app.errorhandler(400)
     def invalid_api(e):
+        logger.warning(e.description)
         return jsonify({"error": str(e.description)}), 400
 
     @app.errorhandler(500)
     def server_error(e):
+        logger.warning(e.description)
         return jsonify({"error": str(e.description)}), 500
 
     @app.errorhandler(429)
     def slow_down_error(e):
+        logger.warning(e.description)
         return jsonify({"error": "Slowdown: " + str(e.description)}), 429
 
     @app.errorhandler(403)
     def denied(e):
+        logger.warning(e.description)
         return jsonify({"error": str(e.description)}), 403
 
     @app.after_request

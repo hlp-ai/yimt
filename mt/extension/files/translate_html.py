@@ -46,6 +46,7 @@ def translate_tag_list(markup_strs, source_lang="auto", target_lang="zh", callba
 
     if source_lang == "auto":
         source_lang = detect_lang(" ".join(to_translated_list))
+        print("自动识别语言：" + source_lang)
 
     from service.mt import translator_factory
     translator = translator_factory.get_translator(source_lang, target_lang)
