@@ -26,18 +26,6 @@ def parse_args():
         help="Directory for model (.pth) file",
     )
     parser.add_argument(
-        "--user_network_directory",
-        type=str,
-        default=None,
-        help="Directory for custom network files",
-    )
-    parser.add_argument(
-        "--recog_network",
-        type=str,
-        default='standard',
-        help="Recognition networks",
-    )
-    parser.add_argument(
         "--verbose",
         type=bool,
         choices=[True, False],

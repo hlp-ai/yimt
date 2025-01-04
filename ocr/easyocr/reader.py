@@ -156,7 +156,7 @@ class Reader(object):
                   decoder='greedy', beamWidth=5, batch_size=1,
                   workers=0, detail=1,
                   rotation_info=None, paragraph=False,
-                  contrast_ths=0.1, adjust_contrast=0.5, filter_ths=0.003,
+                  contrast_ths=0.1, adjust_contrast=0.5,
                   y_ths=0.5, x_ths=1.0, reformat=True, output_format='standard'):
 
         if reformat:
@@ -180,7 +180,6 @@ class Reader(object):
                 image_list, max_width = get_image_list(h_list, f_list, img_cv_grey, model_height=imgH)
                 result0 = get_text(self.character, imgH, int(max_width), self.recognizer, self.converter, image_list,
                                    ignore_char, decoder, beamWidth, batch_size, contrast_ths, adjust_contrast,
-                                   filter_ths,
                                    workers, self.device)
                 result += result0
             for bbox in free_list:
@@ -189,7 +188,6 @@ class Reader(object):
                 image_list, max_width = get_image_list(h_list, f_list, img_cv_grey, model_height=imgH)
                 result0 = get_text(self.character, imgH, int(max_width), self.recognizer, self.converter, image_list,
                                    ignore_char, decoder, beamWidth, batch_size, contrast_ths, adjust_contrast,
-                                   filter_ths,
                                    workers, self.device)
                 result += result0
         # default mode will try to process multiple boxes at the same time
@@ -201,7 +199,7 @@ class Reader(object):
                 max_width = max(max_width, imgH)
 
             result = get_text(self.character, imgH, int(max_width), self.recognizer, self.converter, image_list,
-                              ignore_char, decoder, beamWidth, batch_size, contrast_ths, adjust_contrast, filter_ths,
+                              ignore_char, decoder, beamWidth, batch_size, contrast_ths, adjust_contrast,
                               workers, self.device)
 
             if rotation_info and (horizontal_list + free_list):
@@ -243,7 +241,7 @@ class Reader(object):
     def readtext(self, image, decoder='greedy', beamWidth=5, batch_size=1,
                  workers=0, detail=1,
                  rotation_info=None, paragraph=False, min_size=20,
-                 contrast_ths=0.1, adjust_contrast=0.5, filter_ths=0.003,
+                 contrast_ths=0.1, adjust_contrast=0.5,
                  text_threshold=0.7, low_text=0.4, link_threshold=0.4,
                  canvas_size=2560, mag_ratio=1.,
                  slope_ths=0.1, ycenter_ths=0.5, height_ths=0.5,
@@ -272,6 +270,6 @@ class Reader(object):
                                 decoder, beamWidth, batch_size,
                                 workers, detail, rotation_info,
                                 paragraph, contrast_ths, adjust_contrast,
-                                filter_ths, y_ths, x_ths, False, output_format)
+                                y_ths, x_ths, False, output_format)
 
         return result
