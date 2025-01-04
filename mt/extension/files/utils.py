@@ -578,7 +578,7 @@ def should_translate(txt, lang="en"):
     if is_file_type(txt):
         return False
 
-    if is_measure(txt):
+    if lang == "en" and is_measure(txt):
         return False
 
     if is_url(txt):

@@ -4,8 +4,8 @@ import os
 from bs4 import BeautifulSoup, Comment, Doctype
 
 from extension.files.utils import should_translate, TranslationProgress
+from extension.lid import detect_lang
 from service.mt import translator_factory
-from service.utils import detect_lang
 
 
 def collect_tag(markup_str, no_translatable_tags=['style', 'script', 'head', 'meta', 'link'], lang="en"):
@@ -22,6 +22,8 @@ def collect_tag(markup_str, no_translatable_tags=['style', 'script', 'head', 'me
                 continue
 
             t = element.string
+            if lang == "auto":
+                lang = detect_lang(t)
             if not should_translate(t, lang):  # 过滤不需要翻译的
                 continue
 
