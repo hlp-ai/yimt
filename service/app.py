@@ -294,10 +294,11 @@ def create_app(args):
 
         if isinstance(q, list):  # 浏览器插件元素列表翻译
             try:
-                if text_format == "html":
-                    translations = translate_tag_list(q, source_lang, target_lang)
-                else:
-                    translations = translate_txt_list(q, source_lang, target_lang)
+                translations = translate_tag_list(q, source_lang, target_lang)
+                # if text_format == "html":
+                #     translations = translate_tag_list(q, source_lang, target_lang)
+                # else:
+                #     translations = translate_txt_list(q, source_lang, target_lang)
             except ValueError as e:
                 abort(400, description=e)
 

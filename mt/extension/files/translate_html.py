@@ -3,8 +3,9 @@ import os
 
 from bs4 import BeautifulSoup, Comment, Doctype
 
-from extension.files.utils import should_translate, TranslationProgress
+from extension.files.utils import TranslationProgress
 from extension.lid import detect_lang
+from extension.translation_filters import should_translate
 from service.mt import translator_factory
 
 
