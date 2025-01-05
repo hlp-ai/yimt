@@ -14,12 +14,14 @@ from easyocr.recognition import NormalizePAD
 
 
 def contrast_grey(img):
+    """XXX: 不同于推理时的对比度计算"""
     high = np.percentile(img, 90)
     low  = np.percentile(img, 10)
     return (high-low)/(high+low), high, low
 
 
 def adjust_contrast_grey(img, target = 0.4):
+    """调整对比度"""
     contrast, high, low = contrast_grey(img)
     if contrast < target:
         img = img.astype(int)

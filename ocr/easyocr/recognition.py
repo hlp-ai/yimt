@@ -17,12 +17,14 @@ def custom_mean(x):
 
 
 def contrast_grey(img):
+    """图形灰度对比度"""
     high = np.percentile(img, 90)
     low = np.percentile(img, 10)
     return (high - low) / np.maximum(10, high + low), high, low
 
 
 def adjust_contrast_grey(img, target=0.4):
+    """调整图形灰度对比度"""
     contrast, high, low = contrast_grey(img)
     if contrast < target:
         img = img.astype(int)
@@ -44,7 +46,7 @@ class NormalizePAD(object):
         img = self.toTensor(img)
         img.sub_(0.5).div_(0.5)
         c, h, w = img.size()
-        Pad_img = torch.FloatTensor(*self.max_size).fill_(0)
+        Pad_img = torch.FloatTensor(*self.max_size).fill_(0)  # 填充为0
         Pad_img[:, :, :w] = img  # right pad
         if self.max_size[2] != w:  # add border Pad
             Pad_img[:, :, w:] = img[:, :, w - 1].unsqueeze(2).expand(c, h, self.max_size[2] - w)
@@ -63,7 +65,7 @@ class ListDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         img = self.image_list[index]
-        return Image.fromarray(img, 'L')
+        return Image.fromarray(img, 'L')  # 灰度图像
 
 
 class AlignCollate(object):
