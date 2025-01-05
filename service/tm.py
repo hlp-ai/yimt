@@ -73,7 +73,7 @@ class BasicTMSaver(TMSaver):
             tm_dir = os.path.join(os.path.dirname(__file__), "tm")
         if not os.path.exists(tm_dir):
             os.makedirs(tm_dir, exist_ok=True)
-        self.fn_prefix = os.path.join(tm_dir, strftime("%Y%m%d.tm", time.localtime()) if tm_file is None else tm_file)
+        self.fn_prefix = os.path.join(tm_dir, strftime("%Y%m%d-%H%M.tm", time.localtime()) if tm_file is None else tm_file)
         if overwrite:
             self.tm_f = open(self.fn_prefix, "w", encoding="utf-8")
         else:
