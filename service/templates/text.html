@@ -13,6 +13,7 @@
 
             API_KEY = window.localStorage.getItem("key");
 
+            /*
             var userAgentInfo = navigator.userAgent;
             var Agents = ["Android","iPhone","SymbianOS","Windows Phone","iPad","iPod"];
             var mobile = false;
@@ -20,12 +21,13 @@
             {
                 if(userAgentInfo.indexOf(Agents[v])>0)
                 {
-                    mobile=false;
+                    mobile=true;
                     break;
                 }
             }
             if(mobile)
                 window.location.href="{{url_for('mobile')}}"
+            */
 
             // 请求翻译语言列表
             request_languages();
