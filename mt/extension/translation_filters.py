@@ -558,10 +558,10 @@ class TranslationFilter:
 class TranslationFilterEN(TranslationFilter):
 
     def __call__(self, txt):
+        txt = txt.strip()
+
         if not super(TranslationFilterEN, self).__call__(txt):
             return False
-
-        txt = txt.strip()
 
         if len(txt) == 1:
             return False
@@ -575,10 +575,10 @@ class TranslationFilterEN(TranslationFilter):
         if len(txt) <= 3:
             return False
 
-        toks = txt.split()
-        avg_w_len = sum([len(t) for t in toks]) / len(toks)
-        if avg_w_len <= 3 or len(toks) == 1:
-            return False
+        # toks = txt.split()
+        # avg_w_len = sum([len(t) for t in toks]) / len(toks)
+        # if avg_w_len <= 3 or len(toks) == 1:
+        #     return False
 
         return True
 

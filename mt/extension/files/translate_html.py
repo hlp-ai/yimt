@@ -26,6 +26,7 @@ def collect_tag(markup_str, no_translatable_tags=['style', 'script', 'head', 'me
             if lang == "auto":
                 lang = detect_lang(t)
             if not should_translate(t, lang):  # 过滤不需要翻译的
+                print("Filtered: " + t + ": " + lang)
                 continue
 
             to_translated_elements.append(element)
