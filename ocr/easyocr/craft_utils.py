@@ -21,18 +21,19 @@ def getDetBoxes_core(textmap, linkmap, text_threshold, link_threshold, low_text,
     textmap = textmap.copy()
     img_h, img_w = textmap.shape
 
-    """ labeling method """
+    """ 根据打分对像素进行标记 """
     ret, text_score = cv2.threshold(textmap, low_text, 1, 0)
     ret, link_score = cv2.threshold(linkmap, link_threshold, 1, 0)
 
     text_score_comb = np.clip(text_score + link_score, 0, 1)
+    # 根据标记形成连通分量
     nLabels, labels, stats, centroids = cv2.connectedComponentsWithStats(text_score_comb.astype(np.uint8),
                                                                          connectivity=4)
 
     det = []
     mapper = []
-    for k in range(1, nLabels):
-        # size filtering
+    for k in range(1, nLabels):  # 对每个分量或区域
+        # 区域大小过滤
         size = stats[k, cv2.CC_STAT_AREA]
         if size < 10: continue
 
