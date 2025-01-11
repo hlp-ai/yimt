@@ -17,16 +17,16 @@ def warpCoord(Minv, pt):
 
 def getDetBoxes_core(textmap, linkmap, text_threshold, link_threshold, low_text, estimate_num_chars=False):
     # prepare data
-    linkmap = linkmap.copy()
-    textmap = textmap.copy()
+    linkmap = linkmap.copy()  # 领域打分
+    textmap = textmap.copy()  # 文本域打分
     img_h, img_w = textmap.shape
 
-    """ 根据打分对像素进行标记 """
+    """ 根据打分对像素进行标记0或1 """
     ret, text_score = cv2.threshold(textmap, low_text, 1, 0)
     ret, link_score = cv2.threshold(linkmap, link_threshold, 1, 0)
 
     text_score_comb = np.clip(text_score + link_score, 0, 1)
-    # 根据标记形成连通分量
+    # 根据标记形成连通分量：连通域数量，每个连通域编号，每个连通域左上角坐标宽高面积，每个连通域中心坐标
     nLabels, labels, stats, centroids = cv2.connectedComponentsWithStats(text_score_comb.astype(np.uint8),
                                                                          connectivity=4)
 
@@ -34,10 +34,10 @@ def getDetBoxes_core(textmap, linkmap, text_threshold, link_threshold, low_text,
     mapper = []
     for k in range(1, nLabels):  # 对每个分量或区域
         # 区域大小过滤
-        size = stats[k, cv2.CC_STAT_AREA]
+        size = stats[k, cv2.CC_STAT_AREA]  # 面积
         if size < 10: continue
 
-        # thresholding
+        # 连通域最大分数过小
         if np.max(textmap[labels == k]) < text_threshold: continue
 
         # make segmentation map
@@ -49,7 +49,7 @@ def getDetBoxes_core(textmap, linkmap, text_threshold, link_threshold, low_text,
             mapper.append(n_chars)
         else:
             mapper.append(k)
-        segmap[np.logical_and(link_score == 1, text_score == 0)] = 0  # remove link area
+        segmap[np.logical_and(link_score == 1, text_score == 0)] = 0  # 去掉邻接域
         x, y = stats[k, cv2.CC_STAT_LEFT], stats[k, cv2.CC_STAT_TOP]
         w, h = stats[k, cv2.CC_STAT_WIDTH], stats[k, cv2.CC_STAT_HEIGHT]
         niter = int(math.sqrt(size * min(w, h) / (w * h)) * 2)
@@ -59,13 +59,13 @@ def getDetBoxes_core(textmap, linkmap, text_threshold, link_threshold, low_text,
         if sy < 0: sy = 0
         if ex >= img_w: ex = img_w
         if ey >= img_h: ey = img_h
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1 + niter, 1 + niter))
-        segmap[sy:ey, sx:ex] = cv2.dilate(segmap[sy:ey, sx:ex], kernel)
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1 + niter, 1 + niter))  # 生成变换核
+        segmap[sy:ey, sx:ex] = cv2.dilate(segmap[sy:ey, sx:ex], kernel)  # 增大亮度区域
 
         # make box
-        np_contours = np.roll(np.array(np.where(segmap != 0)), 1, axis=0).transpose().reshape(-1, 2)
-        rectangle = cv2.minAreaRect(np_contours)
-        box = cv2.boxPoints(rectangle)
+        np_contours = np.roll(np.array(np.where(segmap != 0)), 1, axis=0).transpose().reshape(-1, 2)  # 循环移位1
+        rectangle = cv2.minAreaRect(np_contours)  # 最小外接矩形
+        box = cv2.boxPoints(rectangle)  # 4个顶点坐标
 
         # align diamond-shape
         w, h = np.linalg.norm(box[0] - box[1]), np.linalg.norm(box[1] - box[2])
