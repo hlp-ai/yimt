@@ -34,7 +34,7 @@ class DecodeStrategy(object):
       start (int): See above.
       predictions (list[list[LongTensor]]): For each batch, holds a
         list of beam prediction sequences.
-        scores (list[list[FloatTensor]]): For each batch, holds a
+      scores (list[list[FloatTensor]]): For each batch, holds a
         list of scores.
       attention (list[list[FloatTensor or list[]]]): For each
         batch, holds a list of attention sequence tensors
@@ -160,15 +160,16 @@ class DecodeStrategy(object):
         return None
 
     def __len__(self):
+        """生成序列长"""
         return self.alive_seq.shape[1]
 
     def ensure_min_length(self, log_probs):
         if len(self) <= self.min_length:
-            log_probs[:, self.eos] = -65504  # -1e20
+            log_probs[:, self.eos] = -65504  # -1e20，将结束符置为几乎不可能
 
     def ensure_unk_removed(self, log_probs):
         if self.ban_unk_token:
-            log_probs[:, self.unk] = -65504  # -1e20
+            log_probs[:, self.unk] = -65504  # -1e20，将UNK置为几乎不可能
 
     def ensure_max_length(self):
         # add one to account for BOS. Don't account for EOS because hitting
@@ -177,7 +178,7 @@ class DecodeStrategy(object):
             self.is_finished_list = [
                 [True for _ in range(self.parallel_paths)]
                 for _ in range(len(self.is_finished_list))
-            ]
+            ]  # 设置为结束
 
     def target_prefixing(self, log_probs):
         """Fix the first part of predictions with `self.target_prefix`.
