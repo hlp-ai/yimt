@@ -531,6 +531,8 @@ def is_measure(s):
 
 class TranslationFilter:
     def __call__(self, txt):
+        txt = txt.strip()
+
         if is_empty(txt):
             return False
 

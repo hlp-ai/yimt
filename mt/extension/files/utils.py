@@ -310,6 +310,7 @@ coutry_codes = set([
     'YE',
     'ZM',
     'ZW',
+    "EN"
 ])
 
 

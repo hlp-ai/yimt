@@ -37,6 +37,15 @@ def near_to(b1, b2, eps=9.9):
     return b2[0] - b1[2] < eps
 
 
+def union_bbox(bbox1, bbox2):
+    bbox = (min(bbox1[0], bbox2[0]),
+            min(bbox1[1], bbox2[1]),
+            max(bbox1[2], bbox2[2]),
+            max(bbox1[3], bbox2[3])
+            )
+    return bbox
+
+
 def merge(block1, block2, sep_char=" "):
     """block结构为: bbox, size, text"""
     # 两个bbox的最大外包bbox
