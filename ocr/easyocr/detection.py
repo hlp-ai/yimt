@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 from easyocr.craft_utils import getDetBoxes, adjustResultCoordinates
 from easyocr.imgproc import resize_aspect_ratio, normalizeMeanVariance
-from easyocr.craft import CRAFT
+from easyocr.model.craft import CRAFT
 
 
 def copyStateDict(state_dict):
