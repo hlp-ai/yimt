@@ -1,5 +1,4 @@
 import io
-import os
 from typing import List, Optional, Union
 
 import torch
@@ -31,7 +30,7 @@ def available_models() -> List[str]:
 
 
 def load_model(
-    name: str,
+    model_path: str,
     device: Optional[Union[str, torch.device]] = None,
     in_memory: bool = False,
 ) -> Whisper:
@@ -40,8 +39,7 @@ def load_model(
 
     Parameters
     ----------
-    name : str
-        one of the official model names listed by `whisper.available_models()`, or
+    model_path : str
         path to a model checkpoint containing the model dimensions and the model state_dict.
     device : Union[str, torch.device]
         the PyTorch device to put the model into
@@ -57,10 +55,7 @@ def load_model(
     if device is None:
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    if os.path.isfile(name):
-        checkpoint_file = open(name, "rb").read() if in_memory else name
-    else:
-        raise RuntimeError(f"Model {name} not found; available models = {available_models()}")
+    checkpoint_file = open(model_path, "rb").read() if in_memory else model_path
 
     with io.BytesIO(checkpoint_file) if in_memory else open(checkpoint_file, "rb") as fp:
         checkpoint = torch.load(fp, map_location=device)
