@@ -88,9 +88,7 @@ class TestGreedySearch(unittest.TestCase):
             for temp in [1.0, 3.0]:
                 n_words = 100
                 _non_eos_idxs = [47, 51, 13, 88, 99]
-                valid_score_dist_1 = torch.log_softmax(
-                    torch.tensor([6.0, 5.0, 4.0, 3.0, 2.0, 1.0]), dim=0
-                )
+                valid_score_dist_1 = torch.log_softmax(torch.tensor([6.0, 5.0, 4.0, 3.0, 2.0, 1.0]), dim=0)
                 valid_score_dist_2 = torch.log_softmax(torch.tensor([6.0, 1.0]), dim=0)
                 eos_idx = 2
                 lengths = torch.randint(0, 30, (batch_sz,))

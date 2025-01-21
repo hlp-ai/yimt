@@ -36,7 +36,6 @@ class PenaltyBuilder(object):
 
         See "Google's Neural Machine Translation System" :cite:`wu2016google`.
         """
-
         return ((5 + cur_len) / 6.0) ** alpha
 
     def length_average(self, cur_len, alpha=1.0):

@@ -364,16 +364,11 @@ class GNMTGlobalScorer(object):
 
     Args:
        alpha (float): Length parameter.
-       beta (float):  Coverage parameter.
        length_penalty (str): Length penalty strategy.
-       coverage_penalty (str): Coverage penalty strategy.
 
     Attributes:
         alpha (float): See above.
-        beta (float): See above.
         length_penalty (callable): See :class:`penalties.PenaltyBuilder`.
-        coverage_penalty (callable): See :class:`penalties.PenaltyBuilder`.
-        has_cov_pen (bool): See :class:`penalties.PenaltyBuilder`.
         has_len_pen (bool): See :class:`penalties.PenaltyBuilder`.
     """
 

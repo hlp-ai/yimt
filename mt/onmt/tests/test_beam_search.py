@@ -22,213 +22,6 @@ class GlobalScorerStub(object):
 
 
 class TestBeamSearch(unittest.TestCase):
-    BLOCKED_SCORE = -10e20
-
-    def test_advance_with_all_repeats_gets_blocked(self):
-        # all beams repeat (beam >= 1 repeat dummy scores)
-        beam_sz = 5
-        n_words = 100
-        repeat_idx = 47
-        ngram_repeat = 3
-        device_init = torch.zeros(1, 1)
-        for batch_sz in [1, 3]:
-            beam = BeamSearch(
-                beam_sz,
-                batch_sz,
-                0,
-                1,
-                2,
-                3,
-                1,
-                2,
-                GlobalScorerStub(),
-                0,
-                30,
-                False,
-                ngram_repeat,
-                set(),
-                0.0,
-                False,
-            )
-            beam.initialize(device_init, torch.randint(0, 30, (batch_sz,)))
-            for i in range(ngram_repeat + 4):
-                # predict repeat_idx over and over again
-                word_probs = torch.full((batch_sz * beam_sz, n_words), -float("inf"))
-                word_probs[0::beam_sz, repeat_idx] = 0
-
-                attns = torch.randn(batch_sz * beam_sz, 1, 53)
-                beam.advance(word_probs, attns)
-
-                if i < ngram_repeat:
-                    # before repeat, scores are either 0 or -inf
-                    expected_scores = torch.tensor(
-                        [0] + [-float("inf")] * (beam_sz - 1)
-                    ).repeat(batch_sz, 1)
-                    self.assertTrue(beam.topk_log_probs.equal(expected_scores))
-                elif i % ngram_repeat == 0:
-                    # on repeat, `repeat_idx` score is BLOCKED_SCORE
-                    # (but it's still the best score, thus we have
-                    # [BLOCKED_SCORE, -inf, -inf, -inf, -inf]
-                    expected_scores = torch.tensor(
-                        [self.BLOCKED_SCORE] + [-float("inf")] * (beam_sz - 1)
-                    ).repeat(batch_sz, 1)
-                    self.assertTrue(beam.topk_log_probs.equal(expected_scores))
-                else:
-                    # repetitions keeps maximizing score
-                    # index 0 has been blocked, so repeating=>+0.0 score
-                    # other indexes are -inf so repeating=>BLOCKED_SCORE
-                    # which is higher
-                    expected_scores = torch.tensor(
-                        [self.BLOCKED_SCORE] + [-float("inf")] * (beam_sz - 1)
-                    ).repeat(batch_sz, 1)
-                    self.assertTrue(beam.topk_log_probs.equal(expected_scores))
-
-    def test_advance_with_some_repeats_gets_blocked(self):
-        # beam 0 and beam >=2 will repeat (beam >= 2 repeat dummy scores)
-        beam_sz = 5
-        n_words = 100
-        repeat_idx = 47
-        ngram_repeat = 3
-        no_repeat_score = -2.3
-        repeat_score = -0.1
-        device_init = torch.zeros(1, 1)
-        for batch_sz in [1, 3]:
-            beam = BeamSearch(
-                beam_sz,
-                batch_sz,
-                0,
-                1,
-                2,
-                3,
-                1,
-                2,
-                GlobalScorerStub(),
-                0,
-                30,
-                False,
-                ngram_repeat,
-                set(),
-                0.0,
-                False,
-            )
-            beam.initialize(device_init, torch.randint(0, 30, (batch_sz,)))
-            for i in range(ngram_repeat + 4):
-                # non-interesting beams are going to get dummy values
-                word_probs = torch.full((batch_sz * beam_sz, n_words), -float("inf"))
-                if i == 0:
-                    # on initial round, only predicted scores for beam 0
-                    # matter. Make two predictions. Top one will be repeated
-                    # in beam zero, second one will live on in beam 1.
-                    word_probs[0::beam_sz, repeat_idx] = repeat_score
-                    word_probs[0::beam_sz, repeat_idx + i + 1] = no_repeat_score
-                else:
-                    # predict the same thing in beam 0
-                    word_probs[0::beam_sz, repeat_idx] = 0
-                    # continue pushing around what beam 1 predicts
-                    word_probs[1::beam_sz, repeat_idx + i + 1] = 0
-                attns = torch.randn(batch_sz * beam_sz, 1, 53)
-                beam.advance(word_probs, attns)
-                if i < ngram_repeat:
-                    self.assertFalse(
-                        beam.topk_log_probs[0::beam_sz].eq(self.BLOCKED_SCORE).any()
-                    )
-                    self.assertFalse(
-                        beam.topk_log_probs[1::beam_sz].eq(self.BLOCKED_SCORE).any()
-                    )
-                elif i == ngram_repeat:
-                    # now beam 0 dies (along with the others), beam 1 -> beam 0
-                    self.assertFalse(
-                        beam.topk_log_probs[:, 0].eq(self.BLOCKED_SCORE).any()
-                    )
-
-                    expected = torch.full([batch_sz, beam_sz], float("-inf"))
-                    expected[:, 0] = no_repeat_score
-                    expected[:, 1] = self.BLOCKED_SCORE
-                    self.assertTrue(beam.topk_log_probs[:, :].equal(expected))
-                else:
-                    # now beam 0 dies (along with the others), beam 1 -> beam 0
-                    self.assertFalse(
-                        beam.topk_log_probs[:, 0].eq(self.BLOCKED_SCORE).any()
-                    )
-
-                    expected = torch.full([batch_sz, beam_sz], float("-inf"))
-                    expected[:, 0] = no_repeat_score
-                    expected[:, 1:3] = self.BLOCKED_SCORE
-                    expected[:, 3:] = float("-inf")
-                    self.assertTrue(beam.topk_log_probs.equal(expected))
-
-    def test_repeating_excluded_index_does_not_die(self):
-        # beam 0 and beam >= 2 will repeat (beam 2 repeats excluded idx)
-        beam_sz = 5
-        n_words = 100
-        repeat_idx = 47  # will be repeated and should be blocked
-        repeat_idx_ignored = 7  # will be repeated and should not be blocked
-        ngram_repeat = 3
-        device_init = torch.zeros(1, 1)
-        for batch_sz in [1, 3]:
-            beam = BeamSearch(
-                beam_sz,
-                batch_sz,
-                0,
-                1,
-                2,
-                3,
-                1,
-                2,
-                GlobalScorerStub(),
-                0,
-                30,
-                False,
-                ngram_repeat,
-                {repeat_idx_ignored},
-                0.0,
-                False,
-            )
-            beam.initialize(device_init, torch.randint(0, 30, (batch_sz,)))
-            for i in range(ngram_repeat + 4):
-                # non-interesting beams are going to get dummy values
-                word_probs = torch.full((batch_sz * beam_sz, n_words), -float("inf"))
-                if i == 0:
-                    word_probs[0::beam_sz, repeat_idx] = -0.1
-                    word_probs[0::beam_sz, repeat_idx + i + 1] = -2.3
-                    word_probs[0::beam_sz, repeat_idx_ignored] = -5.0
-                else:
-                    # predict the same thing in beam 0
-                    word_probs[0::beam_sz, repeat_idx] = 0
-                    # continue pushing around what beam 1 predicts
-                    word_probs[1::beam_sz, repeat_idx + i + 1] = 0
-                    # predict the allowed-repeat again in beam 2
-                    word_probs[2::beam_sz, repeat_idx_ignored] = 0
-                attns = torch.randn(batch_sz * beam_sz, 1, 53)
-                beam.advance(word_probs, attns)
-                if i < ngram_repeat:
-                    self.assertFalse(
-                        beam.topk_log_probs[:, 0].eq(self.BLOCKED_SCORE).any()
-                    )
-                    self.assertFalse(
-                        beam.topk_log_probs[:, 1].eq(self.BLOCKED_SCORE).any()
-                    )
-                    self.assertFalse(
-                        beam.topk_log_probs[:, 2].eq(self.BLOCKED_SCORE).any()
-                    )
-                else:
-                    # now beam 0 dies, beam 1 -> beam 0, beam 2 -> beam 1
-                    # and the rest die
-                    self.assertFalse(
-                        beam.topk_log_probs[:, 0].eq(self.BLOCKED_SCORE).any()
-                    )
-                    # since all preds after i=0 are 0, we can check
-                    # that the beam is the correct idx by checking that
-                    # the curr score is the initial score
-                    self.assertTrue(beam.topk_log_probs[:, 0].eq(-2.3).all())
-                    self.assertFalse(
-                        beam.topk_log_probs[:, 1].eq(self.BLOCKED_SCORE).all()
-                    )
-                    self.assertTrue(beam.topk_log_probs[:, 1].eq(-5.0).all())
-
-                    self.assertTrue(
-                        beam.topk_log_probs[:, 2].eq(self.BLOCKED_SCORE).all()
-                    )
 
     def test_doesnt_predict_eos_if_shorter_than_min_len(self):
         # beam 0 will always predict EOS. The other beams will predict
@@ -256,8 +49,6 @@ class TestBeamSearch(unittest.TestCase):
                 min_length,
                 30,
                 False,
-                0,
-                set(),
                 0.0,
                 False,
             )
@@ -328,8 +119,6 @@ class TestBeamSearch(unittest.TestCase):
             min_length,
             30,
             False,
-            0,
-            set(),
             0.0,
             False,
         )
@@ -397,8 +186,6 @@ class TestBeamSearch(unittest.TestCase):
             min_length,
             30,
             True,
-            0,
-            set(),
             0.0,
             False,
         )
@@ -656,8 +443,6 @@ class TestBeamSearchAgainstReferenceCase(unittest.TestCase):
             0,
             30,
             False,
-            0,
-            set(),
             0.0,
             False,
         )
@@ -688,8 +473,6 @@ class TestBeamWithLengthPenalty(TestBeamSearchAgainstReferenceCase):
             0,
             30,
             False,
-            0,
-            set(),
             0.0,
             False,
         )
