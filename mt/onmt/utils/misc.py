@@ -51,9 +51,7 @@ def check_path(path, exist_ok=False, log=print):
 
 
 def sequence_mask(lengths, max_len=None):
-    """
-    Creates a boolean mask from sequence lengths.
-    """
+    """创建序列长度bool掩码"""
     max_len = max_len or lengths.max()
     return torch.arange(0, max_len, device=lengths.device) >= lengths.unsqueeze(1)
 

@@ -491,7 +491,7 @@ class TransformerDecoder(TransformerDecoderBase):
 
         pad_idx = self.embeddings.word_padding_idx
         src_len = kwargs["src_len"]
-        src_max_len = self.state["src"].shape[1]
+        src_max_len = self.state["src"].shape[1]  # TODO: 此处需要从状态中获得输入最大长度吗？
         src_pad_mask = sequence_mask(src_len, src_max_len).unsqueeze(1)  # [B x 1 x slen]
         tgt_pad_mask = tgt[:, :, 0].eq(pad_idx).unsqueeze(1)  # [B, 1, T_tgt]
 

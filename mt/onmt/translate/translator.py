@@ -420,10 +420,10 @@ class Inference(object):
         self,
         decoder_in,
         enc_out,
-        batch,
+        # batch,
         src_len,
         step=None,
-        batch_offset=None,
+        # batch_offset=None,
         return_attn=False,
     ):
         # Decoder forward, takes [batch, tgt_len, nfeats] as input
@@ -558,11 +558,13 @@ class Translator(Inference):
 
         batch_size = len(batch["srclen"])
 
-        # (1) Run the encoder on the src.
+        # (1) 输入编码.
         src, enc_out, src_len = self._run_encoder(batch)
 
-        self.model.decoder.init_state(src, enc_out)
+        # 解码器保留src作为状态
+        self.model.decoder.init_state(src, enc_out)  # TODO: 有必要吗？
 
+        # TODO: 黄金分数没有必要，只有占位代码，未来删除
         gold_score, gold_log_probs = self._gold_score(
             batch,
             enc_out,
@@ -571,31 +573,34 @@ class Translator(Inference):
             src,
         )
 
-        # (2) prep decode_strategy. Possibly repeat src objects.
+        # (2) 准备decode_strategy. Possibly repeat src objects.
         target_prefix = batch["tgt"] if self.tgt_file_prefix else None
         (fn_map_state, enc_out) = decode_strategy.initialize(enc_out, src_len, target_prefix=target_prefix)
 
+        # 初始化解码器状态
         if fn_map_state is not None:
             self.model.decoder.map_state(fn_map_state)
 
-        # (3) Begin decoding step by step:
+        # (3) 逐步解码:
         for step in range(decode_strategy.max_length):
-            decoder_input = decode_strategy.current_predictions.view(-1, 1, 1)
+            decoder_input = decode_strategy.current_predictions.view(-1, 1, 1)  # 前一步的预测
 
+            # 单步预测
             log_probs, attn = self._decode_and_generate(
                 decoder_input,
                 enc_out,
-                batch,
+                #batch,
                 src_len=decode_strategy.src_len,
                 step=step,
-                batch_offset=decode_strategy.batch_offset,
+                #batch_offset=decode_strategy.batch_offset,
                 return_attn=decode_strategy.return_attention,
             )
 
+            # 解码
             decode_strategy.advance(log_probs, attn)
 
             any_finished = any([any(sublist) for sublist in decode_strategy.is_finished_list])
-            if any_finished:
+            if any_finished:  # 有完成的
                 decode_strategy.update_finished()
                 if decode_strategy.done:
                     break

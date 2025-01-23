@@ -429,7 +429,7 @@ class Trainer(object):
 
                 # If truncated, don't backprop fully.
                 if self.model.decoder.state != {}:
-                    self.model.decoder.detach_state()
+                    self.model.decoder.detach_state()  # TODO: Transformer需要截断吗？需要保存状态吗？
 
         # in case of multi step gradient accumulation,
         # update only after accum batches
