@@ -583,7 +583,8 @@ class Translator(Inference):
 
         # (3) 逐步解码:
         for step in range(decode_strategy.max_length):
-            decoder_input = decode_strategy.current_predictions.view(-1, 1, 1)  # 前一步的预测
+            # TODO: 取一步或长度为1序列作为输入，是否有问题？取前面所有预测序列作为输入？
+            decoder_input = decode_strategy.current_predictions.view(-1, 1, 1)  # 前一步的预测，序列长度为1
 
             # 单步预测
             log_probs, attn = self._decode_and_generate(

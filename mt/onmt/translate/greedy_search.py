@@ -164,6 +164,7 @@ class GreedySearch(DecodeStrategy):
 
         super(GreedySearch, self).initialize(device, target_prefix)
 
+        # TODO: greedy的beam size为1，允许大于1？
         self.select_indices = torch.arange(self.batch_size * self.beam_size, dtype=torch.long, device=device)
         self.original_batch_idx = fn_map_state(torch.arange(self.batch_size, dtype=torch.long, device=device), dim=0)
         self.beams_scores = torch.zeros((self.batch_size * self.beam_size, 1), dtype=torch.float, device=device)
@@ -216,30 +217,40 @@ class GreedySearch(DecodeStrategy):
         self.ensure_min_length(log_probs)
         self.ensure_unk_removed(log_probs)
 
+        # 根据预测概率进行采样
         topk_ids, self.topk_scores = self._pick(log_probs)
+
+        # 更新分数
         self.beams_scores += self.topk_scores
 
-        self.is_finished_list = topk_ids.eq(self.eos).tolist()
+        self.is_finished_list = topk_ids.eq(self.eos).tolist()  # 判断是否结束
 
+        # 拼接得到更长的预测
         self.alive_seq = torch.cat([self.alive_seq, topk_ids], -1)
+
         if self.return_attention:
             if self.alive_attn is None:
                 self.alive_attn = attn
             else:
                 self.alive_attn = torch.cat([self.alive_attn, attn], 1)
+
         self.ensure_max_length()
 
     def update_finished(self):
         """Finalize scores and predictions."""
         # shape: (sum(~ self.is_finished), 1)
         step = len(self)
-        non_finished_batch = [b for b, fin in enumerate(self.is_finished_list) if not fin[0]]
+
+        # 未完成样本序号
+        non_finished_batch = [b for b, fin in enumerate(self.is_finished_list) if not fin[0]]  # greedy的BS为1
+
+        # 计算长度惩罚
         length_penalty = self.global_scorer.length_penalty(step, alpha=self.global_scorer.alpha)
 
-        for b in [i for i, fin in enumerate(self.is_finished_list) if fin[0]]:
+        for b in [i for i, fin in enumerate(self.is_finished_list) if fin[0]]:  # 对每个完成样本
             b_orig = self.original_batch_idx[b]
-            score = self.beams_scores[b, 0] / length_penalty
-            pred = self.alive_seq[b, 1:]
+            score = self.beams_scores[b, 0] / length_penalty  # 惩罚后的打分
+            pred = self.alive_seq[b, 1:]  # 预测结果序列
             attention = (
                 self.alive_attn[b, :, : self.src_len[b],]
                 if self.alive_attn is not None
@@ -257,6 +268,7 @@ class GreedySearch(DecodeStrategy):
                     self.attention[b].append(attn)
             return
 
+        # 更新未完成
         self.select_indices = torch.tensor(non_finished_batch, device=self.alive_seq.device)
         self.alive_seq = self.alive_seq[self.select_indices]
         self.beams_scores = self.beams_scores[self.select_indices]
