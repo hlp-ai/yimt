@@ -27,7 +27,7 @@ class ModelDimensions:
 
 class LayerNorm(nn.LayerNorm):
     def forward(self, x: Tensor) -> Tensor:
-        return super().forward(x.float()).type(x.dtype)
+        return super().forward(x.float()).type(x.dtype)  # float运算，结果再还原成输入类型
 
 
 class Linear(nn.Linear):
@@ -36,16 +36,17 @@ class Linear(nn.Linear):
             x,
             self.weight.to(x.dtype),
             None if self.bias is None else self.bias.to(x.dtype),
-        )
+        )  # 使用输入的类型进行运算
 
 
 class Conv1d(nn.Conv1d):
     def _conv_forward(self, x: Tensor, weight: Tensor, bias: Optional[Tensor]) -> Tensor:
+        # 使用输入的类型进行运算
         return super()._conv_forward(x, weight.to(x.dtype), None if bias is None else bias.to(x.dtype))
 
 
 def sinusoids(length, channels, max_timescale=10000):
-    """Returns sinusoids for positional embedding"""
+    """绝对位置编码"""
     assert channels % 2 == 0
     log_timescale_increment = np.log(max_timescale) / (channels // 2 - 1)
     inv_timescales = torch.exp(-log_timescale_increment * torch.arange(channels // 2))
@@ -57,7 +58,7 @@ class MultiHeadAttention(nn.Module):
     def __init__(self, n_state: int, n_head: int):
         super().__init__()
         self.n_head = n_head
-        self.query = Linear(n_state, n_state)
+        self.query = Linear(n_state, n_state)  # 加bias
         self.key = Linear(n_state, n_state, bias=False)
         self.value = Linear(n_state, n_state)
         self.out = Linear(n_state, n_state)
@@ -65,15 +66,14 @@ class MultiHeadAttention(nn.Module):
     def forward(
         self,
         x: Tensor,
-        xa: Optional[Tensor] = None,
+        xa: Optional[Tensor] = None,  # 为None时是自注意力
         mask: Optional[Tensor] = None,
         kv_cache: Optional[dict] = None,
     ):
         q = self.query(x)
 
         if kv_cache is None or xa is None or self.key not in kv_cache:
-            # hooks, if installed (i.e. kv_cache is not None), will prepend the cached kv tensors;
-            # otherwise, perform key/value projections for self- or cross-attention as usual.
+            # 无kv缓存，或自注意力，或第一次
             k = self.key(x if xa is None else xa)
             v = self.value(x if xa is None else xa)
         else:
@@ -86,17 +86,18 @@ class MultiHeadAttention(nn.Module):
 
     def qkv_attention(self, q: Tensor, k: Tensor, v: Tensor, mask: Optional[Tensor] = None):
         n_batch, n_ctx, n_state = q.shape
-        scale = (n_state // self.n_head) ** -0.25
-        q = q.view(*q.shape[:2], self.n_head, -1).permute(0, 2, 1, 3) * scale
-        k = k.view(*k.shape[:2], self.n_head, -1).permute(0, 2, 3, 1) * scale
-        v = v.view(*v.shape[:2], self.n_head, -1).permute(0, 2, 1, 3)
+        scale = (n_state // self.n_head) ** -0.25  # 缩放系数
+        # 缩放k和v
+        q = q.view(*q.shape[:2], self.n_head, -1).permute(0, 2, 1, 3) * scale  # B, H, L, D/H
+        k = k.view(*k.shape[:2], self.n_head, -1).permute(0, 2, 3, 1) * scale  # B, H, D/H, L
+        v = v.view(*v.shape[:2], self.n_head, -1).permute(0, 2, 1, 3)  # B, H, L, D/H
 
-        qk = q @ k
+        qk = q @ k  # B, H, L, L
         if mask is not None:
             qk = qk + mask[:n_ctx, :n_ctx]
         qk = qk.float()
 
-        w = F.softmax(qk, dim=-1).to(q.dtype)
+        w = F.softmax(qk, dim=-1).to(q.dtype)  # B, H, L, L
         return (w @ v).permute(0, 2, 1, 3).flatten(start_dim=2), qk.detach()
 
 
@@ -121,7 +122,7 @@ class ResidualAttentionBlock(nn.Module):
         mask: Optional[Tensor] = None,
         kv_cache: Optional[dict] = None,
     ):
-        x = x + self.attn(self.attn_ln(x), mask=mask, kv_cache=kv_cache)[0]
+        x = x + self.attn(self.attn_ln(x), mask=mask, kv_cache=kv_cache)[0]  # pre-norm
         if self.cross_attn:
             x = x + self.cross_attn(self.cross_attn_ln(x), xa, kv_cache=kv_cache)[0]
         x = x + self.mlp(self.mlp_ln(x))
@@ -264,11 +265,11 @@ class Whisper(nn.Module):
                 # save as-is, for the first token or cross attention
                 cache[module] = output
             else:
-                cache[module] = torch.cat([cache[module], output], dim=1).detach()
+                cache[module] = torch.cat([cache[module], output], dim=1).detach()  # 和前一步的缓冲拼接
             return cache[module]
 
         def install_hooks(layer: nn.Module):
-            if isinstance(layer, MultiHeadAttention):
+            if isinstance(layer, MultiHeadAttention):  # 对多头注意力添加KV缓冲
                 hooks.append(layer.key.register_forward_hook(save_to_cache))
                 hooks.append(layer.value.register_forward_hook(save_to_cache))
 

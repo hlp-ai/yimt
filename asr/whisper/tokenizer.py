@@ -157,7 +157,7 @@ class Tokenizer:
             task_token: int = transcribe if self.task == "transcribe" else translate
             sot_sequence.append(task_token)  # 任务编码
 
-        self.sot_sequence = tuple(sot_sequence)
+        self.sot_sequence = tuple(sot_sequence)  # 这个序列和语音任务有关
 
     def encode(self, text, **kwargs):
         return self.encoding.encode(text, **kwargs)
@@ -237,7 +237,7 @@ class Tokenizer:
 
     @cached_property
     def sot_sequence_including_notimestamps(self) -> Tuple[int]:
-        return tuple(list(self.sot_sequence) + [self.no_timestamps])
+        return tuple(list(self.sot_sequence) + [self.no_timestamps])  # 只进行转录的开始特殊token序列
 
     @cached_property
     def non_speech_tokens(self) -> Tuple[int]:

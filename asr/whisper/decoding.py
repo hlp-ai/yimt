@@ -38,11 +38,10 @@ def detect_language(
     if single:
         mel = mel.unsqueeze(0)
 
-    # skip encoder forward pass if already-encoded audio features were given
-    if mel.shape[-2:] != (model.dims.n_audio_ctx, model.dims.n_audio_state):  # 音频为编码
+    if mel.shape[-2:] != (model.dims.n_audio_ctx, model.dims.n_audio_state):  # 音频未编码
         mel = model.encoder(mel)
 
-    # forward pass using a single token, startoftranscript
+    # 批大小
     n_audio = mel.shape[0]
 
     # 解码器输入
@@ -51,11 +50,11 @@ def detect_language(
     # 解码
     logits = model.logits(x, mel)[:, 0]  # 取解码器第一个位置的输出
 
-    # collect detected languages; suppress all non-language tokens
+    # 压抑所有非语言token
     mask = torch.ones(logits.shape[-1], dtype=torch.bool)
     mask[list(tokenizer.all_language_tokens)] = False  # 非语言编码位置置False
     logits[:, mask] = -np.inf
-    language_tokens = logits.argmax(dim=-1)
+    language_tokens = logits.argmax(dim=-1)  # 最可能语言
     language_token_probs = logits.softmax(dim=-1).cpu()
     language_probs = [
         {
@@ -142,6 +141,7 @@ class PyTorchInference(Inference):
         self.kv_cache = {}
         self.hooks = []
 
+        # 解码器多头注意力KV缓冲
         key_modules = [block.attn.key for block in self.model.decoder.blocks]
         value_modules = [block.attn.value for block in self.model.decoder.blocks]
         self.kv_modules = key_modules + value_modules
@@ -272,14 +272,14 @@ class GreedyDecoder(TokenDecoder):
         if self.temperature == 0:
             next_tokens = logits.argmax(dim=-1)
         else:
-            next_tokens = Categorical(logits=logits / self.temperature).sample()
+            next_tokens = Categorical(logits=logits / self.temperature).sample()  # 温度采样
 
         logprobs = F.log_softmax(logits.float(), dim=-1)
         current_logprobs = logprobs[torch.arange(logprobs.shape[0]), next_tokens]
         sum_logprobs += current_logprobs * (tokens[:, -1] != self.eot)
 
-        next_tokens[tokens[:, -1] == self.eot] = self.eot
-        tokens = torch.cat([tokens, next_tokens[:, None]], dim=-1)
+        next_tokens[tokens[:, -1] == self.eot] = self.eot  # 已经结束的继续设置结束token
+        tokens = torch.cat([tokens, next_tokens[:, None]], dim=-1)  # 延展预测token序列
 
         completed = (tokens[:, -1] == self.eot).all()
         return tokens, completed
@@ -577,21 +577,22 @@ class DecodingTask:
         no_speech_probs = [np.nan] * n_batch
 
         try:
-            for i in range(self.sample_len):
+            for i in range(self.sample_len):  # 采样步
+                # 预测
                 logits = self.inference.logits(tokens, audio_features)
 
                 if (i == 0 and self.tokenizer.no_speech is not None):  # save no_speech_probs
                     probs_at_sot = logits[:, self.sot_index].float().softmax(dim=-1)
-                    no_speech_probs = probs_at_sot[:, self.tokenizer.no_speech].tolist()
+                    no_speech_probs = probs_at_sot[:, self.tokenizer.no_speech].tolist()  # 非语音概率
 
-                # now we need to consider the logits at the last token only
+                # 最后一步的概率分布
                 logits = logits[:, -1]
 
                 # apply the logit filters, e.g. for suppressing or applying penalty to
                 for logit_filter in self.logit_filters:
-                    logit_filter.apply(logits, tokens)
+                    logit_filter.apply(logits, tokens)  # 对概率分布进行修正
 
-                # expand the tokens tensor with the selected next tokens
+                # expand预测结果，判断是否结束
                 tokens, completed = self.decoder.update(tokens, logits, sum_logprobs)
 
                 if completed or tokens.shape[-1] > self.n_ctx:
@@ -603,14 +604,21 @@ class DecodingTask:
 
     @torch.no_grad()
     def run(self, mel: Tensor) -> List[DecodingResult]:
+        # 充值解码器状态
         self.decoder.reset()
+
         tokenizer: Tokenizer = self.tokenizer
+
+        # 批大小
         n_audio: int = mel.shape[0]
 
-        audio_features: Tensor = self._get_audio_features(mel)  # encoder forward pass
+        # 音频编码
+        audio_features: Tensor = self._get_audio_features(mel)
+
+        # 准备初始tokens
         tokens: Tensor = torch.tensor([self.initial_tokens]).repeat(n_audio, 1)
 
-        # detect language if requested, overwriting the language token
+        # 检测语言
         languages, language_probs = self._detect_language(audio_features, tokens)
         if self.options.task == "lang_id":
             return [
@@ -618,10 +626,10 @@ class DecodingTask:
                 for features, language, probs in zip(audio_features, languages, language_probs)
             ]
 
-        # repeat text tensors by the group size, for beam search or best-of-n sampling
+        # 为beam搜索和best-n准备输入token
         tokens = tokens.repeat_interleave(self.n_group, dim=0).to(audio_features.device)
 
-        # call the main sampling loop
+        # 循环解码
         tokens, sum_logprobs, no_speech_probs = self._main_loop(audio_features, tokens)
 
         # reshape the tensors to have (n_audio, n_group) as the first two dimensions
