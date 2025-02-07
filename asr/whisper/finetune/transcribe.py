@@ -36,7 +36,7 @@ def get_parser() -> argparse.ArgumentParser:
         default="cuda" if torch.cuda.is_available() else "cpu",
         help="Device to use for PyTorch inference",
     )
-    parser.add_argument("--model", required=True, help="Name or path to the Whisper model to use")
+    parser.add_argument("--model", required=True, help="path to the Whisper model to use")
     parser.add_argument(
         "--task",
         type=str,

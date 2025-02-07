@@ -148,9 +148,9 @@ class AudioEncoder(nn.Module):
         x : torch.Tensor, shape = (batch_size, n_mels, n_ctx)
             the mel spectrogram of the audio
         """
-        x = F.gelu(self.conv1(x))
+        x = F.gelu(self.conv1(x))  # B, D, L
         x = F.gelu(self.conv2(x))
-        x = x.permute(0, 2, 1)
+        x = x.permute(0, 2, 1)  # B, L, D
 
         # assert x.shape[1:] == self.positional_embedding.shape, "incorrect audio shape"
         x = (x + self.positional_embedding).to(x.dtype)
@@ -167,7 +167,7 @@ class TextDecoder(nn.Module):
         super().__init__()
 
         self.token_embedding = nn.Embedding(n_vocab, n_state)
-        self.positional_embedding = nn.Parameter(torch.empty(n_ctx, n_state))
+        self.positional_embedding = nn.Parameter(torch.empty(n_ctx, n_state))  # 可学习位置嵌入
 
         self.blocks: Iterable[ResidualAttentionBlock] = nn.ModuleList(
             [
@@ -177,7 +177,7 @@ class TextDecoder(nn.Module):
         )
         self.ln = LayerNorm(n_state)
 
-        mask = torch.empty(n_ctx, n_ctx).fill_(-np.inf).triu_(1)
+        mask = torch.empty(n_ctx, n_ctx).fill_(-np.inf).triu_(1)  # 上三角提取
         self.register_buffer("mask", mask, persistent=False)
 
     def forward(self, x: Tensor, xa: Tensor, kv_cache: Optional[dict] = None):

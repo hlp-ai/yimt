@@ -41,9 +41,9 @@ class AudioDataset(Dataset):
     def _get_special_tokens(
         self, is_text_empty: bool, language: str, no_timestamps: bool=True
     ) -> List[int]:
-        if is_text_empty:
+        if is_text_empty:  # 非语音： SOT, NO_SPEECH
             special_tokens = [self.tokenizer.sot, self.tokenizer.no_speech]
-        else:
+        else:  # SOT, LANG, TRANSCRIBE, NO_TIMESTAMP
             special_tokens = [
                 self.tokenizer.sot,
                 self.tokenizer.special_tokens[f"<|{language}|>"],
@@ -55,7 +55,7 @@ class AudioDataset(Dataset):
         return special_tokens
 
     def _encode_text(self, text: str) -> List[int]:
-        parts = text.split()
+        parts = text.split()  # TODO: 中文如何处理？
         parts = [token for token in parts if token != ""]
         tokens = []
         for part in parts:
@@ -76,7 +76,7 @@ class AudioDataset(Dataset):
     def _get_text_tokens(self, text: str) -> Tuple[List[int], Optional[float]]:
         text_tokens = self._encode_text(text)
         next_partial_segment_start = self._get_partial_segment_start(text_tokens)
-        text_tokens = list(filter(lambda x: x < self.tokenizer.timestamp_begin, text_tokens))
+        text_tokens = list(filter(lambda x: x < self.tokenizer.timestamp_begin, text_tokens))  # 过滤掉时间标签
 
         return text_tokens, next_partial_segment_start
 
