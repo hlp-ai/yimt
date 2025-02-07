@@ -586,6 +586,8 @@ class Translator(Inference):
             # TODO: 取一步或长度为1序列作为输入，是否有问题？取前面所有预测序列作为输入？
             decoder_input = decode_strategy.current_predictions.view(-1, 1, 1)  # 前一步的预测，序列长度为1
 
+            # print(decoder_input.shape)
+
             # 单步预测
             log_probs, attn = self._decode_and_generate(
                 decoder_input,

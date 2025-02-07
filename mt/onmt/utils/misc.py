@@ -57,9 +57,7 @@ def sequence_mask(lengths, max_len=None):
 
 
 def tile(x, count, dim=0):
-    """
-    Tiles x on dimension dim count times.
-    """
+    """在给定维度上交织堆叠"""
     return x.repeat_interleave(count, dim)
 
 
@@ -91,7 +89,7 @@ def set_random_seed(seed, is_cuda):
 
 
 def fn_args(fun):
-    """Returns the list of function arguments name."""
+    """返回函数的参数名 列表"""
     return inspect.getfullargspec(fun).args
 
 

@@ -111,13 +111,16 @@ class DecodeStrategy(object):
         def fn_map_state(state, dim=0):
             return tile(state, self.beam_size, dim=dim)
 
+        # 堆叠编码输入
         if isinstance(enc_out, tuple):
             enc_out = tuple(tile(x, self.beam_size, dim=0) for x in enc_out)
         elif enc_out is not None:
             enc_out = tile(enc_out, self.beam_size, dim=0)
 
+        # 堆叠输入长度
         self.src_len = tile(src_len, self.beam_size)
 
+        # 堆叠目标前缀
         if target_prefix is not None:
             target_prefix = tile(target_prefix, self.beam_size, dim=0)
 
