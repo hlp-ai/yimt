@@ -3,7 +3,7 @@ from typing import List, Optional, Union
 
 import torch
 
-from .audio import load_audio, load_audio_librosa, log_mel_spectrogram, pad_or_trim
+from .audio import load_audio_librosa, log_mel_spectrogram, pad_or_trim
 from .decoding import DecodingOptions, DecodingResult, decode, detect_language
 from .model import ModelDimensions, Whisper
 from .transcribe import transcribe

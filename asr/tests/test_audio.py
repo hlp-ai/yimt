@@ -3,12 +3,12 @@ import os.path
 import librosa
 import numpy as np
 
-from whisper.audio import SAMPLE_RATE, load_audio, log_mel_spectrogram
+from whisper.audio import SAMPLE_RATE, log_mel_spectrogram, load_audio_librosa
 
 
 def test_audio():
     audio_path = os.path.join(os.path.dirname(__file__), "jfk.flac")
-    audio = load_audio(audio_path)
+    audio = load_audio_librosa(audio_path)
     assert audio.ndim == 1
     assert SAMPLE_RATE * 10 < audio.shape[0] < SAMPLE_RATE * 12
     assert 0 < audio.std() < 1
