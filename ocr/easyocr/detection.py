@@ -74,6 +74,7 @@ def test_net(canvas_size, mag_ratio, net, image, text_threshold, link_threshold,
 
 
 def get_detector(trained_model, device='cpu', quantize=True, cudnn_benchmark=False):
+    """加载检测器模型权重"""
     net = CRAFT()
 
     if device == 'cpu':

@@ -35,24 +35,23 @@ class Reader(object):
 
         LOGGER.warning('Using device {}'.format(self.device))
 
-
+        # 配置
         self.detection_models = detection_models
         self.recognition_models = recognition_models
 
-        # check and download detection model
-        self.quantize = quantize,
-        self.cudnn_benchmark = cudnn_benchmark
+        self.quantize = quantize  # CPU下是否量化模型
+        self.cudnn_benchmark = cudnn_benchmark  # 是否自动选择优化卷积算法
 
-        recog_network = ""
-        recog_model = None
+        recog_network = ""  # 识别网络
+        recog_model = None  # 具体识别器配置
 
         # 查找能识别给定语言列表的识别器
         for model in recognition_models['gen1']:
             if set(lang_list).issubset(set(recognition_models['gen1'][model]["languages"])):
                 recog_network = 'generation1'
                 recog_model = recognition_models['gen1'][model]
-                self.model_lang = recog_model['model_script']
-                self.character = recog_model['characters']
+                self.model_lang = recog_model['model_script']  # 模型识别语言
+                self.character = recog_model['characters']  # 模型识别字符列表
                 break
 
         for model in recognition_models['gen2']:
@@ -63,16 +62,15 @@ class Reader(object):
                 self.character = recog_model['characters']
                 break
 
-        # self.character = recog_model['characters']
         if recog_model is None:
             raise FileNotFoundError("Missing recognize for lang %s" % lang_list)
 
-        model_path = os.path.join(self.model_storage_directory, recog_model['filename'])
+        model_path = os.path.join(self.model_storage_directory, recog_model['filename'])  # 模型文件路径
         print(model_path)
         if not os.path.isfile(model_path):
             raise FileNotFoundError("Missing %s" % model_path)
 
-        detector_path = self.getDetectorPath()
+        detector_path = self.getDetectorPath()  # 检测器模型文件路径
         self.detector = self.initDetector(detector_path)
 
         if recog_network == 'generation1':
