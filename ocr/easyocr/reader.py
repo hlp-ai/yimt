@@ -22,7 +22,7 @@ class Reader(object):
         Parameters:
             lang_list (list): Language codes (ISO 639) for languages to be recognized during analysis.
 
-            model_storage_directory (string): Path to directory for model data.
+            model_storage_directory (string): 模型数据目录.
         """
         self.verbose = verbose
 
@@ -71,7 +71,7 @@ class Reader(object):
             raise FileNotFoundError("Missing %s" % model_path)
 
         detector_path = self.getDetectorPath()  # 检测器模型文件路径
-        self.detector = self.initDetector(detector_path)
+        self.detector = self.initDetector(detector_path)  # 加载检测器
 
         if recog_network == 'generation1':
             network_params = {
@@ -86,6 +86,7 @@ class Reader(object):
                 'hidden_size': 256
             }
 
+        # 加载识别器
         self.recognizer, self.converter = get_recognizer(recog_network, network_params,
                                                          self.character,
                                                          model_path, device=self.device, quantize=quantize)
@@ -248,9 +249,9 @@ class Reader(object):
                  output_format='standard'):
         '''
         Parameters:
-        image: file path or numpy-array or a byte stream object
+        image: 图片路径，或图片numpy，或图片流
         '''
-        img, img_cv_grey = reformat_input(image)
+        img, img_cv_grey = reformat_input(image)  # 加载和转换图片
 
         horizontal_list, free_list = self.detect(img,
                                                  min_size=min_size, text_threshold=text_threshold,

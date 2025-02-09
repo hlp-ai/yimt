@@ -158,8 +158,9 @@ def recognizer_predict(model, converter, test_loader,
 def get_recognizer(recog_network, network_params, character, model_path,
                    device='cpu', quantize=True):
     converter = CTCLabelConverter(character)
-    num_class = len(converter.character)
+    num_class = len(converter.character)  # 包括blank符号
 
+    # 创建不同的识别模型
     if recog_network == 'generation1':
         model_pkg = importlib.import_module("easyocr.model.model")
     elif recog_network == 'generation2':

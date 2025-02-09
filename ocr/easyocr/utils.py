@@ -6,9 +6,8 @@ import math
 import cv2
 from PIL import Image, JpegImagePlugin
 from scipy import ndimage
-import sys, os
+import os
 from easyocr.imgproc import loadImage
-from urllib.request import urlretrieve
 
 
 def consecutive(data, mode='first', stepsize=1):
@@ -234,10 +233,10 @@ class CTCLabelConverter(object):
     """ Convert between text-label and text-index """
 
     def __init__(self, character):
-        # character (str): set of the possible characters.
+        # character (str): 符号列表.
         dict_character = list(character)
 
-        self.dict = {}
+        self.dict = {}  # 符号->id
         for i, char in enumerate(dict_character):
             self.dict[char] = i + 1
 
@@ -631,22 +630,16 @@ def printProgressBar(prefix='', suffix='', decimals=1, length=100, fill='█'):
 
 
 def reformat_input(image):
-    if type(image) == str:
-        if image.startswith('http://') or image.startswith('https://'):
-            tmp, _ = urlretrieve(image, reporthook=printProgressBar(prefix='Progress:', suffix='Complete', length=50))
-            img_cv_grey = cv2.imread(tmp, cv2.IMREAD_GRAYSCALE)
-            os.remove(tmp)
-        else:
-            img_cv_grey = cv2.imread(image, cv2.IMREAD_GRAYSCALE)
-            image = os.path.expanduser(image)
-        img = loadImage(image)  # can accept URL
-    elif type(image) == bytes:
+    if type(image) == str:  # 图片路径
+        img_cv_grey = cv2.imread(image, cv2.IMREAD_GRAYSCALE)
+        image = os.path.expanduser(image)
+        img = loadImage(image)
+    elif type(image) == bytes:  # 图片流
         nparr = np.frombuffer(image, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img_cv_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-    elif type(image) == np.ndarray:
+    elif type(image) == np.ndarray:  # 图片数组
         if len(image.shape) == 2:  # grayscale
             img_cv_grey = image
             img = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
@@ -660,10 +653,6 @@ def reformat_input(image):
             img = image[:, :, :3]
             img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             img_cv_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    elif type(image) == JpegImagePlugin.JpegImageFile:
-        image_array = np.array(image)
-        img = cv2.cvtColor(image_array, cv2.COLOR_RGB2BGR)
-        img_cv_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     else:
         raise ValueError('Invalid input type. Supporting format = string(file path or url), bytes, numpy array')
 
