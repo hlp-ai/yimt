@@ -95,7 +95,7 @@ def parse_args():
         "--min_size",
         type=int,
         default=20,
-        help="Filter text box smaller than minimum value in pixel",
+        help="最小文本框，像素",
     )
     parser.add_argument(
         "--contrast_ths",
@@ -113,25 +113,25 @@ def parse_args():
         "--text_threshold",
         type=float,
         default=0.7,
-        help="Text confidence threshold",
+        help="文本置信度阈值",
     )
     parser.add_argument(
         "--low_text",
         type=float,
         default=0.4,
-        help="Text low-bound score",
+        help="文本下限分数",
     )
     parser.add_argument(
         "--link_threshold",
         type=float,
         default=0.4,
-        help="Link confidence threshold",
+        help="连接置信度阈值",
     )
     parser.add_argument(
         "--canvas_size",
         type=int,
         default=2560,
-        help="Maximum image size. Image bigger than this value will be resized down.",
+        help="最大图片，超过会缩小",
     )
     parser.add_argument(
         "--mag_ratio",
