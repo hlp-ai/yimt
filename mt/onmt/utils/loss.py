@@ -79,41 +79,36 @@ class LossCompute(nn.Module):
     def _unbottle(self, _v, batch_size):
         return _v.view(-1, batch_size, _v.size(1))
 
-    def forward(self, batch, output, attns, trunc_start=0, trunc_size=None):
-        """Compute the forward loss, supports truncated BPTT for long
-        sequences by taking a range in the decoder output sequence to
-        back propagate in.
-        Range is from `(trunc_start, trunc_start + trunc_size)`.
-        Truncation is an approximate efficiency trick to relieve the
-        memory required in the RNN buffers.
+    def forward(self, batch, output):
+        """Compute the forward loss
 
         Args:
           batch (batch) : batch of labeled examples
           output (:obj:`FloatTensor`) :
               output of decoder model ``(batch, tgt_len, hidden)``
-          attns (dict) : dictionary of attention weights
-              ``(batch, tgt_len, src_len)``
-          trunc_start (int) : starting position of truncation window
-          trunc_size (int) : length of truncation window
 
         Returns:
             A tuple with the loss and a :obj:`onmt.utils.Statistics` instance.
         """
 
-        if trunc_size is None:
-            trunc_size = batch["tgt"].size(1) - trunc_start
+        # if trunc_size is None:
+        #     trunc_size = batch["tgt"].size(1) - trunc_start
         # take into account here the tgt_shift_index (0 / 1 = LM/NMT)
-        trunc_range = (trunc_start + self.tgt_shift_index, trunc_start + trunc_size)
+        # trunc_range = (trunc_start + self.tgt_shift_index, trunc_start + trunc_size)
+        # trunc_range = (0 + self.tgt_shift_index, 0 + trunc_size)
 
-        target = batch["tgt"][:, trunc_range[0] : trunc_range[1], :]
-        output = output[:, trunc_start : trunc_range[1], :].contiguous()
+        # target = batch["tgt"][:, trunc_range[0] : trunc_range[1], :]
+        # output = output[:, trunc_start : trunc_range[1], :].contiguous()
+        target = batch["tgt"][:, self.tgt_shift_index:, :]
+        output = output.contiguous()
 
         flat_tgt = target[:, :, 0].contiguous().view(-1)
 
         scores = self.generator(self._bottle(output))
         loss = self.criterion(scores.to(torch.float32), flat_tgt)
 
-        n_sents = len(batch["srclen"]) if trunc_start == 0 else 0
+        # n_sents = len(batch["srclen"]) if trunc_start == 0 else 0
+        n_sents = len(batch["srclen"])
         stats = self._stats(n_sents, loss.sum().item(), scores, flat_tgt)
 
         return loss, stats

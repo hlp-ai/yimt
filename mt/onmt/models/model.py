@@ -15,7 +15,7 @@ class BaseModel(nn.Module):
     def __init__(self, encoder, decoder):
         super(BaseModel, self).__init__()
 
-    def forward(self, src, tgt, src_len, bptt=False):
+    def forward(self, src, tgt, src_len):
         """Forward propagate a `src` and `tgt` pair for training.
 
         Args:
@@ -26,8 +26,6 @@ class BaseModel(nn.Module):
             tgt (LongTensor): A target sequence passed to decoder.
                 Size ``(batch, tgt_len, features)``.
             src_len(LongTensor): The src lengths, pre-padding ``(batch,)``.
-            bptt (Boolean): A flag indicating if truncated bptt is set.
-                If bptt is false then init decoder state.
 
         Returns:
             (FloatTensor, dict[str, FloatTensor]):
@@ -163,7 +161,7 @@ class NMTModel(BaseModel):
         self.encoder = encoder
         self.decoder = decoder
 
-    def forward(self, src, tgt, src_len, bptt=False):
+    def forward(self, src, tgt, src_len):
         """An NMTModel forward the src side to the encoder.
         Then the output of encoder ``enc_out`` is forwarded to the
         decoder along with the target excluding the last token.
@@ -172,8 +170,7 @@ class NMTModel(BaseModel):
         dec_in = tgt[:, :-1, :]
         enc_out, src_len = self.encoder(src, src_len)
 
-        if not bptt:
-            self.decoder.init_state(src, enc_out)
+        self.decoder.init_state(src, enc_out)
 
         dec_out, attns = self.decoder(dec_in, enc_out, src_len=src_len)
         return dec_out, attns

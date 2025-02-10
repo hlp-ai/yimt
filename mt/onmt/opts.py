@@ -949,13 +949,6 @@ def _add_train_general_opts(parser):
         help="Steps at which dropout changes.",
     )
     group.add(
-        "--truncated_decoder",
-        "-truncated_decoder",
-        type=int,
-        default=0,
-        help="""Truncated bptt.""",
-    )
-    group.add(
         "--adam_beta1",
         "-adam_beta1",
         type=float,
