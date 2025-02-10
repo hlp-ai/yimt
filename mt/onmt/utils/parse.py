@@ -221,10 +221,6 @@ class ArgumentParser(cfargparse.ArgumentParser, DataOptsCheckerMixin):
             ], '-update_vocab needs -reset_optim "states" or "all"'
 
     @classmethod
-    def validate_translate_opts(cls, opt):
-        pass
-
-    @classmethod
     def validate_translate_opts_dynamic(cls, opt):
         # It comes from training
         # TODO: needs to be added as inference opt

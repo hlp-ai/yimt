@@ -9,7 +9,6 @@ from time import time
 
 
 def translate(opt):
-    ArgumentParser.validate_translate_opts(opt)
     ArgumentParser._get_all_transform_translate(opt)
     ArgumentParser._validate_transforms_opts(opt)
     ArgumentParser.validate_translate_opts_dynamic(opt)

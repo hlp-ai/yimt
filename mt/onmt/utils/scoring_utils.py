@@ -58,7 +58,6 @@ class ScoringPreparator:
         if hasattr(self.opt, "tgt_file_prefix"):
             opt.tgt_file_prefix = self.opt.tgt_file_prefix
         opt.beam_size = 1  # prevent OOM when GPU is almost full at training
-        ArgumentParser.validate_translate_opts(opt)
 
         # Build translator from options
         scorer = GNMTGlobalScorer.from_opt(opt)
