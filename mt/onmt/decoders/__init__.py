@@ -25,21 +25,6 @@ def get_decoders_cls(decoders_names):
     return decoders_cls
 
 
-def register_decoder(name):
-    """Encoder register that can be used to add new encoder class."""
-
-    def register_decoder_cls(cls):
-        if name in str2dec:
-            raise ValueError("Cannot register duplicate decoder ({})".format(name))
-        if not issubclass(cls, DecoderBase):
-            raise ValueError(f"decoder ({name}: {cls.__name_}) must extend DecoderBase")
-        str2dec[name] = cls
-        __all__.append(cls.__name__)  # added to be complete
-        return cls
-
-    return register_decoder_cls
-
-
 # Auto import python files in this directory
 decoder_dir = os.path.dirname(__file__)
 for file in os.listdir(decoder_dir):
