@@ -264,23 +264,6 @@ def _add_vocab_opts(parser):
         help="Discard target words with lower frequency.",
     )
 
-    # Truncation options, for text corpus
-    group = parser.add_argument_group("Pruning")
-    group.add(
-        "--src_seq_length_trunc",
-        "-src_seq_length_trunc",
-        type=int,
-        default=None,
-        help="Truncate source sequence length.",
-    )
-    group.add(
-        "--tgt_seq_length_trunc",
-        "-tgt_seq_length_trunc",
-        type=int,
-        default=None,
-        help="Truncate target sequence length.",
-    )
-
     group = parser.add_argument_group("Embeddings")
     group.add(
         "-both_embeddings",
