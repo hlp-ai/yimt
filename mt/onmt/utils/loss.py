@@ -72,7 +72,6 @@ class LossCompute(nn.Module):
     def padding_idx(self):
         return self.criterion.ignore_index
 
-
     def _bottle(self, _v):
         return _v.view(-1, _v.size(2))
 
@@ -90,15 +89,6 @@ class LossCompute(nn.Module):
         Returns:
             A tuple with the loss and a :obj:`onmt.utils.Statistics` instance.
         """
-
-        # if trunc_size is None:
-        #     trunc_size = batch["tgt"].size(1) - trunc_start
-        # take into account here the tgt_shift_index (0 / 1 = LM/NMT)
-        # trunc_range = (trunc_start + self.tgt_shift_index, trunc_start + trunc_size)
-        # trunc_range = (0 + self.tgt_shift_index, 0 + trunc_size)
-
-        # target = batch["tgt"][:, trunc_range[0] : trunc_range[1], :]
-        # output = output[:, trunc_start : trunc_range[1], :].contiguous()
         target = batch["tgt"][:, self.tgt_shift_index:, :]
         output = output.contiguous()
 
@@ -107,7 +97,6 @@ class LossCompute(nn.Module):
         scores = self.generator(self._bottle(output))
         loss = self.criterion(scores.to(torch.float32), flat_tgt)
 
-        # n_sents = len(batch["srclen"]) if trunc_start == 0 else 0
         n_sents = len(batch["srclen"])
         stats = self._stats(n_sents, loss.sum().item(), scores, flat_tgt)
 

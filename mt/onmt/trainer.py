@@ -31,7 +31,6 @@ def build_trainer(opt, device_id, model, vocabs, optim, model_saver=None):
     scorers_cls = get_scorers_cls(opt.valid_metrics)
     valid_scorers = build_scorers(opt, scorers_cls)
 
-    # trunc_size = opt.truncated_decoder  # Badly named...
     norm_method = opt.normalization
     accum_count = opt.accum_count
     accum_steps = opt.accum_steps
@@ -62,7 +61,6 @@ def build_trainer(opt, device_id, model, vocabs, optim, model_saver=None):
         scoring_preparator,
         valid_scorers,
         optim,
-        # trunc_size,
         norm_method,
         accum_count,
         accum_steps,
@@ -96,8 +94,6 @@ class Trainer(object):
           of the validation metrics
         optim(:obj:`onmt.utils.optimizers.Optimizer`):
           the optimizer responsible for update
-        trunc_size(int): length of truncated back propagation
-          through time
         accum_count(list): accumulate gradients this many times.
         accum_steps(list): steps for accum gradients changes.
         n_gpu (int): number of gpu.
@@ -122,7 +118,6 @@ class Trainer(object):
         scoring_preparator,
         valid_scorers,
         optim,
-        # trunc_size=0,
         norm_method="sents",
         accum_count=[1],
         accum_steps=[0],
@@ -144,7 +139,6 @@ class Trainer(object):
         self.scoring_preparator = scoring_preparator
         self.valid_scorers = valid_scorers
         self.optim = optim
-        # self.trunc_size = trunc_size
         self.norm_method = norm_method
         self.accum_count_l = accum_count
         self.accum_count = accum_count[0]
@@ -367,13 +361,6 @@ class Trainer(object):
 
         for k, batch in enumerate(true_batches):  # 对累积批中每个小批
             target_size = batch["tgt"].size(1)
-            # Truncated BPTT: reminder not compatible with accum > 1
-            # if self.trunc_size:
-            #     trunc_size = self.trunc_size
-            # else:
-            #     trunc_size = target_size
-
-            # trunc_size = target_size
 
             src = batch["src"]
             src_len = batch["srclen"]
@@ -383,10 +370,7 @@ class Trainer(object):
 
             tgt_outer = batch["tgt"]
 
-            # bptt = False
-            # for j in range(0, target_size - 1, trunc_size):
             # 1. Create truncated target.
-
             tgt = tgt_outer[:, 0: 0 + target_size, :]
 
             # 2. F-prop all but generator.
@@ -397,16 +381,9 @@ class Trainer(object):
                 with torch.cuda.amp.autocast(enabled=self.optim.amp):
                     # 模型前向
                     model_out, attns = self.model(src, tgt, src_len)
-                    # bptt = True
 
                     # 3. Compute loss.
-                    loss, batch_stats = self.train_loss(
-                        batch,
-                        model_out,
-                        # attns,
-                        # trunc_start=j,
-                        # trunc_size=trunc_size,
-                    )
+                    loss, batch_stats = self.train_loss(batch, model_out,)
 
                 # 后向传播
                 if loss is not None:
@@ -432,7 +409,6 @@ class Trainer(object):
             # If truncated, don't backprop fully.
             if self.model.decoder.state != {}:
                 self.model.decoder.detach_state()  # TODO: Transformer需要截断吗？需要保存状态吗？
-
 
         # in case of multi step gradient accumulation,
         # update only after accum batches
