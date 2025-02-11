@@ -1252,12 +1252,6 @@ def translate_opts(parser):
         action="store_true",
         help="Report some translation time metrics",
     )
-    group.add(
-        "--profile",
-        "-profile",
-        action="store_true",
-        help="Report pytorch profiling stats",
-    )
 
     # Adding options relate to decoding strategy
     _add_decoding_opts(parser)
