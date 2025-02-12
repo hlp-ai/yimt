@@ -23,34 +23,34 @@ def copyStateDict(state_dict):
 
 def test_net(canvas_size, mag_ratio, net, image, text_threshold, link_threshold, low_text, poly, device,
              estimate_num_chars=False):
-    if isinstance(image, np.ndarray) and len(image.shape) == 4:  # image is batch of np arrays
+    if isinstance(image, np.ndarray) and len(image.shape) == 4:  # 图片批
         image_arrs = image
-    else:  # image is single numpy array
+    else:  # 转换成图片批
         image_arrs = [image]
 
     img_resized_list = []
-    # resize
+    # 调整图片大小
     for img in image_arrs:
         img_resized, target_ratio, size_heatmap = resize_aspect_ratio(img, canvas_size,
                                                                       interpolation=cv2.INTER_LINEAR,
                                                                       mag_ratio=mag_ratio)
         img_resized_list.append(img_resized)
     ratio_h = ratio_w = 1 / target_ratio
-    # preprocessing
-    x = [np.transpose(normalizeMeanVariance(n_img), (2, 0, 1))
-         for n_img in img_resized_list]
+
+    # 规范化图片，重排图片
+    x = [np.transpose(normalizeMeanVariance(n_img), (2, 0, 1)) for n_img in img_resized_list]
+
     x = torch.from_numpy(np.array(x))
     x = x.to(device)
 
-    # forward pass
+    # 前向
     with torch.no_grad():
-        y, feature = net(x)
+        y, feature = net(x)  # 像素分类分数
 
     boxes_list, polys_list = [], []
     for out in y:
-        # make score and link map
-        score_text = out[:, :, 0].cpu().data.numpy()
-        score_link = out[:, :, 1].cpu().data.numpy()
+        score_text = out[:, :, 0].cpu().data.numpy()  # 文本域打分
+        score_link = out[:, :, 1].cpu().data.numpy()  # 邻接域打分
 
         # Post-processing
         boxes, polys, mapper = getDetBoxes(

@@ -16,7 +16,6 @@ def warpCoord(Minv, pt):
 
 
 def getDetBoxes_core(textmap, linkmap, text_threshold, link_threshold, low_text, estimate_num_chars=False):
-    # prepare data
     linkmap = linkmap.copy()  # 领域打分
     textmap = textmap.copy()  # 文本域打分
     img_h, img_w = textmap.shape
@@ -35,14 +34,14 @@ def getDetBoxes_core(textmap, linkmap, text_threshold, link_threshold, low_text,
     for k in range(1, nLabels):  # 对每个分量或区域
         # 区域大小过滤
         size = stats[k, cv2.CC_STAT_AREA]  # 面积
-        if size < 10: continue
+        if size < 10: continue  # TODO: 最小文本面积可配置
 
         # 连通域最大分数过小
         if np.max(textmap[labels == k]) < text_threshold: continue
 
         # make segmentation map
         segmap = np.zeros(textmap.shape, dtype=np.uint8)
-        segmap[labels == k] = 255
+        segmap[labels == k] = 255  # 当前分量
         if estimate_num_chars:
             _, character_locs = cv2.threshold((textmap - linkmap) * segmap / 255., text_threshold, 1, 0)
             _, n_chars = label(character_locs)
@@ -50,8 +49,8 @@ def getDetBoxes_core(textmap, linkmap, text_threshold, link_threshold, low_text,
         else:
             mapper.append(k)
         segmap[np.logical_and(link_score == 1, text_score == 0)] = 0  # 去掉邻接域
-        x, y = stats[k, cv2.CC_STAT_LEFT], stats[k, cv2.CC_STAT_TOP]
-        w, h = stats[k, cv2.CC_STAT_WIDTH], stats[k, cv2.CC_STAT_HEIGHT]
+        x, y = stats[k, cv2.CC_STAT_LEFT], stats[k, cv2.CC_STAT_TOP]  # 分量左上坐标
+        w, h = stats[k, cv2.CC_STAT_WIDTH], stats[k, cv2.CC_STAT_HEIGHT]  # 分量宽和高
         niter = int(math.sqrt(size * min(w, h) / (w * h)) * 2)
         sx, ex, sy, ey = x - niter, x + w + niter + 1, y - niter, y + h + niter + 1
         # boundary check
