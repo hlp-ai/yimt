@@ -27,7 +27,7 @@ def train(opt):
 
     nb_gpu = len(opt.gpu_ranks)
 
-    if opt.world_size > 1:
+    if opt.world_size > 1:  # 多卡
         mp = torch.multiprocessing.get_context("spawn")
         # Create a thread to listen for errors in the child processes.
         error_queue = mp.SimpleQueue()
@@ -48,9 +48,9 @@ def train(opt):
         for p in procs:
             p.join()
 
-    elif nb_gpu == 1:  # case 1 GPU only
+    elif nb_gpu == 1:  # 单卡
         train_process(opt, device_id=0)
-    else:  # case only CPU
+    else:  # CPU
         train_process(opt, device_id=-1)
 
 

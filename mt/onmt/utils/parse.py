@@ -159,15 +159,15 @@ class ArgumentParser(cfargparse.ArgumentParser, DataOptsCheckerMixin):
 
     @classmethod
     def update_model_opts(cls, model_opt):
-        if model_opt.word_vec_size > 0:
+        if model_opt.word_vec_size > 0:  # 同时设置src和tgt
             model_opt.src_word_vec_size = model_opt.word_vec_size
             model_opt.tgt_word_vec_size = model_opt.word_vec_size
 
-        if model_opt.layers > 0:
+        if model_opt.layers > 0:  # 同时设置enc和dec层数
             model_opt.enc_layers = model_opt.layers
             model_opt.dec_layers = model_opt.layers
 
-        if model_opt.hidden_size > 0:
+        if model_opt.hidden_size > 0:  # 同时设置enc和dec大小
             model_opt.enc_hid_size = model_opt.hidden_size
             model_opt.dec_hid_size = model_opt.hidden_size
 
@@ -175,7 +175,7 @@ class ArgumentParser(cfargparse.ArgumentParser, DataOptsCheckerMixin):
     def validate_model_opts(cls, model_opt):
         # encoder and decoder should be same sizes
         same_size = model_opt.enc_hid_size == model_opt.dec_hid_size
-        assert same_size, "The encoder and decoder rnns must be the same size for now"
+        assert same_size, "The encoder and decoder must be the same size for now"  # TODO: transformer也要这样吗
 
     @classmethod
     def ckpt_model_opts(cls, ckpt_opt):
@@ -192,13 +192,11 @@ class ArgumentParser(cfargparse.ArgumentParser, DataOptsCheckerMixin):
             logger.warn("You have a CUDA device, should run with -gpu_ranks")
         if opt.world_size < len(opt.gpu_ranks):
             raise AssertionError(
-                "parameter counts of -gpu_ranks must be less or equal "
-                "than -world_size."
+                "parameter counts of -gpu_ranks must be less or equal than -world_size."
             )
         if opt.world_size == len(opt.gpu_ranks) and min(opt.gpu_ranks) > 0:
             raise AssertionError(
-                "-gpu_ranks should have master(=0) rank "
-                "unless -world_size is greater than len(gpu_ranks)."
+                "-gpu_ranks should have master(=0) rank unless -world_size is greater than len(gpu_ranks)."
             )
 
         assert len(opt.dropout) == len(
