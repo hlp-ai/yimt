@@ -32,7 +32,6 @@ class PositionwiseFeedForward(nn.Module):
             of the FNN.
         dropout (float): dropout probability in :math:`[0, 1)`.
         activation_fn (ActivationFunction): activation function used.
-        layer_norm (string): 'standard' or 'rms'
     """
 
     def __init__(
@@ -42,7 +41,6 @@ class PositionwiseFeedForward(nn.Module):
         dropout=0.1,
         activation_fn=ActivationFunction.relu,
         add_ffnbias=True,
-        layer_norm="standard",
         norm_eps=1e-6,
         use_ckpting=[],
         parallel_gpu=1,

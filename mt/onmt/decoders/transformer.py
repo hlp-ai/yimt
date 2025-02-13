@@ -25,7 +25,6 @@ class TransformerDecoderLayerBase(nn.Module):
         pos_ffn_activation_fn=ActivationFunction.relu,
         add_qkvbias=False,
         add_ffnbias=True,
-        layer_norm="standard",
         norm_eps=1e-6,
         use_ckpting=[],
         parallel_gpu=1,
@@ -51,7 +50,6 @@ class TransformerDecoderLayerBase(nn.Module):
                 activation function choice for PositionwiseFeedForward layer
             add_qkvbias (bool): whether to add bias to the Key/Value nn.Linear
             add_ffnbias (bool): whether to add bias to the FF nn.Linear
-            layer_norm (string): type of layer normalization standard/rms
             norm_eps (float): layer norm epsilon
             use_ckpting (List): layers for which we checkpoint for backward
             parallel_gpu (int): Number of gpu for tensor parallelism
@@ -81,7 +79,6 @@ class TransformerDecoderLayerBase(nn.Module):
                 dropout,
                 pos_ffn_activation_fn,
                 add_ffnbias,
-                layer_norm,
                 norm_eps,
                 use_ckpting=use_ckpting,
                 parallel_gpu=parallel_gpu,
@@ -93,7 +90,6 @@ class TransformerDecoderLayerBase(nn.Module):
                 dropout,
                 pos_ffn_activation_fn,
                 add_ffnbias,
-                layer_norm,
                 norm_eps,
                 use_ckpting=use_ckpting,
                 parallel_gpu=parallel_gpu,
@@ -194,7 +190,6 @@ class TransformerDecoderLayer(TransformerDecoderLayerBase):
         pos_ffn_activation_fn=ActivationFunction.relu,
         add_qkvbias=False,
         add_ffnbias=True,
-        layer_norm="standard",
         norm_eps=1e-6,
         use_ckpting=[],
         parallel_gpu=1,
@@ -216,7 +211,6 @@ class TransformerDecoderLayer(TransformerDecoderLayerBase):
             pos_ffn_activation_fn=pos_ffn_activation_fn,
             add_qkvbias=add_qkvbias,
             add_ffnbias=add_ffnbias,
-            layer_norm=layer_norm,
             norm_eps=norm_eps,
             use_ckpting=use_ckpting,
             parallel_gpu=parallel_gpu,
@@ -302,7 +296,7 @@ class TransformerDecoderLayer(TransformerDecoderLayerBase):
 
 
 class TransformerDecoderBase(DecoderBase):
-    def __init__(self, d_model, embeddings, layer_norm, norm_eps):
+    def __init__(self, d_model, embeddings, norm_eps):
         super(TransformerDecoderBase, self).__init__()
 
         self.embeddings = embeddings
@@ -332,7 +326,6 @@ class TransformerDecoderBase(DecoderBase):
             pos_ffn_activation_fn=opt.pos_ffn_activation_fn,
             add_qkvbias=opt.add_qkvbias,
             add_ffnbias=opt.add_ffnbias,
-            layer_norm=opt.layer_norm,
             norm_eps=opt.norm_eps,
             use_ckpting=opt.use_ckpting,
             parallel_gpu=opt.world_size
@@ -424,7 +417,6 @@ class TransformerDecoder(TransformerDecoderBase):
         pos_ffn_activation_fn=ActivationFunction.relu,
         add_qkvbias=False,
         add_ffnbias=True,
-        layer_norm="standard",
         norm_eps=1e-6,
         use_ckpting=[],
         parallel_gpu=1,
@@ -432,7 +424,7 @@ class TransformerDecoder(TransformerDecoderBase):
         num_experts=0,
         num_experts_per_tok=2,
     ):
-        super(TransformerDecoder, self).__init__(d_model, embeddings, layer_norm, norm_eps)
+        super(TransformerDecoder, self).__init__(d_model, embeddings, norm_eps)
 
         self.transformer_layers = nn.ModuleList(
             [
@@ -446,7 +438,6 @@ class TransformerDecoder(TransformerDecoderBase):
                     pos_ffn_activation_fn=pos_ffn_activation_fn,
                     add_qkvbias=add_qkvbias,
                     add_ffnbias=add_ffnbias,
-                    layer_norm=layer_norm,
                     norm_eps=norm_eps,
                     use_ckpting=use_ckpting,
                     parallel_gpu=parallel_gpu,

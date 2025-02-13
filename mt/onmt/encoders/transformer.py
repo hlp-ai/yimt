@@ -26,7 +26,6 @@ class TransformerEncoderLayer(nn.Module):
             activation function choice for PositionwiseFeedForward layer
         add_qkvbias (bool): whether to add bias to the Key/Value nn.Linear
         add_ffnbias (bool): whether to add bias to the FF nn.Linear
-        layer_norm (string): type of layer normalization standard/rms
         norm_eps (float): layer norm epsilon
         use_ckpting (List): layers for which we checkpoint for backward
         parallel_gpu (int): Number of gpu for tensor parallelism
@@ -42,7 +41,6 @@ class TransformerEncoderLayer(nn.Module):
         pos_ffn_activation_fn=ActivationFunction.relu,
         add_qkvbias=False,
         add_ffnbias=True,
-        layer_norm="standard",
         norm_eps=1e-6,
         use_ckpting=[],
         parallel_gpu=1,
@@ -65,7 +63,6 @@ class TransformerEncoderLayer(nn.Module):
             dropout,
             pos_ffn_activation_fn,
             add_ffnbias,
-            layer_norm,
             norm_eps,
             use_ckpting=use_ckpting,
             parallel_gpu=parallel_gpu,
@@ -133,7 +130,6 @@ class TransformerEncoder(EncoderBase):
         pos_ffn_activation_fn=ActivationFunction.relu,
         add_qkvbias=False,
         add_ffnbias=True,
-        layer_norm="standard",
         norm_eps=1e-6,
         use_ckpting=[],
         parallel_gpu=1,
@@ -152,7 +148,6 @@ class TransformerEncoder(EncoderBase):
                     pos_ffn_activation_fn=pos_ffn_activation_fn,
                     add_qkvbias=add_qkvbias,
                     add_ffnbias=add_ffnbias,
-                    layer_norm=layer_norm,
                     norm_eps=norm_eps,
                     use_ckpting=use_ckpting,
                     parallel_gpu=parallel_gpu,
@@ -178,7 +173,6 @@ class TransformerEncoder(EncoderBase):
             pos_ffn_activation_fn=opt.pos_ffn_activation_fn,
             add_qkvbias=opt.add_qkvbias,
             add_ffnbias=opt.add_ffnbias,
-            layer_norm=opt.layer_norm,
             norm_eps=opt.norm_eps,
             use_ckpting=opt.use_ckpting,
             parallel_gpu=opt.world_size
