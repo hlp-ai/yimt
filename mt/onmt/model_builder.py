@@ -7,8 +7,8 @@ import torch.nn as nn
 from torch.nn.utils import skip_init
 from torch.nn.init import xavier_uniform_, zeros_, uniform_
 from onmt.models.model import NMTModel
-from onmt.encoders import str2enc
-from onmt.decoders import str2dec
+from onmt.encoders import TransformerEncoder
+from onmt.decoders import TransformerDecoder
 from onmt.inputters.inputter import dict_to_vocabs
 from onmt.modules import Embeddings
 from onmt.utils.misc import use_gpu
@@ -56,8 +56,7 @@ def build_encoder(opt, embeddings):
         opt: the option in current environment.
         embeddings (Embeddings): vocab embeddings for this encoder.
     """
-    enc_type = opt.encoder_type
-    return str2enc[enc_type].from_opt(opt, embeddings)
+    return TransformerEncoder.from_opt(opt, embeddings)
 
 
 def build_decoder(opt, embeddings):
@@ -67,8 +66,7 @@ def build_decoder(opt, embeddings):
         opt: the option in current environment.
         embeddings (Embeddings): vocab embeddings for this decoder.
     """
-    dec_type = opt.decoder_type
-    return str2dec[dec_type].from_opt(opt, embeddings)
+    return TransformerDecoder.from_opt(opt, embeddings)
 
 
 def load_test_model(opt, device_id=0, model_path=None):

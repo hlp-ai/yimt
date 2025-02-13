@@ -451,23 +451,6 @@ def model_opts(parser):
         help="Data type of the model.",
     )
 
-    group.add(
-        "--encoder_type",
-        "-encoder_type",
-        type=str,
-        default="transformer",
-        help="Type of encoder layer to use."
-        "Default options are [transformer].",
-    )
-    group.add(
-        "--decoder_type",
-        "-decoder_type",
-        type=str,
-        default="transformer",
-        help="Type of decoder layer to use. "
-        "Default options are [transformer].",
-    )
-
     # Freeze Encoder and/or Decoder
     group.add(
         "--freeze_encoder",
