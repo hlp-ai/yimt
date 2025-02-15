@@ -58,7 +58,7 @@ def getDetBoxes_core(textmap, linkmap, text_threshold, link_threshold, low_text,
         if sy < 0: sy = 0
         if ex >= img_w: ex = img_w
         if ey >= img_h: ey = img_h
-        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1 + niter, 1 + niter))  # 生成变换核
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1 + niter, 1 + niter))  # 生成变换核，二值矩阵
         segmap[sy:ey, sx:ex] = cv2.dilate(segmap[sy:ey, sx:ex], kernel)  # 增大亮度区域
 
         # make box
