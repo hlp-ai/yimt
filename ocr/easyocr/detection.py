@@ -65,7 +65,7 @@ def test_net(canvas_size, mag_ratio, net, image, text_threshold, link_threshold,
         for k in range(len(polys)):
             if estimate_num_chars:
                 boxes[k] = (boxes[k], mapper[k])
-            if polys[k] is None:
+            if polys[k] is None:  # 用方框代替多边形框
                 polys[k] = boxes[k]
         boxes_list.append(boxes)
         polys_list.append(polys)
