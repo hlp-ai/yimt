@@ -149,31 +149,31 @@ def parse_args():
         "--ycenter_ths",
         type=float,
         default=0.5,
-        help="Maximum shift in y direction. Boxes with different level should not be merged.",
+        help="y方向最大偏移，y方向相差太大的box不应合并",
     )
     parser.add_argument(
         "--height_ths",
         type=float,
         default=0.5,
-        help="Maximum different in box height. Boxes with very different text size should not be merged. ",
+        help="box高度最大差异。高度相差太大不应合并",
     )
     parser.add_argument(
         "--width_ths",
         type=float,
         default=0.5,
-        help="Maximum horizontal distance to merge boxes.",
+        help="合并box的最大水平距离",
     )
     parser.add_argument(
         "--y_ths",
         type=float,
         default=0.5,
-        help="Maximum vertical distance to merge boxes (when paragraph = True).",
+        help="段落模式下最大合并垂直距离",
     )
     parser.add_argument(
         "--x_ths",
         type=float,
         default=1.0,
-        help="Maximum horizontal distance to merge boxes (when paragraph = True).",
+        help="段落模式下最大合并水平距离",
     )
     parser.add_argument(
         "--add_margin",
