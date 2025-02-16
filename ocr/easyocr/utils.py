@@ -10,17 +10,6 @@ import os
 from easyocr.imgproc import loadImage
 
 
-def consecutive(data, mode='first', stepsize=1):
-    group = np.split(data, np.where(np.diff(data) != stepsize)[0] + 1)
-    group = [item for item in group if len(item) > 0]
-
-    if mode == 'first':
-        result = [l[0] for l in group]
-    elif mode == 'last':
-        result = [l[-1] for l in group]
-    return result
-
-
 # code is based from https://github.com/githubharald/CTCDecoder/blob/master/src/BeamSearch.py
 class BeamEntry:
     "information about one single beam at specific time-step"
